@@ -1,0 +1,397 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>VANIX TETRIS</title><style>
+html,body{margin:0;padding:0;background:#050505;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.back{display:block;text-align:center;color:#ffd23f;margin:12px 0 6px;text-decoration:none;font-weight:bold}
+.wrap{max-width:460px;margin:0 auto;padding:0 10px 24px}
+/* Tetris compacting: board + sidebar side-by-side, board 220px, tighter controls — layout only, no gameplay change */
+#vanix-game{max-width:430px !important;margin:12px auto !important}
+.vg-main{flex-wrap:nowrap !important;gap:10px !important}
+.vg-side{min-width:0 !important;flex:0 0 104px !important}
+#vg-next,#vg-hold{width:96px !important;height:64px !important}
+#vg-canvas{width:220px !important}
+.vg-ctl{flex-wrap:wrap !important;gap:6px !important;margin-top:10px !important}
+.vg-body{padding:10px 8px !important}
+#vanix-game button{padding:10px 12px !important;font-size:13px !important}
+/* Border fix: controls row wraps + smaller buttons on phones so ◀ ▶ HOLD PAUSE ▼ DROP all fit (was nowrap ~345-360px vs ~314px available, DROP clipped) */
+@media (max-width:480px){#vanix-game button{padding:10px 8px !important;font-size:12px !important}}
+</style></head><body><div class="wrap"><a class="back" href="index.html">← BACK TO THE ARCADE</a><div id=vanix-game style="display:block;background:rgba(0,0,0,0.9); border:1px solid #f0f; padding:0; overflow:hidden; box-shadow:0 0 30px rgba(255,0,255,0.2); position:relative; max-width:430px; margin:12px auto; font-family:'JetBrains Mono', monospace;">
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@800&family=Orbitron:wght@900&display=swap');#vanix-game .scanline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#0ff,transparent);animation:vg-scan 3s linear infinite;opacity:0.5;pointer-events:none;z-index:5;}@keyframes vg-scan{0%{transform:translateY(-100%)}100%{transform:translateY(420px)}}#vg-canvas,#vg-hold{touch-action:none}#vanix-game{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;font-family:'Orbitron'}#vanix-game button{touch-action:manipulation;background:transparent;color:#0ff;border:1px solid #0ff;padding:20px 24px;font-weight:900;cursor:pointer;font-size:16px;font-family:'Orbitron'}#vanix-game .vgw{color:#fff}</style>
+<div class=scanline></div><div style="background:linear-gradient(90deg, #f0f, #0ff); color:#000; padding:12px; display:flex; justify-content:space-between; font-weight:900; letter-spacing:3px; font-size:12px;"><span>◢ VANIX_TETRIS.exe</span><span id=vg-score style="background:#000; color:#0ff; padding:4px 12px; border:1px solid #0ff;">$0</span></div><div class="vg-body" style="position:relative; background:#000; padding:14px 10px; overflow:hidden;"><div class="vg-main" style="display:flex; gap:12px; justify-content:center; align-items:flex-start; flex-wrap:wrap;"><div style=position:relative;><canvas id=vg-canvas width=300 height=600 style="width:300px; max-width:72vw; height:auto; display:block; background:#050510; border:1px solid #333; touch-action:none;"></canvas><div id=vg-over style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.95); color:#0ff; text-align:center; padding:50px 16px; z-index:10; border:1px solid #f0f;"><h2 style="font-size:22px; margin:0; letter-spacing:4px; color:#f0f;">// GAME_OVER //</h2><p id=vg-final style="font-size:14px; margin:15px 0; color:#fff;">You stacked $0</p><p style="font-size:10px; color:#0ff;">TIME: <span id=vg-timePlayed>0s</span></p><button onclick=vg_revive() style="background:linear-gradient(90deg,#f0f,#0ff);color:#000;border:0;padding:14px 24px;margin:12px;width:90%;letter-spacing:2px">◢ REVIVE // 100 ATOMS ◣</button><div id="vg-ion-box" style="margin:12px auto 0;max-width:340px;text-align:left;border:1px solid #0ff;padding:8px;"><div style="font-size:10px;color:#0ff;letter-spacing:2px">⚡ ATOM WALLET — REVIVE COSTS 100 ATOMS</div><div id="vg-ion-line" style="font-size:11px;color:#fff;line-height:1.5;margin:6px 0">Paste your wallet code from the ion site to link your atom wallet. $1 = 100 atoms.</div><div style="display:flex;gap:6px"><input id="vg-ion-code" type="text" placeholder="ATOM1-…-…" style="flex:1;min-width:0;background:#000;color:#0ff;border:1px solid #0ff;padding:10px;font-size:12px;font-family:inherit" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="vg-ion-link" type="button" style="padding:10px 14px">LINK</button><button id="vg-ion-unlink" type="button" style="padding:10px 14px;display:none">UNLINK</button></div></div><div style="display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;"><button onclick=vg_start() style="padding:12px 20px;font-weight:800">RETRY // FREE</button><a href=https://cash.app/$CeeWraith target=_blank style="background:#0ff; color:#000; padding:12px 20px; text-decoration:none; font-weight:900;">DONATE = UNLIMITED</a></div></div><div id=vg-start style="position:absolute; inset:0; background:rgba(5,0,20,0.92); color:#0ff; text-align:center; padding:40px 16px; z-index:10;"><h2 style="font-size:20px; letter-spacing:4px; margin:0;">◢ TETRIS PROTOCOL ◣</h2><p style="font-size:10px; color:#aaa; margin:12px 0 20px 0; line-height:1.6;">ARROWS / A D TO MOVE &bull; UP / W TO ROTATE<br>DOWN = SOFT DROP &bull; SPACE = HARD DROP<br>C / H = HOLD — SKIP THIS BLOCK<br>CLEAR LINES = STACK THE BAG</p><button onclick=vg_start() style="background:linear-gradient(90deg,#0ff,#f0f);color:#000;border:0;padding:16px 32px;font-size:14px;letter-spacing:3px">▶ INITIATE</button></div></div><div class="vg-side" style=min-width:110px;><p style="color:#0ff; font-size:10px; letter-spacing:2px; margin:0 0 6px;">NEXT</p><canvas id=vg-next width=120 height=80 style="width:120px; height:80px; background:#050510; border:1px solid #333; display:block;"></canvas><p style="color:#f0f; font-size:10px; letter-spacing:2px; margin:10px 0 6px;">HOLD — SKIP</p><canvas id=vg-hold width=120 height=80 style="width:120px; height:80px; background:#050510; border:1px solid #333; display:block;"></canvas><p style="color:#aaa; font-size:10px; line-height:1.8; margin:14px 0 0;">LEVEL <span id=vg-level class=vgw>1</span><br>LINES <span id=vg-lines class=vgw>0</span><br>CANDY <span id=vg-candy class=vgw>0</span><br>ORE <span id=vg-ore class=vgw>0</span><br>HIGH <span id=vg-high class=vgw>0</span></p><button onclick=vg_rotate() style="padding:10px 16px;font-weight:800;margin-top:14px;width:100%">&#8635;</button></div></div><div class="vg-ctl" style="display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;"><button onpointerdown=vg_rep(-1) onpointerup=vg_rep() onpointerleave=vg_rep() onpointercancel=vg_rep()>&#9664;</button><button onpointerdown=vg_rep(1) onpointerup=vg_rep() onpointerleave=vg_rep() onpointercancel=vg_rep()>&#9654;</button><button onclick=vg_hold() style=color:#f0f;border-color:#f0f;font-size:14px>HOLD</button><button onclick=vg_pause() style=font-size:14px;font-weight:800>PAUSE</button><button onclick=vg_soft()>&#9660;</button><button onclick=vg_hard() style=background:linear-gradient(90deg,#f0f,#0ff);color:#000;border:0;font-size:14px>DROP</button></div></div><div style="background:rgba(255,0,255,0.1); color:#0ff; padding:10px; display:flex; justify-content:space-between; font-size:10px; font-weight:800; letter-spacing:2px; border-top:1px solid #f0f;"><span>⏱ <span id=vg-timer>0s</span></span><span>LINES: <span id=vg-stacks>0</span></span><span>LEVEL: <span id=vg-level2>1</span></span></div></div>
+
+</div><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script>(function(){
+const COLS=10, ROWS=20, CELL=30;
+const canvas=document.getElementById('vg-canvas');
+const ctx=canvas.getContext('2d');
+const nextCanvas=document.getElementById('vg-next');
+const nctx=nextCanvas.getContext('2d');
+const holdCanvas=document.getElementById('vg-hold');
+const hctx=holdCanvas.getContext('2d');
+const SHAPES={
+I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+O:[[1,1],[1,1]],
+T:[[0,1,0],[1,1,1],[0,0,0]],
+S:[[0,1,1],[1,1,0],[0,0,0]],
+Z:[[1,1,0],[0,1,1],[0,0,0]],
+J:[[1,0,0],[1,1,1],[0,0,0]],
+L:[[0,0,1],[1,1,1],[0,0,0]],
+B:[[1]]
+};
+const EGG='#ffe9a8';
+const COLORS={I:'#0ff',O:'#ffe600',T:'#f0f',S:'#0f0',Z:'#f00',J:'#00f',L:'#f80',B:EGG};
+let grid, bag, cur, nextPiece, held, canHold, score, lines, level, time, timer, running, paused, dropAt, lockAt, lockResets, candy, ore, blastN;
+function vg_getHigh(){ try{ return parseInt(localStorage.getItem('vanixHigh')||0)||0; }catch(e){ return 0; } }
+function vg_setHigh(v){ try{ localStorage.setItem('vanixHigh', v); }catch(e){} }
+function emptyGrid(){ return Array.from({length:ROWS},()=>Array(COLS).fill(0)); }
+function newBag(){
+const keys=Object.keys(SHAPES).filter(k=>k!=='B');
+for(let i=keys.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=keys[i]; keys[i]=keys[j]; keys[j]=t; }
+return keys;
+}
+function makePiece(key){
+return {key:key, m:SHAPES[key].map(r=>r.slice()), x:3, y:0};
+}
+function collides(m, px, py){
+for(let y=0;y<m.length;y++) for(let x=0;x<m[y].length;x++){
+if(!m[y][x]) continue;
+const gx=px+x, gy=py+y;
+if(gx<0||gx>=COLS||gy>=ROWS) return true;
+if(gy>=0 && grid[gy][gx]) return true;
+}
+return false;
+}
+function rotate(m){
+const n=m.map(r=>r.slice());
+const size=n.length;
+const out=Array.from({length:size},()=>Array(size).fill(0));
+for(let y=0;y<size;y++) for(let x=0;x<size;x++) out[x][size-1-y]=n[y][x];
+return out;
+}
+function tryMove(dx, dy){
+if(!cur) return false;
+if(!collides(cur.m, cur.x+dx, cur.y+dy)){ cur.x+=dx; cur.y+=dy; return true; }
+return false;
+}
+function tryRotate(){
+if(!cur) return false;
+const r=rotate(cur.m);
+const kicks=[0,-1,1,-2,2];
+for(let i=0;i<kicks.length;i++){
+if(!collides(r, cur.x+kicks[i], cur.y)){ cur.m=r; cur.x+=kicks[i]; noteLockReset(); return true; }
+}
+return false;
+}
+function noteLockReset(){
+if(lockAt && lockResets<15){ lockAt=performance.now()+500; lockResets++; }
+}
+function spawn(){
+if(!bag.length) bag=newBag();
+if(!nextPiece) nextPiece=makePiece(bag.shift());
+cur=nextPiece;
+cur.x=Math.floor((COLS-cur.m[0].length)/2); cur.y=cur.key==='I'?-1:0;
+if(!bag.length) bag=newBag();
+nextPiece=blastN>0?(blastN--,makePiece('B')):makePiece(bag.shift());
+dropAt=performance.now()+gravity(); lockAt=null; lockResets=0; canHold=true;
+if(collides(cur.m, cur.x, cur.y)){ vg_end(); return false; }
+drawNext();
+return true;
+}
+function gravity(){ return Math.max(80, 800-(level-1)*70); }
+function fitsAt(m, px, py){
+for(let y=0;y<m.length;y++) for(let x=0;x<m[y].length;x++){
+if(!m[y][x]) continue;
+const gx=px+x, gy=py+y;
+if(gx<0||gx>=COLS||gy<0||gy>=ROWS) return false;
+if(grid[gy][gx]) return false;
+}
+return true;
+}
+function eggTransform(ex, ey, locked){
+if(ey<0||ey>=ROWS||ex<0||ex>=COLS) return;
+if(!nextPiece) return;
+const key=nextPiece.key;
+grid[ey][ex]=0;
+let m=nextPiece.m.map(r=>r.slice());
+for(let rot=0;rot<4;rot++){
+for(let fy=0;fy<m.length;fy++) for(let fx=0;fx<m[fy].length;fx++){
+if(!m[fy][fx]) continue;
+const px=ex-fx, py=ey-fy;
+if(!fitsAt(m, px, py)) continue;
+for(let y=0;y<m.length;y++) for(let x=0;x<m[y].length;x++){
+if(!m[y][x]) continue;
+const gy=py+y, gx=px+x;
+grid[gy][gx]=key; locked.push(gy*COLS+gx);
+}
+nextPiece=null;
+return;
+}
+m=rotate(m);
+}
+grid[ey][ex]='B';
+}
+function lockPiece(){
+var locked=[];
+for(let y=0;y<cur.m.length;y++) for(let x=0;x<cur.m[y].length;x++){
+if(!cur.m[y][x]) continue;
+const gy=cur.y+y; if(gy>=0){grid[gy][cur.x+x]=cur.key; locked.push(gy*COLS+cur.x+x);}
+}
+if(cur.key==='B') eggTransform(cur.x, cur.y, locked);
+clearLines();
+popClusters(locked);
+spawn();
+}
+function spendCandy(){while(candy>=10){candy-=10;grid.pop();grid.unshift(Array(COLS).fill(0));blastN++;}}
+function clearLines(){
+let cleared=0;
+for(let y=ROWS-1;y>=0;y--){
+if(grid[y].every(c=>c)){
+grid.splice(y,1); grid.unshift(Array(COLS).fill(0)); cleared++; y++;
+}
+}
+if(cleared){
+lines+=cleared;
+candy+=cleared;spendCandy();
+score+=[0,100,300,500,800][cleared]*level+cleared*50*level;ore+=cleared*50*level;
+level=Math.floor(lines/10)+1;
+}
+vg_ui();
+}
+function popClusters(excl){var D=[[1,0],[-1,0],[0,1],[0,-1]],seen=[],p=0;
+for(var y=0;y<ROWS;y++)for(var x=0;x<COLS;x++){if(!grid[y][x]||seen[y*COLS+x]||(excl&&excl.indexOf(y*COLS+x)>=0))continue;var k=grid[y][x],st=[[x,y]],c=[];seen[y*COLS+x]=1;while(st.length){var a=st.pop();c.push(a);for(var i=0;i<4;i++){var nx=a[0]+D[i][0],ny=a[1]+D[i][1];if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&!seen[ny*COLS+nx]&&grid[ny][nx]===k&&!(excl&&excl.indexOf(ny*COLS+nx)>=0)){seen[ny*COLS+nx]=1;st.push([nx,ny]);}}}if(c.length>4){for(var j=0;j<c.length;j++)grid[c[j][1]][c[j][0]]=0;p+=c.length;}}
+if(p){score+=p*20*level;vg_ui();}return p;}
+function ghostY(){
+let y=cur.y;
+while(!collides(cur.m, cur.x, y+1)) y++;
+return y;
+}
+function drawCell(c, x, y, color, ghost){
+var X=x*CELL,Y=y*CELL;
+if(color===EGG){
+c.fillStyle=ghost?'rgba(255,233,168,0.10)':EGG;
+c.beginPath(); c.ellipse(X+CELL/2, Y+CELL/2+1, 11, 13, 0, 0, Math.PI*2); c.fill();
+if(!ghost){ c.strokeStyle='rgba(160,110,30,.75)'; c.lineWidth=1.5; c.stroke(); c.fillStyle='rgba(255,255,255,.85)'; c.beginPath(); c.ellipse(X+CELL/2-4, Y+CELL/2-5, 3, 4.5, -0.4, 0, Math.PI*2); c.fill(); }
+return;
+}
+c.fillStyle=ghost?'rgba(255,255,255,0.08)':color;
+c.fillRect(X+1, Y+1, CELL-2, CELL-2);
+if(!ghost){ c.strokeStyle='rgba(0,0,0,.4)'; c.strokeRect(X+1.5, Y+1.5, CELL-3, CELL-3); c.fillStyle='rgba(0,0,0,.25)'; var s=(x*31+y*17)%3; c.fillRect(X+4+s*6, Y+5, 5, 5); c.fillRect(X+20-s*4, Y+19, 6, 4); }
+}
+function draw(){
+ctx.fillStyle='#050510'; ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.strokeStyle='rgba(0,255,255,0.06)';
+for(let i=1;i<COLS;i++){ ctx.beginPath(); ctx.moveTo(i*CELL,0); ctx.lineTo(i*CELL,canvas.height); ctx.stroke(); }
+for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++) if(grid[y][x]) drawCell(ctx,x,y,COLORS[grid[y][x]]);
+if(cur){
+const gy=ghostY();
+for(let y=0;y<cur.m.length;y++) for(let x=0;x<cur.m[y].length;x++){
+if(!cur.m[y][x]) continue;
+if(gy+y!==cur.y+y && gy+y>=0) drawCell(ctx,cur.x+x,gy+y,COLORS[cur.key],true);
+if(cur.y+y>=0) drawCell(ctx,cur.x+x,cur.y+y,COLORS[cur.key]);
+}
+}
+}
+function mini(c,x,y,col){if(col===EGG){c.fillStyle=EGG;c.beginPath();c.ellipse(x+9,y+9,7,8.5,0,0,Math.PI*2);c.fill();c.strokeStyle='rgba(160,110,30,.75)';c.lineWidth=1;c.stroke();return;}c.fillStyle=col;c.fillRect(x,y,18,18);c.fillStyle='rgba(0,0,0,.28)';c.fillRect(x+7,y+7,4,4);}
+function drawHold(){
+hctx.fillStyle='#050510'; hctx.fillRect(0,0,holdCanvas.width,holdCanvas.height);
+if(!held) return;
+const m=SHAPES[held], ox=Math.floor((4-m[0].length)/2)*20+10, oy=10;
+hctx.globalAlpha=canHold?1:0.35;
+for(let y=0;y<m.length;y++) for(let x=0;x<m[y].length;x++){
+if(m[y][x])mini(hctx,ox+x*20+1,oy+y*20+1,COLORS[held]);
+}
+hctx.globalAlpha=1;
+}
+function drawNext(){
+nctx.fillStyle='#050510'; nctx.fillRect(0,0,nextCanvas.width,nextCanvas.height);
+if(!nextPiece) return;
+const m=nextPiece.m, ox=Math.floor((4-m[0].length)/2)*20+10, oy=10;
+for(let y=0;y<m.length;y++) for(let x=0;x<m[y].length;x++){
+if(m[y][x])mini(nctx,ox+x*20+1,oy+y*20+1,COLORS[nextPiece.key]);
+}
+}
+function loop(now){
+if(!running||paused) return;
+if(cur){
+if(!collides(cur.m, cur.x, cur.y+1)){
+if(now>=dropAt){ cur.y++; dropAt=now+gravity(); }
+lockAt=null;
+} else {
+if(!lockAt) lockAt=now+500;
+else if(now>=lockAt){ lockPiece(); }
+}
+}
+draw();
+requestAnimationFrame(loop);
+}
+window.vg_start=function(){
+grid=emptyGrid(); bag=newBag(); nextPiece=null; held=null; canHold=true; drawHold();
+score=0; lines=0; candy=0; level=1; time=0; ore=0; blastN=0; running=true; paused=false;
+d('vg-start','none');
+d('vg-over','none');
+vg_tick();
+u('vg-timer','0s');
+vg_ui();
+if(spawn()) requestAnimationFrame(loop);
+};
+window.vg_pause=function(){
+if(!running) return;
+paused=!paused;
+if(!paused){ dropAt=performance.now()+gravity(); requestAnimationFrame(loop); }
+};
+window.vg_move=function(dx){ if(running&&!paused&&cur){ if(tryMove(dx,0)) noteLockReset(); draw(); } };
+let vg_hT=0,vg_hI=0;
+window.vg_rep=function(dx){clearTimeout(vg_hT);clearInterval(vg_hI);if(dx===undefined||!running||paused||!cur)return;window.vg_move(dx);vg_hT=setTimeout(()=>{vg_hI=setInterval(()=>{window.vg_move(dx);},70);},180);};
+window.vg_rotate=function(){ if(running&&!paused&&cur){ tryRotate(); draw(); } };
+window.vg_soft=function(){ if(running&&!paused&&cur){ if(tryMove(0,1)) score++; vg_ui(); draw(); } };
+window.vg_hold=function(){
+if(!running||paused||!cur||!canHold) return;
+if(!held){
+held=cur.key;
+if(spawn()){ canHold=false; }
+drawHold(); draw();
+return;
+}
+const swap=cur.key;
+cur=makePiece(held); held=swap;
+cur.x=Math.floor((COLS-cur.m[0].length)/2); cur.y=cur.key==='I'?-1:0;
+dropAt=performance.now()+gravity(); lockAt=null; lockResets=0; canHold=false;
+if(collides(cur.m, cur.x, cur.y)){ vg_end(); return; }
+drawHold(); draw();
+};
+window.vg_hard=function(){
+if(!running||paused||!cur) return;
+const gy=ghostY(); score+=(gy-cur.y)*2; cur.y=gy; vg_ui(); lockPiece(); draw();
+};
+window.vg_end=function(){
+running=false; paused=false; clearInterval(timer);
+u('vg-final','You stacked $'+score+' in '+time+'s - '+lines+' lines');
+u('vg-timePlayed',time+'s');
+d('vg-over','block');
+if(score>vg_getHigh()) vg_setHigh(score);
+vg_ui();
+};
+window.vg_revive=function(){
+/* ATOM REVIVE — 100 atoms (locked $1 = 100 atoms, Cee 2026-11-01). No Cash App
+   open here any more: the spend goes through window.__IONTETRIS (the wallet
+   module in the next script block), which deducts from the linked atom
+   wallet. No wallet / not enough atoms = no revive, plain message. */
+var T=window.__IONTETRIS,line=document.getElementById('vg-ion-line');
+function say(m){if(line)line.textContent=m;}
+if(!T){say('Atom wallet unavailable — check your connection and reload.');return;}
+var st=T.reviveState();
+if(!st.linked){say('REVIVE NEEDS 100 ATOMS — paste your wallet code below (from the ion site) to link your atom wallet.');return;}
+if(st.bal===null){say('Atom wallet still loading — try again in a second.');return;}
+if(st.bal<100){say('NOT ENOUGH ATOMS — YOU HAVE '+st.bal+', REVIVE COSTS 100. EARN MORE ON THE ION SITE.');return;}
+T.spendRevive(function(ok,msg){
+if(!ok){say(msg||'REVIVE FAILED — TRY AGAIN.');return;}
+d('vg-over','none');
+for(let i=0;i<4;i++){ grid.shift(); grid.push(Array(COLS).fill(0)); }
+running=true; paused=false;
+vg_tick();
+if(spawn()) requestAnimationFrame(loop);
+});
+};
+function u(i,v){document.getElementById(i).textContent=v;}
+function d(i,v){document.getElementById(i).style.display=v;}
+function vg_ui(){
+u('vg-score','$'+score);u('vg-stacks',lines);u('vg-lines',lines);u('vg-candy',candy);
+u('vg-ore',ore);u('vg-level',level);u('vg-level2',level);u('vg-high',vg_getHigh());
+}
+function vg_tick(){clearInterval(timer);timer=setInterval(()=>{time++;u('vg-timer',time+'s');},1000);}
+document.addEventListener('keydown', e=>{
+if(!running||paused) return;
+if(e.code==='ArrowLeft'||e.code==='KeyA'){ e.preventDefault(); window.vg_move(-1); }
+else if(e.code==='ArrowRight'||e.code==='KeyD'){ e.preventDefault(); window.vg_move(1); }
+else if(e.code==='ArrowUp'||e.code==='KeyW'){ e.preventDefault(); window.vg_rotate(); }
+else if(e.code==='ArrowDown'||e.code==='KeyS'){ e.preventDefault(); window.vg_soft(); }
+else if(e.code==='Space'){ e.preventDefault(); window.vg_hard(); }
+else if(e.code==='KeyC'||e.code==='KeyH'||e.code==='ShiftLeft'||e.code==='ShiftRight'){ e.preventDefault(); window.vg_hold(); }
+else if(e.code==='KeyP'){ window.vg_pause(); }
+});
+let vg_dragging=false, vg_dragStartX=0, vg_dragStartY=0, vg_dragMoved=false;
+canvas.addEventListener('pointerdown', e=>{
+if(!running||paused||!cur) return;
+vg_dragging=true; vg_dragMoved=false;
+vg_dragStartX=e.clientX; vg_dragStartY=e.clientY;
+try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+});
+canvas.addEventListener('pointermove', e=>{
+if(!vg_dragging||!running||paused||!cur) return;
+const dx=e.clientX-vg_dragStartX, dy=e.clientY-vg_dragStartY;
+if(Math.abs(dx)>12||Math.abs(dy)>12) vg_dragMoved=true;
+const rect=canvas.getBoundingClientRect();
+const col=Math.floor((e.clientX-rect.left)/rect.width*COLS);
+let lo=99, hi=-1;
+for(let y=0;y<cur.m.length;y++) for(let x=0;x<cur.m[y].length;x++) if(cur.m[y][x]){ lo=Math.min(lo,x); hi=Math.max(hi,x); }
+const w=hi-lo+1;
+const target=Math.max(-lo, Math.min(COLS-1-hi, col-Math.floor((lo+hi)/2)));
+if(target!==cur.x && !collides(cur.m, target, cur.y)){ cur.x=target; noteLockReset(); draw(); }
+if(dy>70){ window.vg_hard(); vg_dragging=false; }
+});
+function vg_pointerEnd(e){
+if(!vg_dragging) return;
+vg_dragging=false;
+if(!vg_dragMoved) window.vg_rotate();
+}
+canvas.addEventListener('pointerup', vg_pointerEnd);
+canvas.addEventListener('pointercancel', ()=>{ vg_dragging=false; });
+u('vg-high',vg_getHigh());
+})();
+
+</script>
+
+<script>
+/* ===== ATOM WALLET for Tetris — revive costs 100 atoms =====
+   Locked rate (Cee 2026-11-01): $1 = 100 atoms (1 ion = 2 atoms). Same wallet-code bridge as
+   Wraith Pet: paste the code from the ion site once; it is saved in this
+   browser (localStorage, shared with the pet shop on the same origin) and
+   the atom wallet (Firestore ion_wallets) is read/written by uid from the
+   code. Until the wallet-code Firestore rules are published, linking fails
+   cleanly with "wallet refused" and the free RETRY still works. */
+(function(){
+if("undefined"===typeof document||"undefined"===typeof window)return;
+var ATOM_REVIVE_COST=100;
+var ION_CODE_KEY="wraith_ion_code_v1";
+var ION_FIREBASE_CONFIG={apiKey:"AIzaSyB1ERnGB2hAGclij5GN8H184U6jN_tVrKA",authDomain:"swvp-721a0.firebaseapp.com",projectId:"swvp-721a0",storageBucket:"swvp-721a0.firebasestorage.app",messagingSenderId:"100192355951078",appId:"1:100192355951078:web:swvp721a0ion"};
+var ION_B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function ionHash(s){var h=5381;for(var i=0;i<s.length;i++){h=(((h<<5)+h)+s.charCodeAt(i))>>>0}var x=h.toString(16);while(x.length<8)x="0"+x;return x}
+function ionUtf8(s){var o=[];for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c<128)o.push(c);else if(c<2048)o.push(192|(c>>6),128|(c&63));else o.push(224|(c>>12),128|((c>>6)&63),128|(c&63))}return o}
+function ionB64e(b){var o="";for(var i=0;i<b.length;i+=3){var b0=b[i],b1=i+1<b.length?b[i+1]:0,b2=i+2<b.length?b[i+2]:0;o+=ION_B64.charAt(b0>>2);o+=ION_B64.charAt(((b0&3)<<4)|(b1>>4));if(i+1<b.length)o+=ION_B64.charAt(((b1&15)<<2)|(b2>>6));if(i+2<b.length)o+=ION_B64.charAt(b2&63)}return o}
+function ionB64d(s){var v={},i;for(i=0;i<ION_B64.length;i++)v[ION_B64.charAt(i)]=i;var o=[],acc=0,nb=0;for(i=0;i<s.length;i++){var x=v[s.charAt(i)];if(x===undefined)return null;acc=(acc<<6)|x;nb+=6;if(nb>=8){nb-=8;o.push((acc>>nb)&255)}}return o}
+function ionFromUtf8(b){var o="",i=0;while(i<b.length){var x=b[i++];if(x<128)o+=String.fromCharCode(x);else if(x>=192&&x<224&&i<b.length)o+=String.fromCharCode(((x&31)<<6)|(b[i++]&63));else if(x>=224&&x<240&&i+1<b.length){o+=String.fromCharCode(((x&15)<<12)|((b[i]&63)<<6)|(b[i+1]&63));i+=2}else o+="?"}return o}
+function ionCodeFor(uid){if(!uid)return"";var b=ionB64e(ionUtf8(String(uid)));return"ION1-"+b+"-"+ionHash(b)}
+function ionUidFromCode(code){if(!code)return null;var c=String(code).trim().replace(/\s+/g,""),p=c.split("-");if(p.length!==3||(p[0]!=="ION1"&&p[0]!=="ATOM1"))return null;if(ionHash(p[1])!==p[2].toLowerCase())return null;var b=ionB64d(p[1]);if(!b)return null;var u=ionFromUtf8(b);if(!u||/[^A-Za-z0-9_-]/.test(u))return null;return u}
+var ionUid=null,ionCode="",ionBal=null,ionDb=null,ionUnsub=null,ionErr=null;
+function vgIonEl(id){try{return document.getElementById(id)}catch(e){return null}}
+function vgIonSay(m){var e=vgIonEl("vg-ion-line");if(e)e.textContent=m}
+function vgIonLoadCode(){try{return localStorage.getItem(ION_CODE_KEY)||""}catch(e){return""}}
+function vgIonSaveCode(c){try{if(c)localStorage.setItem(ION_CODE_KEY,c);else localStorage.removeItem(ION_CODE_KEY)}catch(e){}}
+function vgIonRender(){var link=vgIonEl("vg-ion-link"),un=vgIonEl("vg-ion-unlink"),inp=vgIonEl("vg-ion-code");if(link)link.style.display=ionUid?"none":"";if(un)un.style.display=ionUid?"":"none";if(inp&&ionCode)inp.value=ionCode;if(ionErr){vgIonSay(ionErr);return}if(!ionUid){vgIonSay("Paste your wallet code from the ion site to link your atom wallet. $1 = 100 atoms.");return}if(ionBal===null){vgIonSay("Atom wallet linked — loading balance…");return}vgIonSay("⚡ "+ionBal+" ATOMS linked — revive costs 100. 1 atom = 13 sats.")}
+function vgIonDetach(){if(ionUnsub){try{ionUnsub()}catch(e){}}ionUnsub=null}
+function vgIonAttach(){vgIonDetach();if(!ionUid||!ionDb)return;var ref=ionDb.collection("ion_wallets").doc(ionUid);ionUnsub=ref.onSnapshot(function(doc){ionErr=null;if(doc.exists){var d=doc.data()||{};ionBal=(typeof d.ions==="number")?d.ions:0}else{ionBal=0;vgIonSay("Wallet not found yet — open the ion site once so it creates your wallet, then link again.")}vgIonRender()},function(err){ionBal=null;var code=err&&err.code?String(err.code):"";if(code.indexOf("permission-denied")>=0||code.indexOf("permission")>=0){ionErr="Atom wallet refused — the wallet-code rules update hasn't landed yet. RETRY (free) still works.";}else{ionErr="Couldn't open the atom wallet ("+(code||"connection")+"). Check the code and try again."}vgIonRender()})}
+function vgIonBoot(){if("undefined"===typeof firebase||!firebase||!firebase.firestore){vgIonSay("Atom wallet unavailable — Firebase didn't load. RETRY (free) still works.");return}try{if(!firebase.apps||!firebase.apps.length){firebase.initializeApp(ION_FIREBASE_CONFIG)}}catch(e){}try{ionDb=firebase.firestore()}catch(e){vgIonSay("Atom wallet unavailable — couldn't start Firebase.");return}try{firebase.auth().signInAnonymously().then(function(){var c=ionCode||vgIonLoadCode();if(c)vgIonLink(c,true)}).catch(function(){vgIonSay("Atom wallet unavailable — couldn't sign in.")})}catch(e){vgIonSay("Atom wallet unavailable — couldn't sign in.")}}
+function vgIonLink(code,silent){var uid=ionUidFromCode(code);if(!uid){if(!silent)vgIonSay("That wallet code doesn't look right — copy it from the ion site (starts ATOM1- or ION1-).");return false}ionUid=uid;ionCode=String(code).trim().replace(/\s+/g,"");ionBal=null;ionErr=null;vgIonSaveCode(ionCode);vgIonRender();if(ionDb){vgIonAttach()}else{vgIonBoot()}return true}
+function vgIonUnlink(){vgIonDetach();ionUid=null;ionCode="";ionBal=null;ionErr=null;vgIonSaveCode("");vgIonRender()}
+window.__IONTETRIS={
+reviveState:function(){return{linked:!!ionUid,bal:ionBal}},
+say:vgIonSay,
+spendRevive:function(cb){if(!ionUid||!ionDb||ionBal===null){cb(false,"Atom wallet not linked.");return}var ref=ionDb.collection("ion_wallets").doc(ionUid);ionDb.runTransaction(function(tx){return tx.get(ref).then(function(doc){if(!doc.exists)throw new Error("no-wallet");var d=doc.data()||{};var bal=(typeof d.ions==="number")?d.ions:0;if(bal<ATOM_REVIVE_COST)throw new Error("insufficient");tx.update(ref,{ions:bal-ATOM_REVIVE_COST,code:ionCode,ts:Date.now()});return bal-ATOM_REVIVE_COST})}).then(function(bal){ionBal=bal;vgIonSay("REVIVED FOR 100 ATOMS — BALANCE "+bal+".");vgIonRender();cb(true)}).catch(function(err){var c=err&&err.message?String(err.message):"";if(c==="insufficient")cb(false,"NOT ENOUGH ATOMS — YOUR BALANCE CHANGED. CHECK THE ION SITE.");else cb(false,"REVIVE FAILED — TRY AGAIN.")})},
+ionUidFromCode:ionUidFromCode,ionCodeFor:ionCodeFor,link:vgIonLink,unlink:vgIonUnlink,
+getState:function(){return{uid:ionUid,bal:ionBal}}
+};
+var lb=vgIonEl("vg-ion-link");if(lb)lb.addEventListener("click",function(){var inp=vgIonEl("vg-ion-code");vgIonLink(inp?inp.value:"")});
+var ub=vgIonEl("vg-ion-unlink");if(ub)ub.addEventListener("click",function(){vgIonUnlink()});
+var saved=vgIonLoadCode();var inp0=vgIonEl("vg-ion-code");if(inp0&&saved)inp0.value=saved;
+vgIonRender();vgIonBoot();
+})();
+</script>
+
+
+<script>
+/* VANIX frame height reporter — tells the main site how tall this game is so the F.U.N frame fits it with no inner scroll. */
+(function(){try{
+function contentH(){var m=0;var cs=document.body?document.body.children:[];for(var i=0;i<cs.length;i++){var el=cs[i];if(!el||el.tagName==='SCRIPT'||el.tagName==='STYLE')continue;var st=null;try{st=getComputedStyle(el);}catch(e){}if(st&&st.position==='fixed')continue;var r=null;try{r=el.getBoundingClientRect();}catch(e){}if(r){var b=r.bottom+(window.scrollY||0);if(b>m)m=b;}}return Math.ceil(m)+12;}
+function send(){try{var h=contentH();if(h>0&&window.parent!==window)window.parent.postMessage({type:'vanix-game-ready',game:'tetris',h:h},'*');}catch(e){}}
+window.addEventListener('load',function(){send();setTimeout(send,1000);});
+window.addEventListener('resize',send);
+}catch(e){}})();
+</script>
+</body></html>

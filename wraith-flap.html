@@ -1,0 +1,221 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>WRAITH WINGS — Wraith's Arcade</title><style>
+*{box-sizing:border-box}body{margin:0;background:#07070d;color:#fff;font-family:monospace;overflow:hidden}
+#hud{display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#ffcc33;letter-spacing:1px}
+#hud b{color:#fff}
+#wrap{position:relative}
+canvas{display:block;width:100%;height:auto;background:#0a0a14;touch-action:none}
+#ctl{display:flex;gap:8px;padding:8px}
+#ctl button{flex:1;padding:19px 0;min-height:56px;background:#111;color:#ffcc33;border:1px solid #ffcc33;border-radius:8px;font-size:14px;font-weight:700;touch-action:none;user-select:none;-webkit-user-select:none}
+#ctl button:active{background:#333}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.85);text-align:center;z-index:2;padding:10px}
+#ov h1{color:#ffcc33;letter-spacing:3px;margin:0 0 8px;font-size:20px}
+#ov p{margin:4px 0;color:#ccc;font-size:12px;line-height:1.5}
+#ov button{margin:4px;padding:16px 22px;min-height:56px;background:#ffcc33;color:#000;border:0;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
+#msg{position:absolute;top:44px;left:0;right:0;text-align:center;font-size:16px;font-weight:700;color:#ffd94d;letter-spacing:2px;z-index:3;pointer-events:none;text-shadow:0 2px 6px #000}
+#pad{display:none;flex-direction:row;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px;pointer-events:none}
+#pad .padTag{font-size:10px;letter-spacing:3px;color:#ffcc33;opacity:.85;text-shadow:0 1px 4px #000}
+#padA{width:72px;height:72px;border-radius:50%;background:rgba(17,17,17,.72);color:#ffcc33;border:2px solid #ffcc33;box-shadow:0 4px 0 #6b4d00,0 6px 12px rgba(0,0,0,.55);font-size:24px;font-weight:700;touch-action:none;user-select:none;-webkit-user-select:none;pointer-events:auto}
+#padA:active{background:rgba(255,204,51,.35)}
+@media(pointer:coarse){#pad{display:flex}}
+#pad.touch{display:flex}
+html,body{touch-action:none;overscroll-behavior:none}
+
+/*STAGE-CAP: desktop stage column, phones unaffected (no-op under 720px)*/
+body{max-width:720px;margin:0 auto}
+html{background:#07070d}
+@media (orientation:landscape) and (max-height:500px){
+/* Landscape phones: HUD + 16:9 canvas + controls + pad + hub link is
+   taller than the viewport and body overflow is hidden, so the controls
+   would be unreachable. Narrow the stage so the canvas height leaves
+   room for everything else in the column. */
+body{max-width:calc((100vh - 220px)*16/9)}
+}
+</style></head><body>
+<div id="hud"><span>SCORE <b id="hs">0</b></span><span>WRAITH WINGS</span><span>BEST <b id="hb">0</b></span></div>
+<div id="wrap"><canvas id="cv" width="480" height="270"></canvas><div id="msg"></div>
+<div id="ov"><h1 id="ovt">WRAITH WINGS</h1><p id="ovp"></p><div id="ovb"></div></div></div>
+<div id="ctl"><button id="bf">RISE</button><button id="bp">PAUSE</button></div>
+<div id="pad"><span class="padTag">PAD</span><button id="padA" type="button" aria-label="RETRO PAD rise">▲</button></div>
+<div style="text-align:center;padding:4px 0 10px"><a href="/" style="color:#ffcc33;text-decoration:none;font-size:12px">← ARCADE HUB</a></div>
+<script>
+'use strict';
+/* WRAITH WINGS — original rising-flight game. No borrowed characters, art, music or names. */
+var W=480,H=270,GY=240,GRAV=0.32,FLAPV=-6.0,OBW=44;
+/* GENTLE START: the opening ~1.5s (90 steps) falls at 55% gravity so the
+   first tap is forgiving. The window runs once per run from run start, and
+   the first flap re-arms it to a full 90 steps from that flap; later flaps
+   never re-arm it. HOVER: while held, vertical velocity eases toward 0. */
+var GENTLE_T=90,GENTLE_SCALE=0.55,HOVER_EASE=0.4;
+function bestKey(){return 'wraith_flap_best';}
+function loadBest(){try{var v=localStorage.getItem(bestKey());return v?parseInt(v,10)||0:0;}catch(e){return 0;}}
+function saveBest(v){try{localStorage.setItem(bestKey(),String(v));}catch(e){}}
+function mkObs(x,gapY,gapH){return {x:x,gapY:gapY,gapH:gapH,w:OBW,passed:false};}
+function createGame(){
+  return {x:64,y:110,w:28,h:20,vy:0,score:0,best:loadBest(),obs:[mkObs(360,120,104)],
+    t:0,spawnT:95,phase:'play',over:false,paused:false,autoPaused:false,speed:1.8,gapH:104,shown:false,
+    gentleT:GENTLE_T,gentleUsed:false};
+}
+function hitRects(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+function endGame(S){
+  S.phase='over';S.over=true;
+  if(S.score>=S.best){S.best=S.score;saveBest(S.best);}
+}
+function pauseGame(S,auto){if(!S)return;S.paused=true;S.autoPaused=!!auto;}
+function resumeGame(S){if(!S)return;S.paused=false;S.autoPaused=false;}
+function stepGame(S,inp){
+  if(!S||S.phase!=='play'||S.paused)return;
+  inp=inp||{};
+  S.t++;
+  S.speed=1.8+Math.min(1.4,S.score*0.07);
+  S.gapH=Math.max(76,104-S.score*1.5);
+  if(inp.flap){S.vy=FLAPV;if(!S.gentleUsed){S.gentleUsed=true;S.gentleT=GENTLE_T;}}
+  if(inp.hold&&!inp.flap){S.vy+=(0-S.vy)*HOVER_EASE;}
+  else{S.vy+=GRAV*(S.gentleT>0?GENTLE_SCALE:1);}
+  if(S.gentleT>0)S.gentleT--;
+  S.y+=S.vy;
+  if(S.y<0){S.y=0;S.vy=0;}
+  for(var i=0;i<S.obs.length;i++)S.obs[i].x-=S.speed;
+  while(S.obs.length&&S.obs[0].x+S.obs[0].w<0)S.obs.shift();
+  if(--S.spawnT<=0){
+    S.obs.push(mkObs(W+10,60+Math.random()*110,S.gapH));
+    S.spawnT=Math.round(170/S.speed);
+  }
+  var pr={x:S.x,y:S.y,w:S.w,h:S.h};
+  for(var j=0;j<S.obs.length;j++){
+    var o=S.obs[j],topH=o.gapY-o.gapH/2,botY=o.gapY+o.gapH/2;
+    if(hitRects(pr,{x:o.x,y:0,w:o.w,h:topH})||hitRects(pr,{x:o.x,y:botY,w:o.w,h:GY-botY})){endGame(S);return;}
+    if(!o.passed&&o.x+o.w<S.x){o.passed=true;S.score++;if(S.score>S.best)S.best=S.score;}
+  }
+  if(S.y+S.h>=GY){S.y=GY-S.h;endGame(S);}
+}
+var ROOT=typeof window!=='undefined'?window:globalThis;
+ROOT.__FLAP__={W:W,H:H,GY:GY,GRAV:GRAV,FLAPV:FLAPV,GENTLE_T:GENTLE_T,GENTLE_SCALE:GENTLE_SCALE,HOVER_EASE:HOVER_EASE,createGame:createGame,stepGame:stepGame,pauseGame:pauseGame,resumeGame:resumeGame,loadBest:loadBest,saveBest:saveBest};
+var cv=(typeof document!=='undefined')?document.getElementById('cv'):null;
+if(cv){
+var ctx=cv.getContext('2d');
+var AC=null;
+function beep(f,d){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type='square';o.frequency.value=f;v.gain.value=.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+var S=null,flapEdge=false,holdTouch=false,holdKey=false,lastTs=0,acc=0;
+function heldNow(){return holdTouch||holdKey;}
+function clearHolds(){holdTouch=false;holdKey=false;}
+function showOv(t,p,h){$('ovt').innerHTML=t;$('ovp').innerHTML=p;$('ovb').innerHTML=h;$('ov').style.display='flex';}
+function hideOv(){$('ov').style.display='none';}
+function renderMenu(){
+  showOv('WRAITH WINGS','TAP, CLICK OR PRESS SPACE TO RISE • HOLD TO HOVER<br>FLY THROUGH THE STONE GAPS • DO NOT TOUCH STONE OR GROUND<br>BEST '+loadBest(),
+  '<button onclick="startGame()">▶ START</button>');
+}
+function startGame(){S=createGame();flapEdge=false;clearHolds();hideOv();}
+function resumeUI(){if(S){resumeGame(S);clearHolds();hideOv();}}
+function pauseShow(){showOv('PAUSED','TAP TO RESUME — RETURNS ON ITS OWN WHEN THE TAB COMES BACK','<button onclick="resumeUI()">▶ RESUME</button>');}
+function togglePause(){
+  if(!S||S.phase!=='play')return;
+  if(S.paused)resumeUI();else{pauseGame(S,false);pauseShow();}
+}
+window.startGame=startGame;window.resumeUI=resumeUI;
+$('ov').addEventListener('click',function(){if(S&&S.paused)resumeUI();});
+cv.addEventListener('pointerdown',function(e){e.preventDefault();if(!S)return;if(S.paused){resumeUI();return;}if(S.phase==='play'){holdTouch=true;flapEdge=true;}});
+cv.addEventListener('pointerup',function(){holdTouch=false;});
+cv.addEventListener('pointercancel',function(){holdTouch=false;});
+cv.addEventListener('pointerleave',function(){holdTouch=false;});
+document.addEventListener('pointerup',function(){holdTouch=false;});
+document.addEventListener('pointercancel',function(){holdTouch=false;});
+function bindTap(el,fn){
+  el.addEventListener('pointerdown',function(e){e.preventDefault();fn();});
+  el.addEventListener('touchstart',function(e){e.preventDefault();fn();},{passive:false});
+}
+/* RETRO PAD: pad A calls the same rise handler as RISE / tap / Space. */
+function riseInput(){if(!S)return;if(S.paused){resumeUI();return;}if(S.phase==='play'){holdTouch=true;flapEdge=true;}}
+bindTap($('bf'),riseInput);
+var padA=$('padA');
+if(padA){bindTap(padA,riseInput);
+padA.addEventListener('pointerup',function(){holdTouch=false;});
+padA.addEventListener('pointercancel',function(){holdTouch=false;});
+padA.addEventListener('pointerleave',function(){holdTouch=false;});
+padA.addEventListener('touchend',function(){holdTouch=false;});
+padA.addEventListener('touchcancel',function(){holdTouch=false;});}
+var padEl=$('pad'),isTouch=false;try{isTouch=('ontouchstart' in window)||(typeof navigator!=='undefined'&&navigator.maxTouchPoints>0);}catch(e){isTouch=false;}
+if(isTouch&&padEl)padEl.classList.add('touch');
+$('bf').addEventListener('pointerup',function(){holdTouch=false;});
+$('bf').addEventListener('pointercancel',function(){holdTouch=false;});
+$('bf').addEventListener('pointerleave',function(){holdTouch=false;});
+$('bf').addEventListener('touchend',function(){holdTouch=false;});
+$('bf').addEventListener('touchcancel',function(){holdTouch=false;});
+bindTap($('bp'),togglePause);
+document.addEventListener('keydown',function(e){
+  if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){
+    e.preventDefault();
+    if(!S)return;
+    if(S.paused)resumeUI();else if(S.phase==='play'){holdKey=true;flapEdge=true;}
+  }
+  if(e.code==='KeyP')togglePause();
+});
+document.addEventListener('keyup',function(e){
+  if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW')holdKey=false;
+});
+document.addEventListener('visibilitychange',function(){
+  if(!S||S.phase!=='play')return;
+  if(document.hidden){clearHolds();if(!S.paused){pauseGame(S,true);pauseShow();}}
+  else if(S.autoPaused)resumeUI();
+});
+function drawWraith(){
+  var wing=Math.sin(S.t*0.5)*5;
+  ctx.save();ctx.translate(S.x+14,S.y+10);ctx.rotate(Math.max(-0.4,Math.min(0.6,S.vy*0.07)));
+  ctx.fillStyle='#0d0d12';ctx.beginPath();ctx.moveTo(-4,-2);ctx.lineTo(-20,-10-wing);ctx.lineTo(-14,4);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#d4af37';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-4,-2);ctx.lineTo(-20,-10-wing);ctx.stroke();
+  ctx.fillStyle='#0d0d12';ctx.fillRect(-14,-8,28,16);
+  ctx.fillStyle='#1c1c22';ctx.fillRect(6,-10,8,20);
+  ctx.fillStyle='#d4af37';ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(4,-18);ctx.lineTo(11,-10);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(13,-10);ctx.lineTo(17,-18);ctx.lineTo(14,-10);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ffcc33';ctx.fillRect(10,-4,3,3);ctx.fillRect(10,2,3,3);
+  ctx.fillStyle='#d4af37';ctx.fillRect(-14,6,28,2);
+  ctx.restore();
+}
+function draw(){
+  var sky=ctx.createLinearGradient(0,0,0,270);
+  sky.addColorStop(0,'#1a0f2e');sky.addColorStop(1,'#0a0a14');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,480,270);
+  ctx.fillStyle='#fff';
+  for(var s=0;s<24;s++){ctx.fillRect((s*173)%480,(s*89)%160,2,2);}
+  ctx.fillStyle='rgba(0,0,0,.35)';
+  var off=(S?S.t*S.speed*0.3:0)%90;
+  for(var hx=-90;hx<480;hx+=90){ctx.fillRect(hx-off,150,60,90);ctx.beginPath();ctx.moveTo(hx-off,150);ctx.lineTo(hx-off+30,120);ctx.lineTo(hx-off+60,150);ctx.closePath();ctx.fill();}
+  for(var i=0;i<S.obs.length;i++){
+    var o=S.obs[i],topH=o.gapY-o.gapH/2,botY=o.gapY+o.gapH/2;
+    ctx.fillStyle='#6a6a72';ctx.fillRect(o.x,0,o.w,topH);ctx.fillRect(o.x,botY,o.w,GY-botY);
+    ctx.fillStyle='rgba(0,0,0,.3)';
+    for(var ly=12;ly<topH;ly+=24)ctx.fillRect(o.x,ly,o.w,2);
+    for(var ly2=botY+12;ly2<GY;ly2+=24)ctx.fillRect(o.x,ly2,o.w,2);
+    ctx.fillStyle='#ffcc33';ctx.fillRect(o.x,topH-4,o.w,4);ctx.fillRect(o.x,botY,o.w,4);
+    ctx.fillStyle='#8a8a92';ctx.fillRect(o.x,0,4,topH);ctx.fillRect(o.x,botY,4,GY-botY);
+  }
+  ctx.fillStyle='#3a2c18';ctx.fillRect(0,GY,480,30);
+  ctx.fillStyle='#ffcc33';ctx.fillRect(0,GY,480,3);
+  if(S)drawWraith();
+  if(S&&S.paused)$('msg').textContent='PAUSED — TAP TO RESUME';
+  else if(S&&S.phase==='play')$('msg').textContent='';
+}
+function hud(){if(!S)return;$('hs').textContent=S.score;$('hb').textContent=S.best;}
+function endOv(){
+  showOv('GAME OVER','SCORE '+S.score+' • BEST '+S.best,
+  '<button onclick="startGame()">↻ TRY AGAIN</button>');
+  beep(160,.25);
+}
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(!S)return;
+  if(S.paused){draw();hud();return;}
+  if(S.phase==='play'){
+    var dt=ts-lastTs;lastTs=ts;acc+=Math.min(dt,100);
+    var steps=0;
+    while(acc>=16.67&&steps<4){stepGame(S,{flap:flapEdge,hold:heldNow()});flapEdge=false;acc-=16.67;steps++;}
+    if(steps===4)acc=0;
+    if(S.phase==='over'&&!S.shown){S.shown=true;endOv();}
+  }
+  draw();hud();
+}
+renderMenu();
+requestAnimationFrame(function(ts){lastTs=ts;requestAnimationFrame(loop);});
+}
+</script>
+</body></html>

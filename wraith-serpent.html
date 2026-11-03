@@ -1,0 +1,185 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>WRAITH SERPENT — Wraith's Arcade</title><style>
+*{box-sizing:border-box}body{margin:0;background:#07070d;color:#fff;font-family:monospace;overflow:hidden}
+#hud{display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#ffcc33;letter-spacing:1px}
+#hud b{color:#fff}
+#wrap{position:relative;max-width:420px;margin:0 auto}
+canvas{display:block;width:100%;height:auto;background:#0a0a14;touch-action:none}
+#ctl{display:flex;gap:8px;padding:8px;max-width:420px;margin:0 auto;align-items:center;justify-content:center}
+#pad{display:none;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(3,58px);gap:6px}
+#pad button,#bp{padding:0;background:rgba(20,20,28,.85);color:#ffcc33;border:3px solid #ffcc33;border-radius:14px;font-size:20px;font-weight:700;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 4px 0 rgba(0,0,0,.55)}
+#pad button{width:58px;height:58px}
+#pad button:active,#bp:active{background:rgba(122,45,45,.92);transform:scale(.96)}
+@media (pointer:coarse){#pad{display:grid}}
+#bp{padding:18px 20px;font-size:14px;min-height:56px}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.85);text-align:center;z-index:2;padding:10px}
+#ov h1{color:#ffcc33;letter-spacing:3px;margin:0 0 8px;font-size:20px}
+#ov p{margin:4px 0;color:#ccc;font-size:12px;line-height:1.5}
+#ov button{margin:4px;padding:16px 22px;min-height:56px;background:#ffcc33;color:#000;border:0;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
+#msg{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:14px;font-weight:700;color:#ffd94d;letter-spacing:2px;z-index:3;pointer-events:none;text-shadow:0 2px 6px #000}
+@media (orientation:landscape) and (max-height:500px){
+/* Landscape phones: the column (HUD + 1:1 canvas + pad + hub link) is
+   taller than the viewport and body overflow is hidden, so the pad and
+   pause would be unreachable. Shrink the square stage so the whole
+   column fits: canvas = viewport height minus HUD + controls + hub. */
+#wrap{max-width:calc(100vh - 150px)}
+#hud{padding:4px 12px}
+}
+html,body{touch-action:none;overscroll-behavior:none}
+</style></head><body>
+<div id="hud"><span>SCORE <b id="hs">0</b></span><span>ORBS <b id="ho">0</b></span><span>BEST <b id="hb">0</b></span></div>
+<div id="wrap"><canvas id="cv" width="400" height="400"></canvas><div id="msg"></div>
+<div id="ov"><h1 id="ovt">WRAITH SERPENT</h1><p id="ovp"></p><div id="ovb"></div></div></div>
+<div id="ctl"><div id="pad" class="retro-pad" aria-label="RETRO PAD">
+<button id="bu" aria-label="Up" style="grid-column:2;grid-row:1">▲</button><button id="bl" aria-label="Left" style="grid-column:1;grid-row:2">◀</button><button id="br" aria-label="Right" style="grid-column:3;grid-row:2">▶</button><button id="bd" aria-label="Down" style="grid-column:2;grid-row:3">▼</button>
+</div><button id="bp">❚❚ PAUSE</button></div>
+<div style="text-align:center;padding:4px 0 10px"><a href="index.html" style="color:#ffcc33;text-decoration:none;font-size:12px">← ARCADE HUB</a></div>
+<script>
+'use strict';
+/* WRAITH SERPENT — original grid serpent. No borrowed characters, art, music or assets. */
+var GRID=20,CELL=20,BESTKEY='wraith_serpent_best';
+function intervalFor(orbs){return Math.max(70,160-orbs*6);}
+function spawnOrb(S){
+  var free=[];
+  for(var x=0;x<GRID;x++)for(var y=0;y<GRID;y++){
+    var on=false;
+    for(var i=0;i<S.snake.length;i++)if(S.snake[i].x===x&&S.snake[i].y===y){on=true;break;}
+    if(!on)free.push({x:x,y:y});
+  }
+  if(!free.length){S.orb=null;return;}
+  var r=S.rng?S.rng():Math.random();
+  S.orb=free[Math.floor(r*free.length)%free.length];
+}
+function createGame(){
+  var S={snake:[{x:10,y:10},{x:9,y:10},{x:8,y:10}],dir:{x:1,y:0},next:{x:1,y:0},orb:null,score:0,orbs:0,over:false,dead:false,ticks:0,rng:null};
+  spawnOrb(S);
+  return S;
+}
+function setDir(S,dx,dy){
+  if(!S||S.over)return;
+  if(dx===-S.next.x&&dy===-S.next.y)return;
+  if(dx===S.next.x&&dy===S.next.y)return;
+  S.next={x:dx,y:dy};
+}
+function stepGame(S){
+  if(!S||S.over)return;
+  S.dir=S.next;
+  var head={x:S.snake[0].x+S.dir.x,y:S.snake[0].y+S.dir.y};
+  S.ticks++;
+  if(head.x<0||head.x>=GRID||head.y<0||head.y>=GRID){S.over=true;S.dead=true;return;}
+  var eats=!!(S.orb&&head.x===S.orb.x&&head.y===S.orb.y);
+  var body=eats?S.snake:S.snake.slice(0,-1);
+  for(var i=0;i<body.length;i++)if(body[i].x===head.x&&body[i].y===head.y){S.over=true;S.dead=true;return;}
+  S.snake.unshift(head);
+  if(eats){S.score+=10;S.orbs++;spawnOrb(S);}else{S.snake.pop();}
+}
+function loadBest(){
+  try{var v=localStorage.getItem(BESTKEY);var n=v===null?0:parseInt(v,10);return isNaN(n)?0:n;}catch(e){return 0;}
+}
+function saveBest(score){
+  try{var b=loadBest();if(score>b)localStorage.setItem(BESTKEY,String(score));}catch(e){}
+}
+var ROOT=typeof window!=='undefined'?window:globalThis;
+ROOT.__SERPENT__={GRID:GRID,CELL:CELL,intervalFor:intervalFor,spawnOrb:spawnOrb,createGame:createGame,setDir:setDir,stepGame:stepGame,loadBest:loadBest,saveBest:saveBest,BESTKEY:BESTKEY};
+var cv=(typeof document!=='undefined')?document.getElementById('cv'):null;
+if(cv){
+var ctx=cv.getContext('2d');
+var AC=null;
+function beep(f,d){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type='square';o.frequency.value=f;v.gain.value=.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+var S=null,playing=false,paused=false,hidePaused=false,tsReset=false,lastTs=0,acc=0,best=loadBest();
+function showOv(t,p,h){$('ovt').innerHTML=t;$('ovp').innerHTML=p;$('ovb').innerHTML=h;$('ov').style.display='flex';}
+function hideOv(){$('ov').style.display='none';}
+function hud(){$('hs').textContent=S?S.score:0;$('ho').textContent=S?S.orbs:0;$('hb').textContent=Math.max(best,S?S.score:0);}
+function showMenu(){
+  S=null;playing=false;paused=false;hidePaused=false;best=loadBest();
+  showOv('WRAITH SERPENT','EAT THE GLOWING ORBS • GROW LONGER • FASTER EVERY ORB<br>WALLS AND YOUR OWN TAIL END THE RUN<br>ARROWS / WASD • SWIPE • D-PAD — NO U-TURNS',
+  '<button onclick="startGame()">▶ START</button><br><span style="font-size:11px;color:#aaa">BEST '+best+'</span>');
+  hud();
+}
+window.startGame=function(){S=createGame();playing=true;paused=false;hidePaused=false;acc=0;tsReset=true;hideOv();hud();};
+window.toMenu=function(){showMenu();};
+function endGame(){
+  playing=false;
+  var nb=S.score>best;
+  if(nb){saveBest(S.score);best=S.score;}
+  hud();
+  showOv('THE SERPENT FALLS','SCORE '+S.score+' • ORBS '+S.orbs+'<br>BEST '+best+(nb?'<br>★ NEW BEST! ★':''),'<button onclick="startGame()">↻ PLAY AGAIN</button><button onclick="toMenu()">MENU</button>');
+  beep(160,.25);
+}
+function resumeGame(){if(!paused)return;paused=false;hidePaused=false;tsReset=true;acc=0;}
+function togglePause(){if(!S||!playing)return;paused=!paused;hidePaused=false;if(!paused){tsReset=true;acc=0;}}
+document.addEventListener('visibilitychange',function(){if(document.hidden){if(S&&playing&&!paused){paused=true;hidePaused=true;}}else if(hidePaused)resumeGame();});
+$('wrap').addEventListener('pointerdown',function(){if(paused)resumeGame();});
+function turn(dx,dy){if(S&&playing&&!paused)setDir(S,dx,dy);}
+function bindBtn(el,dx,dy){
+  el.addEventListener('pointerdown',function(e){e.preventDefault();turn(dx,dy);});
+  el.addEventListener('touchstart',function(e){e.preventDefault();turn(dx,dy);},{passive:false});
+}
+bindBtn($('bu'),0,-1);bindBtn($('bl'),-1,0);bindBtn($('bd'),0,1);bindBtn($('br'),1,0);
+$('bp').addEventListener('click',function(){togglePause();});
+document.addEventListener('keydown',function(e){
+  if(e.code==='ArrowUp'||e.code==='KeyW'){turn(0,-1);e.preventDefault();}
+  else if(e.code==='ArrowDown'||e.code==='KeyS'){turn(0,1);e.preventDefault();}
+  else if(e.code==='ArrowLeft'||e.code==='KeyA'){turn(-1,0);e.preventDefault();}
+  else if(e.code==='ArrowRight'||e.code==='KeyD'){turn(1,0);e.preventDefault();}
+  else if(e.code==='KeyP'){togglePause();}
+  else if((e.code==='Space'||e.code==='Enter')&&!playing){startGame();e.preventDefault();}
+});
+var tx=0,ty=0;
+cv.addEventListener('touchstart',function(e){var t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;},{passive:true});
+cv.addEventListener('touchend',function(e){
+  var t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<24)return;
+  if(Math.abs(dx)>Math.abs(dy))turn(dx>0?1:-1,0);else turn(0,dy>0?1:-1);
+  e.preventDefault();
+},{passive:false});
+function draw(){
+  ctx.fillStyle='#0a0a14';ctx.fillRect(0,0,400,400);
+  ctx.strokeStyle='rgba(255,204,51,.07)';ctx.lineWidth=1;
+  for(var g=1;g<GRID;g++){ctx.beginPath();ctx.moveTo(g*CELL,0);ctx.lineTo(g*CELL,400);ctx.stroke();ctx.beginPath();ctx.moveTo(0,g*CELL);ctx.lineTo(400,g*CELL);ctx.stroke();}
+  ctx.strokeStyle='#ffcc33';ctx.lineWidth=3;ctx.strokeRect(1,1,398,398);
+  if(!S)return;
+  if(S.orb){
+    var pu=1+Math.sin(S.ticks*0.3)*0.12,ox=S.orb.x*CELL+CELL/2,oy=S.orb.y*CELL+CELL/2;
+    ctx.save();ctx.translate(ox,oy);ctx.scale(pu,pu);
+    ctx.fillStyle='rgba(63,224,255,.25)';ctx.beginPath();ctx.arc(0,0,11,0,7);ctx.fill();
+    ctx.fillStyle='#3fe0ff';ctx.beginPath();ctx.arc(0,0,7,0,7);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-2,-2,2.5,0,7);ctx.fill();ctx.restore();
+  }
+  for(var i=S.snake.length-1;i>=0;i--){
+    var s=S.snake[i],px=s.x*CELL,py=s.y*CELL;
+    if(i===0){
+      ctx.fillStyle='#ffcc33';ctx.fillRect(px+1,py+1,18,18);
+      ctx.fillStyle='#1a1a22';ctx.fillRect(px+3,py+3,14,14);
+      var ex=S.dir.x,ey=S.dir.y;
+      ctx.fillStyle='#d4af37';
+      ctx.beginPath();ctx.moveTo(px+4,py+4);ctx.lineTo(px+1,py-2);ctx.lineTo(px+8,py+3);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(px+16,py+4);ctx.lineTo(px+19,py-2);ctx.lineTo(px+12,py+3);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#3fe0ff';
+      var e1x=px+6+ex*3-ey*3,e1y=py+6+ey*3+ex*3,e2x=px+6+ex*3+ey*3,e2y=py+6+ey*3-ex*3;
+      ctx.fillRect(e1x,e1y,4,4);ctx.fillRect(e2x,e2y,4,4);
+    }else{
+      ctx.fillStyle=i%2?'#8a6a14':'#c9a227';ctx.fillRect(px+2,py+2,16,16);
+      ctx.fillStyle='#1a1a22';ctx.fillRect(px+5,py+5,10,10);
+    }
+  }
+  if(paused)$('msg').textContent='PAUSED — TAP TO RESUME';else $('msg').textContent='';
+}
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(!S){draw();return;}
+  if(paused){draw();hud();return;}
+  if(playing&&!S.over){
+    var dt=ts-lastTs;lastTs=ts;if(tsReset){dt=0;tsReset=false;}acc+=Math.min(dt,100);
+    var iv=intervalFor(S.orbs),steps=0,ate=S.orbs;
+    while(acc>=iv&&steps<4){stepGame(S);acc-=iv;steps++;if(S.orbs>ate){beep(880,.08);ate=S.orbs;}}
+    if(steps===4)acc=0;
+    if(S.over)endGame();
+  }
+  draw();hud();
+}
+showMenu();
+requestAnimationFrame(function(ts){lastTs=ts;requestAnimationFrame(loop);});
+}
+</script>
+</body></html>

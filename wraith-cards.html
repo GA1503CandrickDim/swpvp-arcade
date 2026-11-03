@@ -1,0 +1,83 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>WRAITH CARDS — Wraith's Arcade</title><style>
+*{box-sizing:border-box}body{margin:0;background:#07070d;color:#fff;font-family:monospace}
+#hud{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;font-size:12px;letter-spacing:1px;color:#ffcc33;gap:6px;flex-wrap:wrap}
+#hud b{color:#fff}
+#pb{padding:14px 16px;min-height:56px;min-width:56px;background:#111;color:#ffcc33;border:1px solid #ffcc33;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
+#wrap{position:relative;max-width:560px;margin:0 auto}
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px}
+.card{margin:0;padding:4px 2px;min-height:138px;background:#101418;color:#fff;border:2px solid #2c3136;border-radius:10px;font-family:monospace;font-size:9px;line-height:1.35;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;overflow:hidden}
+.card:focus{outline:3px solid #7fd4ff;outline-offset:1px}
+.card.up{border-color:#ffcc33;background:#1a1a12}
+.card.matched{border-color:#39d353;background:#0e1a10;box-shadow:0 0 8px rgba(57,211,83,.5)}
+.card.shiny{border-color:#ffd94d;box-shadow:0 0 10px rgba(255,217,77,.55)}
+.card.shiny.up{background:#241f08}
+.card .shn{color:#ffd94d;font-weight:700}
+.card canvas{width:44px;height:44px}
+.card .back{font-size:26px;color:#ffcc33;line-height:1.4}
+.card .nm{font-size:11px;font-weight:700}
+.card .el{color:#7fd4ff}
+.card .sp{color:#ffe95a}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.88);text-align:center;z-index:2;padding:10px}
+#ov h1{color:#ffcc33;letter-spacing:3px;margin:0 0 8px;font-size:22px}
+#ov p{margin:4px 0;color:#ccc;font-size:12px;line-height:1.5}
+#ov button{margin:6px 4px 0;padding:16px 24px;min-height:56px;background:#ffcc33;color:#000;border:0;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer}
+#ov button.ghost{background:#111;color:#7fd4ff;border:1px solid #3d5a76}
+#inst{text-align:center;padding:4px 10px 8px;color:#ccc;font-size:11px;line-height:1.5}
+#hub{text-align:center;padding:0 0 14px}
+#hub a{color:#ffcc33;text-decoration:none;font-size:12px}
+</style></head><body>
+<div id="hud"><span>MOVES <b id="mv">0</b></span><span>TIME <b id="tm">0:00</b></span><span>PAIRS <b id="pr">0/6</b></span><span>BEST <b id="bs">—</b></span><button id="pb" aria-label="Pause">⏸</button></div>
+<div id="wrap"><div id="grid" aria-label="Card grid"></div>
+<div id="ov"><h1 id="ovt">WRAITH CARDS</h1><p id="ovp"></p><div id="ovb"></div></div></div>
+<p id="inst">FLIP TWO CARDS PER TURN · MATCH ALL 6 PAIRS<br>THE 2ND CINDERKIT PAIR IS GOLD-FRAMED + ★ SHINY — SAME CREATURE, DIFFERENT LOOK<br>MATCHED CREATURES JOIN YOUR ★ CARD COLLECTION (SHARED WITH THE OTHER GAMES)</p>
+<div id="hub"><a href="index.html">← BACK TO HUB</a></div>
+<script>
+var CRET=[{n:'Cinderkit',t:0,hp:36,a:4,d:2,s:4,X:['FIRST FLARE','First attack each battle hits +50%.'],mv:[['Spark Nip',8,0],['Cinder Rush',12,0],['Ash Veil',10,1],['Flare Burst',18,0]]},{n:'Pebblit',t:1,hp:44,a:3,d:5,s:1,X:['STONE SKIN','Takes 1 less damage (min 1).'],mv:[['Rock Tap',8,1],['Stone Slam',13,1],['Dust Guard',9,2],['Quake Hit',17,1]]},{n:'Bloomimp',t:2,hp:34,a:3,d:3,s:3,X:['BLOOM DRAIN','Heals 3 HP after it attacks.'],mv:[['Petal Cut',9,2],['Vine Lash',12,2],['Spore Puff',10,3],['Bloom Burst',17,2]]},{n:'Galewing',t:3,hp:32,a:4,d:2,s:5,X:['TAILWIND','20% chance to strike twice.'],mv:[['Gust Peck',9,3],['Wind Dash',12,3],['Feather Fan',10,0],['Storm Dive',18,3]]}];
+var CTYP=['EMBER','STONE','BLOOM','GALE'];
+var COMP={n:'Auricub',t:1,hp:50,max:50,a:3,d:4,s:3,X:['GOLD GUARD','Takes 1 less damage (min 1).'],mv:[['Gold Bite',11,1],['Ember Swipe',12,0],['Bloom Snare',10,2],['Gale Rush',14,3]]};
+var CREATURES=CRET.concat([COMP]);
+var PAIRS=[0,1,2,3,4,0];
+var CARDS_KEY='vanix_cards_v1';
+var BEST_KEY='wraith_cards_best_v1';
+function pips(n){return '●'.repeat(n)+'○'.repeat(5-n);}
+function cardsGet(store){if(!store)return[];try{return JSON.parse(store.getItem(CARDS_KEY))||[];}catch(e){return[];}}
+function cardsAdd(store,n){if(!store)return;var l=cardsGet(store);if(l.indexOf(n)<0){l.push(n);try{store.setItem(CARDS_KEY,JSON.stringify(l));}catch(e){}}}
+function loadBest(store){if(!store)return null;try{var v=store.getItem(BEST_KEY);return v?JSON.parse(v):null;}catch(e){return null;}}
+function saveBest(store,moves,timeMs){try{var cur=loadBest(store);if(!cur||moves<cur.moves||(moves===cur.moves&&timeMs<cur.time)){store.setItem(BEST_KEY,JSON.stringify({moves:moves,time:timeMs}));return true;}}catch(e){}return false;}
+function buildDeck(rand){rand=rand||Math.random;var deck=[];var seenK={};PAIRS.forEach(function(k,pi){var shiny=!!seenK[k];seenK[k]=1;for(var j=0;j<2;j++)deck.push({pair:pi,k:k,shiny:shiny,up:false,matched:false});});for(var i=deck.length-1;i>0;i--){var j=Math.floor(rand()*(i+1)),t=deck[i];deck[i]=deck[j];deck[j]=t;}return deck;}
+function createGame(rand,store){return{deck:buildDeck(rand),open:[],pending:[],moves:0,pairs:0,elapsed:0,started:true,paused:false,won:false,lock:false,mismatchT:0,bestNew:false,store:store||null};}
+function flipCard(G,i){if(G.won||G.paused||G.lock)return 'ignored';var c=G.deck[i];if(!c||c.up||c.matched)return 'ignored';if(G.open.length>=2)return 'ignored';c.up=true;G.open.push(i);if(G.open.length===2){G.moves++;var a=G.deck[G.open[0]],b=G.deck[G.open[1]];if(a.pair===b.pair){a.matched=true;b.matched=true;G.pairs++;G.open=[];cardsAdd(G.store,CREATURES[a.k].n);if(G.pairs===PAIRS.length){G.won=true;G.bestNew=saveBest(G.store,G.moves,G.elapsed);}return 'match';}G.lock=true;G.mismatchT=700;G.pending=G.open.slice();G.open=[];return 'mismatch';}return 'flip';}
+function tick(G,ms){if(G.won||G.paused||!G.started)return;G.elapsed+=ms;if(G.lock){G.mismatchT-=ms;if(G.mismatchT<=0){G.pending.forEach(function(i){G.deck[i].up=false;});G.pending=[];G.lock=false;}}}
+function fmtTime(ms){var s=Math.floor(ms/1000);return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
+function drawSpr(c,k,shiny){var x=c.getContext('2d');x.clearRect(0,0,64,64);var col=['#ff7a1e','#9aa3ad','#39d353','#7fd4ff','#ffd94d'][k];x.fillStyle=(shiny&&k===0)?'#ffe97a':col;x.beginPath();x.ellipse(32,38,20,16,0,0,7);x.fill();x.fillStyle='#111';x.beginPath();x.arc(25,32,3,0,7);x.arc(39,32,3,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(26,31,1.2,0,7);x.arc(40,31,1.2,0,7);x.fill();if(k===0){x.fillStyle='#ffd94d';x.beginPath();x.moveTo(32,18);x.lineTo(38,6);x.lineTo(40,20);x.closePath();x.fill();}if(k===1){x.fillStyle='#6e757d';[[-18,-8],[18,-8],[-14,10],[14,10]].forEach(function(p){x.beginPath();x.arc(32+p[0],38+p[1],4,0,7);x.fill();});}if(k===2){x.fillStyle='#ff8ac2';for(var a=0;a<5;a++){x.beginPath();x.ellipse(32+Math.cos(a*1.256)*20,26+Math.sin(a*1.256)*8,6,3,a,0,7);x.fill();}}if(k===3){x.strokeStyle='#dff3ff';x.lineWidth=3;x.beginPath();x.moveTo(12,30);x.quadraticCurveTo(2,18,10,10);x.moveTo(52,30);x.quadraticCurveTo(62,18,54,10);x.stroke();}if(k===4){x.fillStyle='#111';x.beginPath();x.moveTo(18,24);x.lineTo(14,10);x.lineTo(26,20);x.closePath();x.moveTo(46,24);x.lineTo(50,10);x.lineTo(38,20);x.closePath();x.fill();x.strokeStyle='#d4af37';x.lineWidth=2;x.beginPath();x.moveTo(20,52);x.lineTo(44,26);x.stroke();}if(shiny){x.strokeStyle='#ffd94d';x.lineWidth=3;x.beginPath();x.arc(32,32,28,0,7);x.stroke();x.fillStyle='#ffd94d';x.beginPath();x.moveTo(54,6);x.lineTo(57,12);x.lineTo(63,15);x.lineTo(57,18);x.lineTo(54,24);x.lineTo(51,18);x.lineTo(45,15);x.lineTo(51,12);x.closePath();x.fill();}}
+var ROOT=typeof window!=='undefined'?window:globalThis;
+ROOT.__CARDS__={CRET:CRET,CTYP:CTYP,COMP:COMP,CREATURES:CREATURES,PAIRS:PAIRS,CARDS_KEY:CARDS_KEY,BEST_KEY:BEST_KEY,pips:pips,cardsGet:cardsGet,cardsAdd:cardsAdd,loadBest:loadBest,saveBest:saveBest,buildDeck:buildDeck,createGame:createGame,flipCard:flipCard,tick:tick,fmtTime:fmtTime,drawSpr:drawSpr};
+var gridEl=(typeof document!=='undefined')?document.getElementById('grid'):null;
+if(gridEl){
+function $(id){return document.getElementById(id);}
+var AC=null;
+function beep(f,d){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type='square';o.frequency.value=f;v.gain.value=.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
+var G=null,els=[],state='menu',paused=false,hidePaused=false,tsReset=false,lastTs=0,lastTm='';
+function bestText(){var b=loadBest(localStorage);return b?(b.moves+' MOVES · '+fmtTime(b.time)):'—';}
+function collCount(){var g=cardsGet(localStorage),n=0;CREATURES.forEach(function(c){if(g.indexOf(c.n)>=0)n++;});return n;}
+function showOv(t,p,btns){$('ovt').textContent=t;$('ovp').innerHTML=p;var b=$('ovb');b.innerHTML='';btns.forEach(function(x){var btn=document.createElement('button');btn.textContent=x[0];if(x[2])btn.className='ghost';btn.addEventListener('click',x[1]);b.appendChild(btn);});$('ov').style.display='flex';}
+function hideOv(){$('ov').style.display='none';}
+function hud(){$('mv').textContent=G?G.moves:0;$('pr').textContent=(G?G.pairs:0)+'/'+PAIRS.length;$('bs').textContent=bestText();}
+function updateCard(i){var c=G.deck[i],b=els[i];b.classList.toggle('up',c.up||c.matched);b.classList.toggle('matched',c.matched);b.classList.toggle('shiny',!!c.shiny);if(c.up||c.matched){var cr=CREATURES[c.k];b.innerHTML='<canvas width="64" height="64"></canvas><div class="nm">'+cr.n+(c.shiny?' ★':'')+'</div><div class="el">'+CTYP[cr.t]+' · HP '+cr.hp+'</div><div>ATK '+pips(cr.a)+' '+cr.a+'<br>DEF '+pips(cr.d)+' '+cr.d+'<br>SPD '+pips(cr.s)+' '+cr.s+'</div><div class="sp">★ '+cr.X[0]+'<br>'+cr.X[1]+'</div>'+(c.shiny?'<div class="shn">★ SHINY VARIANT — SAME CREATURE</div>':'');drawSpr(b.querySelector('canvas'),c.k,c.shiny);b.setAttribute('aria-label',cr.n+(c.shiny?' shiny variant':'')+', '+CTYP[cr.t]);}else{b.innerHTML='<div class="back">★<br>?</div>';b.setAttribute('aria-label','Face-down card '+(i+1));}}
+function renderDeal(){$('grid').innerHTML='';els=[];G.deck.forEach(function(c,i){var b=document.createElement('button');b.className='card';b.type='button';b.dataset.i=i;b.addEventListener('click',function(){onFlip(i);});$('grid').appendChild(b);els.push(b);updateCard(i);});}
+function onFlip(i){if(!G||state!=='play'||G.won||G.paused)return;var before=G.open.slice();var r=flipCard(G,i);if(r==='ignored')return;[i].concat(before).forEach(updateCard);hud();if(r==='flip')beep(520,.05);else if(r==='match')beep(880,.1);else beep(220,.08);if(G.won){state='won';beep(1320,.2);showOv('YOU WIN!','ALL 6 PAIRS MATCHED<br>MOVES '+G.moves+' · TIME '+fmtTime(G.elapsed)+(G.bestNew?'<br>★ NEW BEST! ★':'<br>BEST '+bestText())+'<br>COLLECTION '+collCount()+'/5 IN THIS BROWSER',[[ '↻ PLAY AGAIN',startGame],[ 'MENU',showMenu,true]]);}}
+function startGame(){G=createGame(null,localStorage);state='play';paused=false;hidePaused=false;tsReset=true;renderDeal();hud();hideOv();if(els[0])els[0].focus();}
+function showMenu(){G=null;state='menu';paused=false;hidePaused=false;hud();showOv('WRAITH CARDS','FLIP TWO CARDS · MATCH THE PAIR<br>5 CREATURES · 6 PAIRS · 12 CARDS<br>BEST '+bestText()+' · COLLECTION '+collCount()+'/5 IN THIS BROWSER',[[ '▶ START',startGame]]);}
+function setPaused(p){paused=p;if(G)G.paused=p;if(p)showOv('PAUSED','TAP TO RESUME',[['▶ RESUME',resumeGame]]);else hideOv();}
+function resumeGame(){if(!paused)return;paused=false;hidePaused=false;if(G)G.paused=false;tsReset=true;hideOv();}
+function pauseToggle(){if(state!=='play')return;if(paused)resumeGame();else{hidePaused=false;setPaused(true);}}
+$('pb').addEventListener('click',pauseToggle);
+document.addEventListener('visibilitychange',function(){if(document.hidden){if(state==='play'&&!paused){hidePaused=true;setPaused(true);}}else if(hidePaused)resumeGame();});
+$('wrap').addEventListener('pointerdown',function(){if(paused)resumeGame();});
+$('grid').addEventListener('keydown',function(e){var t=e.target;if(!t.dataset||t.dataset.i===undefined)return;var i=+t.dataset.i,j=null;if(e.code==='ArrowLeft'&&i%4>0)j=i-1;else if(e.code==='ArrowRight'&&i%4<3)j=i+1;else if(e.code==='ArrowUp'&&i-4>=0)j=i-4;else if(e.code==='ArrowDown'&&i+4<G.deck.length)j=i+4;if(j!==null){e.preventDefault();els[j].focus();}});
+document.addEventListener('keydown',function(e){if(e.code==='KeyP')pauseToggle();if(e.code==='KeyR'&&(state==='play'||state==='won'))startGame();});
+function loop(ts){requestAnimationFrame(loop);if(!G)return;if(state==='play'&&!paused){var dt=ts-lastTs;lastTs=ts;if(tsReset){dt=0;tsReset=false;}dt=Math.min(dt,100);var pend=G.pending.slice(),wasLock=G.lock;tick(G,dt);if(wasLock&&!G.lock)pend.forEach(updateCard);var tm=fmtTime(G.elapsed);if(tm!==lastTm){lastTm=tm;$('tm').textContent=tm;}}else{lastTs=ts;}}
+showMenu();hud();
+requestAnimationFrame(function(ts){lastTs=ts;requestAnimationFrame(loop);});
+}
+</script></body></html>

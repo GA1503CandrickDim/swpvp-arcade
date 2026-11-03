@@ -1,0 +1,1007 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>KART RACE — Wraith's Arcade</title><style>
+*{box-sizing:border-box}body{margin:0;background:#07070d;color:#fff;font-family:monospace;overflow:hidden}
+#hud{display:flex;flex-wrap:wrap;gap:2px 16px;justify-content:space-between;align-items:baseline;padding:8px 12px 6px;font-size:12px;color:#ffcc33;letter-spacing:1px;background:#0b0b12;border-bottom:3px solid #ffcc33}
+#hud b{color:#fff}
+.hud-msn{font-size:13px;font-weight:700;text-shadow:2px 2px 0 #000}
+.hud-msn b{color:#ffd94d}
+.hud-spd{font-size:13px}
+.hud-spd b{font-size:18px}
+#wrap{position:relative}
+canvas{display:block;width:100%;height:auto;background:#0a0a14;touch-action:none;image-rendering:pixelated;image-rendering:crisp-edges}
+#spd{display:none;position:absolute;left:10px;bottom:10px;z-index:1;pointer-events:none;text-align:left;color:#ffcc33;text-shadow:2px 2px 0 #000}
+#spdnum{font-size:34px;font-weight:700;color:#fff}
+.spd-unit{font-size:12px;margin-left:4px;letter-spacing:1px}
+.spd-track{display:block;width:96px;height:8px;background:rgba(0,0,0,.65);border:2px solid #ffcc33;margin-top:2px}
+#spdbar{display:block;height:100%;width:0;background:#ffd94d}
+@media (pointer:fine){#spd{display:block}}
+#ctl{display:flex;gap:6px;padding:8px}
+#ctl button{flex:1;min-height:56px;padding:16px 0;background:#111;color:#ffcc33;border:2px solid #ffcc33;border-radius:8px;font-size:15px;font-weight:700;touch-action:none;user-select:none;-webkit-user-select:none}
+#ctl button:active{background:#333}
+#ov{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:720px;top:0;bottom:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:safe center;background:rgba(0,0,0,.85);text-align:center;z-index:2;padding:10px}
+#ov h1{color:#ffcc33;letter-spacing:3px;margin:0 0 8px;font-size:28px;text-shadow:3px 3px 0 #000}
+#ov p{margin:4px 0;color:#ccc;font-size:12px;line-height:1.5}
+#ov button{margin:4px;min-height:56px;padding:14px 20px;background:#ffcc33;color:#000;border:3px solid #000;border-radius:6px;box-shadow:0 4px 0 #000,inset 0 2px 0 rgba(255,255,255,.3);font-weight:700;font-size:15px;cursor:pointer}
+#ov button.sel{outline:3px solid #fff}
+#msg{position:absolute;top:44px;left:0;right:0;text-align:center;font-size:20px;font-weight:700;color:#ffd94d;letter-spacing:2px;z-index:3;pointer-events:none;text-shadow:2px 2px 0 #000}
+html,body{touch-action:none;overscroll-behavior:none}
+#pad{position:static;display:none;justify-content:space-between;align-items:center;padding:10px;max-width:720px;margin:0 auto;pointer-events:none}
+#pad button{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;background:rgba(17,17,17,.68);color:#ffd94d;border:2px solid #ffcc33;border-radius:14px;font-weight:700;box-shadow:0 4px 0 rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.18);opacity:.92}
+#pad button:active{background:rgba(51,51,51,.85);transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.5)}
+#joy{position:relative;width:132px;height:132px;border-radius:50%;background:rgba(17,17,17,.68);border:2px solid #ffcc33;box-shadow:0 4px 0 rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.18);opacity:.92;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#joyNub{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(51,51,51,.9);border:2px solid #ffcc33;box-shadow:0 3px 0 rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.25);transform:translate(0px,0px);pointer-events:none}
+.pad-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.pad-small{display:flex;gap:6px}
+.pad-small button{width:56px;height:56px;font-size:11px;letter-spacing:1px}
+.pad-act{display:flex;gap:8px}
+.pad-act button{width:64px;height:64px;font-size:24px;border-radius:18px}
+#padA{border-color:#ffcc33;color:#ffcc33}
+#padB{border-color:#39d353;color:#39d353}
+#padC{border-color:#39d353;color:#39d353}
+#bbst{border-color:#39d353;color:#39d353}
+#bstbar{display:block;height:100%;width:100%;background:#39d353}
+@media (pointer:coarse){#pad{display:flex}}
+
+/*STAGE-CAP: desktop stage column, phones unaffected (no-op under 720px)*/
+body{max-width:720px;margin:0 auto}
+html{background:#07070d}
+/*LANDSCAPE PHONE FIX: in short viewports the old full-width canvas made the
+   page ~541px tall in a 360-430px viewport with overflow:hidden, so the
+   GAS/BRK/ITEM row fell below the fold and the joystick was cut. Cap the
+   canvas height (HUD ~56 + canvas + #ctl 76 + #pad ~124 + hub 30 must fit
+   the viewport) and shrink the wrap to the canvas. The pad now sits below
+   #ctl in normal flow, so shrink the joystick a little here to keep the
+   canvas usable. Portrait (viewport height >500px) is untouched: this query
+   never matches there. */
+@media (max-height:500px){
+canvas{height:calc(100vh - 294px);height:calc(100dvh - 294px);width:auto;max-width:100%;margin:0 auto}
+#wrap{width:-moz-fit-content;width:fit-content;margin:0 auto}
+#joy{width:104px;height:104px}
+.pad-act button{width:52px;height:52px;font-size:20px}
+}
+</style></head><body>
+<div id="hud"><span class="hud-msn">★ <b id="hm">—</b></span><span>MOLECULES <b id="hc">0</b></span><span>LOOT <b id="hl">0</b></span><span>ITEM <b id="hi">—</b></span><span>FUEL <b id="hf">100</b></span><span>BOOST <b id="hb">100</b></span><span class="hud-spd"><b id="hs">0</b> Km/h</span></div>
+<div id="wrap"><canvas id="cv" width="480" height="270"></canvas><div id="msg"></div><div id="spd"><span id="spdnum">0</span><span class="spd-unit">Km/h</span><span class="spd-track"><span id="spdbar"></span></span><span class="spd-track" style="border-color:#39d353"><span id="bstbar"></span></span></div>
+<div id="ov"><h1 id="ovt">KART RACE</h1><p id="ovp"></p><div id="ovb"></div></div></div>
+<div id="ctl">
+<button id="bl">◀</button><button id="br">▶</button><button id="bg">GAS</button><button id="bb">BRK</button><button id="bi">ITEM</button><button id="bbst">BOOST</button>
+</div>
+<div id="pad" aria-label="RETRO PAD"><div id="joy" aria-label="STEERING STICK"><div id="joyNub"></div></div><div class="pad-act"><button id="padB">●</button><button id="padA">▲</button><button id="padC">⚡</button></div></div>
+<div style="text-align:center;padding:4px 0 10px"><a href="/" style="color:#ffcc33;text-decoration:none;font-size:12px">← ARCADE HUB</a></div>
+<script>
+'use strict';
+/* ---- WRAITH WORLD: one shared world across the arcade games. ----
+   Key wraith_world_v1 (localStorage, JSON). Every game reads it and
+   writes its own marks into it; every game renders the marks other
+   games left. Travel between games is a plain same-site page jump, so
+   the store carries over. Fresh device = base world (nothing done).
+   Namespaced: never touches wraith_pet_v1, wraith_coins,
+   wraith_town_upgrades, wraith_dungeon_rooms_<seed>,
+   wraith_dungeon_hero. */
+var WRAITH_WORLD_KEY='wraith_world_v1';
+function worldLoad(){try{var r=localStorage.getItem(WRAITH_WORLD_KEY);if(!r)return{v:1,missions:{},counts:{pet:0,kart:0,delve:0,rooms:0,hollow:0}};var w=JSON.parse(r);if(!w||typeof w!=='object')throw 0;if(!w.missions)w.missions={};if(!w.counts)w.counts={pet:0,kart:0,delve:0,rooms:0,hollow:0};return w;}catch(e){return{v:1,missions:{},counts:{pet:0,kart:0,delve:0,rooms:0,hollow:0}};}}
+function worldSave(w){try{localStorage.setItem(WRAITH_WORLD_KEY,JSON.stringify(w));}catch(e){}}
+function worldDone(id,game){var w=worldLoad();if(w.missions[id])return false;w.missions[id]=Date.now();if(game)w.counts[game]=(w.counts[game]||0)+1;worldSave(w);return true;}
+function worldHas(id){return !!worldLoad().missions[id];}
+function worldCount(game){return worldLoad().counts[game]||0;}
+function worldMissions(){return worldLoad().missions;}
+/* KART RACE — OPEN WORLD. Original top-down open-town driving: loot the
+   streets, run missions around Wraith Town. No laps, no closed track.
+   No borrowed characters, places, music or items. */
+var DRIVERS=[
+{n:'GOLD DEMON',body:'#15151c',trim:'#ffcc33',eye:'#ffcc33',top:3.40,acc:.056,grip:1.0,tag:'BALANCED'},
+{n:'THRONE KEEPER',body:'#e8e6df',trim:'#ffcc33',eye:'#ffcc33',top:3.55,acc:.050,grip:.92,tag:'FAST • LOOSE'},
+{n:'WHITE MASK',body:'#dfe3e6',trim:'#8a8f96',eye:'#ffcc33',top:3.30,acc:.054,grip:1.12,tag:'GRIPPY'},
+{n:'TATTERED',body:'#241a12',trim:'#ffcc33',eye:'#ffcc33',top:3.45,acc:.062,grip:.95,tag:'QUICK OFF THE LINE'}];
+/* ---- Wraith Town: open map, roads on a grid, solid buildings in blocks ---- */
+var TOWN={W:2400,H:1800,roadsH:[300,700,1100,1500],roadsV:[300,800,1300,1800,2200],RW:120,buildings:[],lootPts:[]};
+(function buildTown(){
+  var BX=[[360,740],[860,1240],[1360,1740],[1860,2140],[0,240]]; /* west edge column: fills the empty x 0-240 strip so the kart cannot drive off the road grid into void */
+  var BY=[[0,240],[360,640],[760,1040],[1160,1440],[1560,1800]];
+  var COLS=['#1c2233','#241d2e','#1a2a22','#2a2118'];
+  for(var bi=0;bi<BX.length;bi++)for(var bj=0;bj<BY.length;bj++){
+    if((bi+bj)%3===2)continue; /* plaza block: stays open, loot gathers here */
+    TOWN.buildings.push({x:BX[bi][0]+45,y:BY[bj][0]+40,w:BX[bi][1]-BX[bi][0]-90,h:BY[bj][1]-BY[bj][0]-80,c:COLS[(bi*2+bj)%4]});
+  }
+  /* Loot spots: along every road and in every plaza centre. */
+  for(var h=0;h<TOWN.roadsH.length;h++)for(var x=120;x<=2280;x+=240)TOWN.lootPts.push({x:x,y:TOWN.roadsH[h]});
+  for(var v=0;v<TOWN.roadsV.length;v++)for(var y=120;y<=1680;y+=260)TOWN.lootPts.push({x:TOWN.roadsV[v],y:y});
+  for(var pi=0;pi<BX.length;pi++)for(var pj=0;pj<BY.length;pj++)
+    if((pi+pj)%3===2)TOWN.lootPts.push({x:(BX[pi][0]+BX[pi][1])/2,y:(BY[pj][0]+BY[pj][1])/2});
+  /* East edge strip (x 2260-2400): same treatment by hand — the BX
+     margin would put the building on the x=2200 road, so the footprint
+     is set clear of it (x 2270, w 120). Row 1 is a plaza (loot only);
+     the other rows get buildings. */
+  for(var ej=0;ej<BY.length;ej++){
+    if(ej===1){TOWN.lootPts.push({x:2330,y:(BY[ej][0]+BY[ej][1])/2});continue;}
+    TOWN.buildings.push({x:2270,y:BY[ej][0]+40,w:120,h:BY[ej][1]-BY[ej][0]-80,c:COLS[(2+ej)%4]});
+  }
+})();
+/* ---- City upgrades: spend wraith_coins to build Wraith Town up. Six
+   tracks, 3 levels each. Looks (lights / districts / decor) render in
+   the town; rewards (fuel / loot / mission payouts) apply immediately.
+   Persisted in localStorage 'wraith_town_upgrades' as {track: level}. */
+var UPG={
+lights:{name:'STREET LIGHTS',costs:[40,90,160],desc:['Lamps along the main roads','Lamps on every road','Brighter glow + lit windows']},
+district:{name:'NEW DISTRICT',costs:[60,130,220],desc:['NEON ARCADE rises on a plaza','SKY TOWER rises on a plaza','GOLD GARDENS rises on a plaza']},
+decor:{name:'CITY DECOR',costs:[30,70,130],desc:['Trees line the roads','Billboards go up','Signs + banners everywhere']},
+fuel:{name:'FUEL DEPOT',costs:[50,110,190],desc:['Tank 125, drain -10%','Tank 150, drain -20%','Tank 175, drain -30%']},
+loot:{name:'LOOT NETWORK',costs:[50,110,190],desc:['12 loot, respawn 8.5s','14 loot, respawn 7s','16 loot, respawn 5.5s']},
+mission:{name:'MISSION BOARD',costs:[60,130,220],desc:['Mission payouts +10%','Mission payouts +20%','Mission payouts +30%']}};
+var UPG_KEYS=['lights','district','decor','fuel','loot','mission'];
+/* District buildings: one per district level, on open plaza blocks.
+   Plaza blocks are the (bi+bj)%3==2 blocks left open by buildTown. */
+/* Town-fill progression (city-builder concept, Wraith Town's own style):
+   the town grows piece by piece on empty plots. Each district level
+   fills one plaza plot with a building of its own kind — shop, tower,
+   park — with a driveway to the nearest road. Unbuilt plots show as
+   dashed outlines so the player can see what is next. */
+var DISTRICTS=[
+{x:905,y:400,w:290,h:160,c:'#3a1a4d',name:'NEON ARCADE',cx:1050,cy:500,kind:'shop',px:860,py:360,pw:380,ph:280},
+{x:1405,y:1200,w:290,h:160,c:'#1a2a4d',name:'SKY TOWER',cx:1550,cy:1300,kind:'tower',px:1360,py:1160,pw:380,ph:280},
+{x:405,y:800,w:290,h:160,c:'#3d2f10',name:'GOLD GARDENS',cx:550,cy:900,kind:'park',px:360,py:760,pw:380,ph:280}];
+function loadUpgrades(){var d={lights:0,district:0,decor:0,fuel:0,loot:0,mission:0};try{var raw=localStorage.getItem('wraith_town_upgrades');if(!raw)return d;var p=JSON.parse(raw);for(var i=0;i<UPG_KEYS.length;i++){var k=UPG_KEYS[i],v=p[k];if(typeof v==='number'&&isFinite(v))d[k]=Math.max(0,Math.min(3,Math.floor(v)));}}catch(e){}return d;}
+function saveUpgrades(){try{localStorage.setItem('wraith_town_upgrades',JSON.stringify(UP));}catch(e){}}
+function cityLevel(){var n=0;for(var i=0;i<UPG_KEYS.length;i++)n+=UP[UPG_KEYS[i]];return n;}
+function fuelMax(){return 100+25*UP.fuel;}
+function fuelDrainMult(){return 1-0.1*UP.fuel;}
+function lootCap(){return 14+4*UP.loot;}
+function lootInitial(){return 10+2*UP.loot;}
+function lootInterval(){return 600-90*UP.loot;}
+function missionReward(def){return Math.round(def.reward*(1+0.1*UP.mission));}
+function litAt(){return UP.lights>=3?70:40;}
+/* Auto-earn: each district building earns 0.1 x district level coins per
+   second while the page is open (L1: 0.1/s, L2: 0.2/s, L3: 0.3/s per
+   building). All owned buildings stack: total 0.1 * L * L /s. */
+var AUTO_EARN_BASE=0.1;
+function autoEarnRate(){return AUTO_EARN_BASE*UP.district*UP.district;}
+/* Apply upgrades to the town. Idempotent: strips previously injected
+   district buildings / lamps / decor first, then rebuilds from UP. */
+function applyUpgradesToTown(){
+  TOWN.buildings=TOWN.buildings.filter(function(b){return !b.dc&&!b.house&&!b.world;});
+  for(var hi=0;hi<HOUSES.length;hi++){
+    if(cityLevel()<HOUSES[hi].at)continue;
+    var hh=HOUSES[hi];
+    /* A house replaces any base building on its plot (the new edge
+       columns) and swallows loot points it covers, so a house never
+       sits inside a building or strands a loot point. */
+    TOWN.buildings=TOWN.buildings.filter(function(b){
+      if(b.house||b.dc||b.world)return true;
+      return !(b.x<hh.x+hh.w+4&&b.x+b.w>hh.x-4&&b.y<hh.y+hh.h+4&&b.y+b.h>hh.y-4);
+    });
+    TOWN.lootPts=TOWN.lootPts.filter(function(p){return Math.hypot(p.x-(hh.x+hh.w/2),p.y-(hh.y+hh.h/2))>50;});
+    TOWN.buildings.push({x:hh.x,y:hh.y,w:hh.w,h:hh.h,c:hh.c,house:true,name:'HOUSE'});
+  }
+  for(var di=0;di<UP.district&&di<DISTRICTS.length;di++){
+    var dd=DISTRICTS[di];
+    TOWN.buildings.push({x:dd.x,y:dd.y,w:dd.w,h:dd.h,c:dd.c,dc:true,name:dd.name,kind:dd.kind});
+    TOWN.lootPts=TOWN.lootPts.filter(function(p){return Math.hypot(p.x-dd.cx,p.y-dd.cy)>30;});
+  }
+  /* Connected worlds: PET SHRINEs (1 per 5 Pet missions, max 3)
+     on the always-open plaza corners, and a HOLLOW LANTERN once
+     the Hollow sigils are done. District plots are never used —
+     the districts own three of the six plazas. World buildings
+     are solid like the rest. */
+  var _wl=worldLoad();
+  var _shr=[[1420,60],[1920,800],[920,1600]];
+  var _nShr=Math.min(3,Math.floor((_wl.counts.pet||0)/5));
+  for(var _si=0;_si<_nShr;_si++)TOWN.buildings.push({x:_shr[_si][0],y:_shr[_si][1],w:70,h:70,c:'#4d3d10',world:true,name:'PET SHRINE'});
+  if(_wl.missions['hollow:sigils']){TOWN.buildings.push({x:1520,y:90,w:60,h:60,c:'#3d2f10',world:true,name:'HOLLOW LANTERN'});TOWN.lootPts=TOWN.lootPts.filter(function(p){return Math.hypot(p.x-1550,p.y-120)>50;});}
+  TOWN.lamps=[];
+  if(UP.lights>=1){
+    for(var h=0;h<TOWN.roadsH.length;h++)for(var x=120;x<=2280;x+=240)TOWN.lamps.push({x:x,y:TOWN.roadsH[h]-75});
+    if(UP.lights>=2)for(var v=0;v<TOWN.roadsV.length;v++)for(var y=120;y<=1680;y+=260)TOWN.lamps.push({x:TOWN.roadsV[v]-75,y:y});
+  }
+  TOWN.decor={trees:[],boards:[],signs:[]};
+  if(UP.decor>=1){
+    for(var th=0;th<TOWN.roadsH.length;th++)for(var tx=270;tx<=2280;tx+=300)TOWN.decor.trees.push({x:tx,y:TOWN.roadsH[th]+75});
+    for(var tv=0;tv<TOWN.roadsV.length;tv++)for(var ty=270;ty<=1680;ty+=300)TOWN.decor.trees.push({x:TOWN.roadsV[tv]+75,y:ty});
+  }
+  if(UP.decor>=2){
+    var bp=[[500,700],[1100,700],[1700,700],[2100,700],[1300,500],[1300,1300]];
+    for(var bi2=0;bi2<bp.length;bi2++)TOWN.decor.boards.push({x:bp[bi2][0],y:bp[bi2][1]-78});
+  }
+  if(UP.decor>=3){
+    var sp=[[300,300],[800,700],[1300,1100],[1800,1500],[2200,300],[300,1500],[800,1100],[1800,700]];
+    for(var si=0;si<sp.length;si++)TOWN.decor.signs.push({x:sp[si][0]+70,y:sp[si][1]+70});
+  }
+}
+/* Houses: one appears per 3 city levels, on the outer edge strips, so
+   the built town visibly pushes outward as it grows. Residents = houses. */
+var HOUSES=[
+{x:65,y:80,w:110,h:80,c:'#4a3423',at:3},
+{x:2225,y:80,w:110,h:80,c:'#3d2f2a',at:6},
+{x:65,y:1640,w:110,h:80,c:'#4a3423',at:9},
+{x:2225,y:1640,w:110,h:80,c:'#33302a',at:12},
+{x:65,y:860,w:110,h:80,c:'#3d2f2a',at:15},
+{x:2225,y:860,w:110,h:80,c:'#4a3423',at:18}];
+function houseCount(){var n=0,cl=cityLevel();for(var i=0;i<HOUSES.length;i++)if(cl>=HOUSES[i].at)n++;return n;}
+/* District buildings level up with the city (1 + a star per 6 city
+   levels, max 3): stars + gold trim + glow, footprint never changes. */
+function districtBuildingLevel(){return Math.min(3,1+Math.floor(cityLevel()/6));}
+/* Wall: none until city 6 (stone), gold trim at city 12. */
+function wallLevel(){var cl=cityLevel();return cl>=12?2:cl>=6?1:0;}
+function wallName(){var w=wallLevel();return w===2?'GOLD':w===1?'STONE':'NONE';}
+function reloadUpgrades(){UP=loadUpgrades();applyUpgradesToTown();}
+var UP=loadUpgrades();
+applyUpgradesToTown();
+var SPOTS={
+garage:{x:1300,y:1500,name:'GARAGE'},
+scrap:{x:600,y:300,name:'SCRAP YARD'},
+fuel:{x:1800,y:700,name:'FUEL DEPOT'},
+market:{x:300,y:1100,name:'MARKET'},
+docks:{x:2200,y:1500,name:'DOCKS'},
+tower:{x:800,y:1100,name:'RADIO TOWER'},
+plaza:{x:1300,y:300,name:'PARK PLAZA'}};
+var LOOT_TYPES={coin:{n:'COIN',c:'#ffcc33',v:5},fuel:{n:'FUEL',c:'#ff4040',v:0},part:{n:'PART',c:'#c9d4dd',v:15},nitro:{n:'NITRO',c:'#39d353',v:0}};
+var MISSIONS=[
+{t:'FIRST RUN',txt:'Drive to the SCRAP YARD',kind:'goto',spot:'scrap',reward:20},
+{t:'FUEL RUN',txt:'Pick up fuel at the FUEL DEPOT, then deliver it to the GARAGE',kind:'carry',pick:'fuel',drop:'garage',reward:40},
+{t:'MARKET DASH',txt:'Reach the MARKET before the timer runs out',kind:'timed',spot:'market',time:3600,reward:50},
+{t:'DOCKS DELIVERY',txt:'Pick up the package at the GARAGE, deliver it to the DOCKS',kind:'carry',pick:'garage',drop:'docks',reward:50},
+{t:'RADIO CHECK',txt:'Visit the RADIO TOWER, then report back to the GARAGE',kind:'carry',pick:'tower',drop:'garage',reward:60}];
+function genMission(n){
+  var spots=['scrap','fuel','market','docks','tower','plaza'];
+  var a=spots[Math.floor(Math.random()*spots.length)],b=spots[Math.floor(Math.random()*spots.length)];
+  if(a===b)b=spots[(spots.indexOf(a)+3)%spots.length];
+  if(n%4===3){var rb=spots[Math.floor(Math.random()*spots.length)];return {t:'RACE',txt:'Race WRAITH, SMOKE & LILY to the '+SPOTS[rb].name,kind:'race',spot:rb,reward:60};}
+  if(n%3===2)return {t:'RUSH JOB',txt:'Reach the '+SPOTS[b].name+' before the timer runs out',kind:'timed',spot:b,time:2700,reward:40+10*(n%5)};
+  if(n%2===0)return {t:'PICKUP RUN',txt:'Pick up at the '+SPOTS[a].name+', deliver to the '+SPOTS[b].name,kind:'carry',pick:a,drop:b,reward:40+10*(n%4)};
+  return {t:'CRUISE',txt:'Drive to the '+SPOTS[b].name,kind:'goto',spot:b,reward:25+5*(n%4)};
+}
+function onRoad(x,y){
+  for(var i=0;i<TOWN.roadsH.length;i++)if(Math.abs(y-TOWN.roadsH[i])<=TOWN.RW/2)return true;
+  for(var j=0;j<TOWN.roadsV.length;j++)if(Math.abs(x-TOWN.roadsV[j])<=TOWN.RW/2)return true;
+  return false;
+}
+function randomIntersection(){
+  return {x:TOWN.roadsV[Math.floor(Math.random()*TOWN.roadsV.length)],y:TOWN.roadsH[Math.floor(Math.random()*TOWN.roadsH.length)]};
+}
+function mkKart(driver,ai,seed){
+  return {x:0,y:0,a:0,sp:0,fuel:ai?undefined:fuelMax(),item:null,boost:0,boostM:100,boostPaid:false,drift:0,driftOn:false,isAI:ai,driver:driver,seed:seed||0,hitCd:0,stall:0,wp:null,pinT:0};
+}
+function spawnLoot(S){
+  if(S.loot.length>=lootCap())return;
+  var p=TOWN.lootPts[Math.floor(Math.random()*TOWN.lootPts.length)];
+  for(var i=0;i<S.loot.length;i++)if(Math.hypot(S.loot[i].x-p.x,S.loot[i].y-p.y)<50)return;
+  var r=Math.random(),type=r<0.45?'coin':r<0.7?'fuel':r<0.88?'part':'nitro';
+  S.loot.push({x:p.x,y:p.y,type:type,ph:Math.random()*6});
+}
+function missionTarget(S){
+  var m=S.mission,def=m.def;
+  if(def.kind==='carry')return SPOTS[m.stage===0?def.pick:def.drop];
+  return SPOTS[def.spot];
+}
+function advanceMission(S){
+  S.missionN++;
+  var def=S.missionN<MISSIONS.length?MISSIONS[S.missionN]:genMission(S.missionN);
+  S.mission={def:def,stage:0,timeLeft:def.time||0};
+  if(def.kind==='race'){
+    /* Fair start: the destination must be at least 500px from the
+       player (no instant win from finishing a mission next to it), and
+       the AI karts line up behind the player — no instant win from a
+       lucky roam spawn on top of the target either. */
+    var pl0=S.karts[0],tg=SPOTS[def.spot];
+    if(Math.hypot(pl0.x-tg.x,pl0.y-tg.y)<500){
+      var far=null,fd=-1;
+      for(var sk in SPOTS){var d2=Math.hypot(pl0.x-SPOTS[sk].x,pl0.y-SPOTS[sk].y);if(d2>fd){fd=d2;far=sk;}}
+      def.spot=far;def.txt='Race WRAITH, SMOKE & LILY to the '+SPOTS[far].name;tg=SPOTS[far];
+    }
+    for(var ai=1;ai<S.karts.length;ai++){var q=S.karts[ai];q.x=pl0.x-Math.cos(pl0.a)*46*ai;q.y=pl0.y-Math.sin(pl0.a)*46*ai;q.a=pl0.a;q.sp=0;q.wp=null;clampToWorld(q);}
+    S.msg='RACE! Beat them to the '+SPOTS[def.spot].name+'!';S.msgT=100;beep(880,.15);return;
+  }
+  S.msg='NEW MISSION: '+def.txt;S.msgT=100;
+}
+function completeMission(S){
+  var rw=missionReward(S.mission.def);
+  S.coins+=rw;bankCoins(rw);S.missionsDone++;
+  var _nw=worldDone('kart:'+S.missionN+':'+S.mission.def.t,'kart');
+  S.msg='MISSION DONE! +'+rw+' MOLECULES';S.msgT=90;beep(880,.15);
+  advanceMission(S);
+  if(_nw)S.msg+=' \u2605 WORLD MARK';
+}
+function createWorld(driverIdx){
+  var S={time:0,phase:'drive',karts:[],loot:[],msg:'',msgT:0,coins:0,lootN:0,missionsDone:0,missionN:0,mission:null,lootT:0};
+  var d=driverIdx||0;
+  S.karts.push(mkKart(d,false,0));
+  for(var k=1;k<4;k++)S.karts.push(mkKart([0,1,2,3].filter(function(x){return x!==d;})[k-1],true,k*1.7));
+  var g=SPOTS.garage,pl=S.karts[0];
+  pl.x=g.x-60;pl.y=g.y;pl.a=0;pl.fuel=fuelMax();
+  for(var a=1;a<4;a++){var s2=randomIntersection();S.karts[a].x=s2.x;S.karts[a].y=s2.y;S.karts[a].a=Math.random()*6.283;S.karts[a].wp=randomIntersection();}
+  /* Retry until the opening loot is actually on the map: spawnLoot skips
+     a pick that lands within 50px of an existing item (including a
+     duplicate point), so a fixed 12 attempts could place as few as 9. */
+  var ltries=0;
+  while(S.loot.length<lootInitial()&&ltries<lootInitial()*10){spawnLoot(S);ltries++;}
+  S.mission={def:MISSIONS[0],stage:0,timeLeft:0};
+  return S;
+}
+/* Building + map-edge collision. Circle (r=10) vs building AABB: push out
+   along the least-penetration axis, cut speed when driving into the wall.
+   The kart then slides tangentially instead of stalling. */
+/* Hard map bound: clamp the kart centre inside the town and kill the
+   outward speed when it presses the wall. Called after EVERY position
+   change (collision, anti-pin nudge, traffic bump) so the kart can never
+   sit past the edge at draw time — the old code only clamped inside
+   collideWorld, and the +5px backstop nudge and the +3px-per-AI traffic
+   bumps moved it back out after the clamp, up to the world boundary
+   with the sprite hanging off the map. Only damps when the velocity
+   points INTO the wall: sliding tangentially along the edge keeps speed. */
+function clampToWorld(k){
+  var hit=false,out=false;
+  if(k.x<14){k.x=14;hit=true;if(Math.cos(k.a)*k.sp<0)out=true;}
+  if(k.x>TOWN.W-14){k.x=TOWN.W-14;hit=true;if(Math.cos(k.a)*k.sp>0)out=true;}
+  if(k.y<14){k.y=14;hit=true;if(Math.sin(k.a)*k.sp<0)out=true;}
+  if(k.y>TOWN.H-14){k.y=TOWN.H-14;hit=true;if(Math.sin(k.a)*k.sp>0)out=true;}
+  if(hit&&out)k.sp*=0.8;
+  return hit;
+}
+function collideWorld(S,k){
+  for(var i=0;i<TOWN.buildings.length;i++){
+    var b=TOWN.buildings[i];
+    var cx=Math.max(b.x,Math.min(k.x,b.x+b.w)),cy=Math.max(b.y,Math.min(k.y,b.y+b.h));
+    var dx=k.x-cx,dy=k.y-cy,d2=dx*dx+dy*dy,R=10;
+    if(d2<R*R){
+      var d=Math.sqrt(d2),ux,uy;
+      if(d>0.01){ux=dx/d;uy=dy/d;}
+      else{
+        var pl=b.x+b.w-k.x,pr=k.x-b.x,pt=b.y+b.h-k.y,pb=k.y-b.y;
+        var m=Math.min(pl,pr,pt,pb);
+        /* pl/pr/pt/pb are the distances to the right/left/bottom/top
+           edges: the shortest exit is TOWARD the nearest edge. The old
+           signs pushed the kart deeper in and it oscillated inside. */
+        if(m===pl){ux=1;uy=0;}else if(m===pr){ux=-1;uy=0;}else if(m===pt){ux=0;uy=1;}else{ux=0;uy=-1;}
+        d=0;
+      }
+      k.x+=ux*(R-d);k.y+=uy*(R-d);
+      var vx=Math.cos(k.a)*k.sp,vy=Math.sin(k.a)*k.sp;
+      if(vx*ux+vy*uy<0){
+        k.sp*=0.85;
+        /* Slide along the wall instead of grinding into it: ease the
+           heading toward the forward-pointing wall tangent, capped at
+           0.12 rad/step, so a head-on kart rounds the building instead
+           of pinning against it at near-zero speed — below the |sp|>0.4
+           steering gate, where it would have no way to turn away. */
+        var tx=-uy,ty=ux;
+        if(tx*Math.cos(k.a)+ty*Math.sin(k.a)<0){tx=-tx;ty=-ty;}
+        var want=Math.atan2(ty,tx),da=want-k.a;
+        while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;
+        if(da>0.12)da=0.12;if(da<-0.12)da=-0.12;
+        k.a+=da;
+        if(k.hitCd<=0&&!k.isAI){S.msg='BUILDING!';S.msgT=40;}k.hitCd=30;
+      }
+    }
+  }
+  if(k.hitCd>0)k.hitCd--;
+  var edgeHit=clampToWorld(k);
+  /* Sustained grind: pressed against the edge and crawling for >2s means
+     the wall slide and anti-pin both failed to free the kart — the old
+     code let it grind the wall forever at 7-8 Km/h burning fuel, because
+     it WAS displacing (sliding south along the edge), so the pin
+     detector never fired. Turn it back into town; only fires while
+     crawling, never while it slides along the wall at speed. */
+  if(edgeHit){k.edgeT=(k.edgeT||0)+1;}else{k.edgeT=0;}
+  if(k.edgeT>120&&Math.abs(k.sp)<0.6){
+    var ex=(k.x>=TOWN.W-14)?-1:(k.x<=14)?1:0;
+    var ey=(k.y>=TOWN.H-14)?-1:(k.y<=14)?1:0;
+    if(ex!==0||ey!==0){k.a=Math.atan2(ey,ex);k.x+=Math.cos(k.a)*10;k.y+=Math.sin(k.a)*10;}
+    else{k.a+=Math.PI;}
+    k.edgeT=0;k.pinT=0;
+    clampToWorld(k);
+  }
+}
+function stepKart(S,k,inp){
+  var D=DRIVERS[k.driver];
+  var px0=k.x,py0=k.y;
+  var onR=onRoad(k.x,k.y);
+  var maxSp=D.top*(k.boost>0?1.4:1);
+  if(!onR)maxSp*=0.75;
+  if(k.fuel!==undefined&&k.fuel<=0)maxSp=Math.min(maxSp,1.2);
+  if(inp.gas)k.sp+=D.acc*(k.boost>0?1.6:1);
+  if(inp.brake)k.sp-=0.12;
+  /* Drag: base 0.012 while driving (top speed unchanged — equilibrium
+     0.056/0.012 = 4.67, above every driver's top). Coasting (no gas, no
+     brake) adds 0.033, so the kart stops within ~2s of release instead
+     of rolling for ~6s. Off-road adds only 0.008: the 0.75x top-speed
+     cap does the slowing (2.55), so the kart stays fast enough to drift
+     off-road instead of bogging to a crawl. */
+  var drag=0.012+(onR?0:0.008);
+  if(!inp.gas&&!inp.brake)drag+=0.033;
+  k.sp-=k.sp*drag;
+  if(!inp.gas&&!inp.brake&&Math.abs(k.sp)<0.04)k.sp=0;
+  if(k.sp>maxSp)k.sp=maxSp;
+  if(k.sp<-1.2)k.sp=-1.2;
+  var st=(inp.left?-1:0)+(inp.right?1:0);
+  if(inp&&typeof inp.steer==='number'&&isFinite(inp.steer)&&inp.steer!==0)st=Math.max(-1,Math.min(1,inp.steer));
+  if(st!==0&&Math.abs(k.sp)>0.4){
+    k.a+=st*0.05*Math.min(1,Math.abs(k.sp)/1.8)*D.grip*(k.sp<0?-1:1);
+    if(inp.gas&&Math.abs(k.sp)>1.9){k.drift++;k.driftOn=true;}else{k.drift=0;k.driftOn=false;}
+  }else{
+    if(k.drift>=30){k.boost=50;if(!k.isAI){S.msg='DRIFT BOOST!';S.msgT=40;}}
+    k.drift=0;k.driftOn=false;
+  }
+  if(k.boost>0)k.boost--;
+  /* NITRO METER BOOST (Cee 2026-11-01): hold SHIFT (PC) or the BOOST
+     button (touch) to spend the boost meter. While the meter lasts the
+     boost timer is held at 12 frames, so top speed x1.4 / accel x1.6
+     stay on; the meter drains 1/frame (~1.7s per full tank). Drift
+     boosts and banked BOOST items are free and never touch the meter:
+     boostPaid marks a paid session, so holding boost during a free
+     boost does not drain the tank. */
+  if(k.boost<=0)k.boostPaid=false;
+  if(!k.isAI&&inp.boost&&k.boostM>0&&(k.boost<=0||k.boostPaid)){
+    var _wasBoosting=k.boost>0;
+    k.boost=12;k.boostPaid=true;k.boostM=Math.max(0,k.boostM-1);
+    if(!_wasBoosting){S.msg='BOOST!';S.msgT=20;}
+  }
+  if(inp.gas&&k.fuel!==undefined&&k.sp>0.1){
+    k.fuel=Math.max(0,k.fuel-0.015*fuelDrainMult());
+    if(k.fuel<=0&&!k.isAI){S.msg='OUT OF FUEL — FIND A CAN!';S.msgT=80;}
+  }
+  k.x+=Math.cos(k.a)*k.sp;k.y+=Math.sin(k.a)*k.sp;
+  collideWorld(S,k);
+  /* Anti-pin backstop: speed with almost no displacement means the kart
+     is grinding a corner the wall slide could not free. Turn it away
+     and nudge it forward so it escapes instead of sitting stuck. */
+  var moved=Math.hypot(k.x-px0,k.y-py0);
+  if(Math.abs(k.sp)>1&&moved<0.7*Math.abs(k.sp)){k.pinT=(k.pinT||0)+1;}else{k.pinT=0;}
+  if(k.pinT>=4){k.a+=0.5;k.x+=Math.cos(k.a)*5;k.y+=Math.sin(k.a)*5;k.pinT=0;}
+  clampToWorld(k); /* re-clamp: the nudge above runs after collideWorld */
+}
+function aiInput(S,k){
+  /* During a RACE the AI stops roaming and heads for the same target
+     as the player, at its own driver speed — no rubber-banding, a clean
+     race the player can win by driving well. Roaming resumes after. */
+  var raceTgt=(S.mission&&S.mission.def.kind==='race')?SPOTS[S.mission.def.spot]:null;
+  var tx,ty;
+  if(raceTgt){tx=raceTgt.x;ty=raceTgt.y;}
+  else{
+    if(!k.wp||Math.hypot(k.wp.x-k.x,k.wp.y-k.y)<36||(k.stall||0)>150){k.wp=randomIntersection();k.stall=0;}
+    tx=k.wp.x;ty=k.wp.y;
+  }
+  var dx=tx-k.x,dy=ty-k.y;
+  var want=Math.atan2(dy,dx),diff=want-k.a;
+  while(diff>Math.PI)diff-=2*Math.PI;while(diff<-Math.PI)diff+=2*Math.PI;
+  var inp={left:diff<-0.08,right:diff>0.08,gas:true,brake:false};
+  if(Math.abs(diff)>0.45&&Math.abs(k.sp)>1.8){inp.gas=false;inp.brake=true;}
+  return inp;
+}
+/* ---- Connected worlds: travel gates. Drive onto a gate and
+   dwell 1.5s to travel — PET GATE goes to the Pet world,
+   DUNGEON GATE to the Delve. The DUNGEON GATE gains a gold
+   arch once Delve floor 3 is reached. ---- */
+var WORLD_GATES=[
+ {x:2000,y:900,r:56,c:'#ffcc33',name:'PET GATE',to:'wraith-pet.html'},
+ {x:1050,y:1680,r:56,c:'#b46bff',name:'DUNGEON GATE',to:'wraith-dungeon.html'}];
+function worldGateAt(x,y){for(var i=0;i<WORLD_GATES.length;i++){var g=WORLD_GATES[i];if(Math.hypot(x-g.x,y-g.y)<g.r)return g;}return null;}
+function stepWorld(S,inp){
+  if(S.phase!=='drive')return;
+  S.time++;
+  if(S.msgT>0)S.msgT--;
+  var pl=S.karts[0];
+  for(var k=0;k<S.karts.length;k++){
+    var kart=S.karts[k],px=kart.x,py=kart.y;
+    var input=kart.isAI?aiInput(S,kart):inp;
+    stepKart(S,kart,input);
+    if(kart.isAI){if(Math.hypot(kart.x-px,kart.y-py)<0.5)kart.stall=(kart.stall||0)+1;else kart.stall=0;}
+  }
+  /* Town traffic bumps: soft push apart, no spin. */
+  for(var r=1;r<S.karts.length;r++){
+    var q=S.karts[r],dx=pl.x-q.x,dy=pl.y-q.y,d=Math.hypot(dx,dy);
+    if(d<20&&d>0.01){var ux=dx/d,uy=dy/d;pl.x+=ux*3;pl.y+=uy*3;q.x-=ux*3;q.y-=uy*3;pl.sp*=0.92;q.sp*=0.92;}
+  }
+  /* Re-clamp after the bumps: a bump can push a kart past the edge after
+     collideWorld already ran this step. */
+  for(var c=0;c<S.karts.length;c++)clampToWorld(S.karts[c]);
+  /* Loot pickup: drive over it. */
+  for(var i=S.loot.length-1;i>=0;i--){
+    var L=S.loot[i];
+    if(Math.hypot(pl.x-L.x,pl.y-L.y)<18){
+      if(L.type==='coin'){S.coins+=5;bankCoins(5);S.lootN++;S.msg='+5 MOLECULES';S.msgT=30;}
+      else if(L.type==='fuel'){pl.fuel=Math.min(fuelMax(),(pl.fuel||0)+45);S.lootN++;S.msg='FUEL +45';S.msgT=40;}
+      else if(L.type==='part'){S.coins+=15;bankCoins(15);S.lootN++;S.msg='+15 MOLECULES (PART)';S.msgT=40;}
+      else if(L.type==='nitro'){pl.boostM=Math.min(100,(pl.boostM||0)+40);pl.item='BOOST';S.lootN++;S.msg='NITRO +40!';S.msgT=40;}
+      S.loot.splice(i,1);
+    }
+  }
+  if(S.lootT>0)S.lootT--;else{S.lootT=lootInterval();spawnLoot(S);}
+  /* Mission progress. */
+  var tgt=missionTarget(S);
+  if(tgt&&Math.hypot(pl.x-tgt.x,pl.y-tgt.y)<42){
+    var def=S.mission.def;
+    if(def.kind==='carry'&&S.mission.stage===0){S.mission.stage=1;S.msg='GOT IT — NOW TO THE '+SPOTS[def.drop].name+'!';S.msgT=70;beep(700,.08);}
+    else completeMission(S);
+  }else if(S.mission.def.kind==='race'){
+    /* First to the target wins — the player is checked first above, so
+       a same-step arrival is the player's win. An AI arrival fails it. */
+    for(var ri=1;ri<S.karts.length;ri++){if(Math.hypot(S.karts[ri].x-tgt.x,S.karts[ri].y-tgt.y)<42){advanceMission(S);S.msg='OUTRUN — MISSION FAILED';S.msgT=90;beep(220,.2);break;}}
+  }
+  /* World gates: dwell 1.5s on a gate to travel. */
+  var _wg=worldGateAt(pl.x,pl.y);
+  if(_wg){S.gateT=(S.gateT||0)+1;if(S.gateT>=90){S.phase='gate';S.gateIdx=WORLD_GATES.indexOf(_wg);S.gateT=0;}else{S.msg='HOLD ON '+_wg.name+'\u2026';S.msgT=5;}}
+  else{S.gateT=0;}
+  if(S.mission.def.kind==='timed'){
+    S.mission.timeLeft--;
+    if(S.mission.timeLeft<=0){advanceMission(S);S.msg='TOO SLOW — MISSION FAILED';S.msgT=70;}
+  }
+}
+function fireItem(S){
+  var k=S.karts[0];
+  if(!k.item||S.phase!=='drive')return;
+  if(k.item==='BOOST'){k.boost=55;k.item=null;S.msg='BOOST!';S.msgT=40;}
+}
+function fmtTime(fr){
+  var t=Math.floor(fr/60),ms=Math.floor((fr%60)*100/60);
+  return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')+'.'+String(ms).padStart(2,'0');
+}
+function readCoins(){try{var v=parseFloat(localStorage.getItem('wraith_coins'));if(isNaN(v)||v<0){localStorage.setItem('wraith_coins','50');return 50;}return v;}catch(e){return 50;}}
+function bankCoins(n){try{var c=readCoins();localStorage.setItem('wraith_coins',String(Math.max(0,c+n)));}catch(e){}}
+function loadBest(){try{return parseInt(localStorage.getItem('wraith_kart_open_best'))||0;}catch(e){return 0;}}
+function saveBest(n){try{var c=loadBest();if(n>c)localStorage.setItem('wraith_kart_open_best',String(n));}catch(e){}}
+/* ---- browser shell ---- */
+var ROOT=typeof window!=='undefined'?window:globalThis;
+ROOT.__KART__={DRIVERS:DRIVERS,TOWN:TOWN,SPOTS:SPOTS,MISSIONS:MISSIONS,LOOT_TYPES:LOOT_TYPES,createWorld:createWorld,createRace:createWorld,stepWorld:stepWorld,stepRace:stepWorld,stepKart:stepKart,fireItem:fireItem,fmtTime:fmtTime,readCoins:readCoins,bankCoins:bankCoins,loadBest:loadBest,saveBest:saveBest,onRoad:onRoad,collideWorld:collideWorld,clampToWorld:clampToWorld,missionTarget:missionTarget,genMission:genMission,UPG:UPG,UPG_KEYS:UPG_KEYS,DISTRICTS:DISTRICTS,loadUpgrades:loadUpgrades,saveUpgrades:saveUpgrades,reloadUpgrades:reloadUpgrades,applyUpgradesToTown:applyUpgradesToTown,cityLevel:cityLevel,fuelMax:fuelMax,fuelDrainMult:fuelDrainMult,lootCap:lootCap,lootInitial:lootInitial,lootInterval:lootInterval,missionReward:missionReward,litAt:litAt,autoEarnRate:autoEarnRate,AUTO_EARN_BASE:AUTO_EARN_BASE,advanceMission:advanceMission,completeMission:completeMission,aiInput:aiInput,spawnLoot:spawnLoot,HOUSES:HOUSES,houseCount:houseCount,districtBuildingLevel:districtBuildingLevel,wallLevel:wallLevel,wallName:wallName,worldDone:worldDone,worldLoad:worldLoad,worldCount:worldCount,worldHas:worldHas,worldMissions:worldMissions,WORLD_GATES:WORLD_GATES,worldGateAt:worldGateAt,getUP:function(){return UP;}};
+var AC=null;
+function beep(f,d,ty,g){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type=ty||'square';o.frequency.value=f;v.gain.value=g||.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
+var cv=(typeof document!=='undefined')?document.getElementById('cv'):null;
+if(cv){
+var ctx=cv.getContext('2d');
+function $(id){return document.getElementById(id);}
+var S=null,selDriver=0,keys={},paused=false,countT=0,lastTs=0,acc=0;
+/* Visual-only effects state: skid segments + drift smoke puffs, recorded in
+   draw() only. Never read by physics, AI, missions, or timing. */
+var skids=[],puffs=[],visPrev=[],visS=null;
+function showOv(t,p,h){$('ovt').innerHTML=t;$('ovp').innerHTML=p;$('ovb').innerHTML=h;$('ov').style.display='flex';$('ctl').style.display='none';$('spd').style.display='none';}
+function hideOv(){$('ov').style.display='none';$('ctl').style.display='flex';$('spd').style.display='';}
+window.stayGate=function(){if(S){S.phase='drive';S.gateOvShown=false;}hideOv();};
+window.goGate=function(i){location.href=WORLD_GATES[i].to;};
+function effInp(){return {left:!!keys.left||!!keys.sLeft,right:!!keys.right||!!keys.sRight,gas:!!keys.gas||!!keys.sGas,brake:!!keys.brake||!!keys.sBrake,boost:!!keys.boost,steer:keys.steer||0};} /* HOLD-to-drive: gas only while GAS/a key is held or the stick is deflected (sGas). The old (keys.touch&&...) term latched gas on forever after a single tap of ANY pad button, because keys.touch was set by every touch and cleared only by joyEnd/keydown. */
+function kc(e){return e.code||({ArrowLeft:'ArrowLeft',ArrowRight:'ArrowRight',ArrowUp:'ArrowUp',ArrowDown:'ArrowDown',' ':'Space',Spacebar:'Space',a:'KeyA',A:'KeyA',w:'KeyW',W:'KeyW',s:'KeyS',S:'KeyS',d:'KeyD',D:'KeyD',p:'KeyP',P:'KeyP'})[e.key]||'';}
+function renderMenu(){
+  var h='<div style="margin:2px 0 8px;color:#ffcc33;letter-spacing:3px;font-weight:700">PICK YOUR DRIVER</div>';
+  for(var i=0;i<4;i++){var d=DRIVERS[i];h+='<button class="'+(i===selDriver?'sel':'')+'" onclick="pickDriver('+i+')"><span style="color:'+d.trim+'">■</span> '+d.n+'<br><span style="font-size:10px;color:#aaa">'+d.tag+'</span></button>';}
+  h+='<div style="margin:12px 0 8px;color:#ffcc33;letter-spacing:3px;font-weight:700">WRAITH TOWN — OPEN WORLD</div>';
+  h+='<div style="color:#ccc;font-size:12px;line-height:1.5">Drive the town freely. Grab loot off the streets,<br>run missions for molecules. Watch your fuel.<br>SHIFT (or BOOST) burns nitro for speed — grab green NITRO cans to refill.</div>';
+  h+='<div style="color:#ffd94d;font-size:12px;margin-top:8px">CITY LV '+cityLevel()+' • RESIDENTS '+houseCount()+' • WALL '+wallName()+' • AUTO-EARN +'+autoEarnRate().toFixed(1)+'c/s'+(autoEarned>0?' • EARNED +'+autoEarned.toFixed(1)+'c':'')+'</div>';
+  var _wm=worldLoad();h+='<div style="color:#ffd94d;font-size:12px;margin-top:4px">WORLD \u2605 PET '+(_wm.counts.pet||0)+' • KART '+(_wm.counts.kart||0)+' • DELVE '+(_wm.counts.delve||0)+' • HOLLOW '+(_wm.counts.hollow||0)+'</div>';
+  h+='<br><button onclick="startDrive()" style="margin-top:10px;background:#ffcc33">▶ START DRIVE</button><button onclick="showShop()">⬆ CITY UPGRADES</button>';
+  var w=readCoins(),best=loadBest();
+  showOv('KART RACE','OPEN WORLD • LOOT • MISSIONS • DRIFT BOOSTS<br>ARCADE MOLECULES: '+Math.floor(w)+' • BEST HAUL: '+best+' MOLECULES',h);
+}
+var shopMsg='',autoEarned=0,autoEarnFrames=0;
+window.showShop=function(){shopMsg='';renderShop();};
+function renderShop(){
+  var w=readCoins();
+  var builtNames=[];for(var bn=0;bn<UP.district;bn++)builtNames.push(DISTRICTS[bn].name);
+  var h='<div style="color:#ffd94d;font-size:12px;line-height:1.6">ARCADE MOLECULES: '+Math.floor(w)+' • CITY LV '+cityLevel()+' • PLOTS FILLED '+UP.district+'/3 • RESIDENTS '+houseCount()+' • WALL '+wallName()+'<br>AUTO-EARN +'+autoEarnRate().toFixed(1)+'c/s'+(autoEarned>0?' • EARNED THIS SESSION +'+autoEarned.toFixed(2)+'c':'')+(builtNames.length?' • BUILT: '+builtNames.join(', '):'')+'</div>';
+  h+='<div style="color:#ccc;font-size:12px;line-height:1.5;margin:6px 0">Spend molecules to build Wraith Town up. Looks change the town; rewards pay off every run.</div>';
+  for(var i=0;i<UPG_KEYS.length;i++){
+    var k=UPG_KEYS[i],u=UPG[k],lv=UP[k],maxed=lv>=3;
+    var pips=('●●●'.slice(0,lv)||'')+('○○○'.slice(0,3-lv));
+    var eff=maxed?('MAX — '+u.desc[2]):('LV'+lv+' → LV'+(lv+1)+': '+u.desc[lv]);
+    if(k==='district'&&lv<3)eff+='<br>BUILT: '+(builtNames.length?builtNames.join(', '):'nothing yet')+' • NEXT: '+DISTRICTS[lv].name;
+    h+='<div style="text-align:left;border:1px solid #ffcc33;border-radius:8px;padding:8px;margin:6px 0"><b style="color:#ffcc33">'+u.name+'</b> <span style="color:#ffd94d">'+pips+'</span><br><span style="font-size:12px;color:#ccc">'+eff+'</span><br>';
+    if(maxed)h+='<span style="color:#39d353;font-size:12px">MAXED OUT</span>';
+    else if(w<u.costs[lv])h+='<button disabled style="opacity:.45">BUY '+u.costs[lv]+'c — NEED '+(u.costs[lv]-Math.floor(w))+' MORE</button>';
+    else h+='<button onclick="buyUpgrade(\''+k+'\')">BUY '+u.costs[lv]+'c</button>';
+    h+='</div>';
+  }
+  if(shopMsg)h+='<div style="color:#ff4040;font-size:12px;margin:6px 0">'+shopMsg+'</div>';
+  h+='<button onclick="toMenu()">← BACK</button>';
+  showOv('CITY UPGRADES','LOOKS + REWARDS • MOLECULES ARE PLAY MONEY ONLY',h);
+}
+window.buyUpgrade=function(k){
+  var u=UPG[k];
+  if(!u)return;
+  var lv=UP[k];
+  if(lv>=3){shopMsg=u.name+' is already MAXED.';renderShop();return;}
+  var cost=u.costs[lv],w=readCoins();
+  if(w<cost){shopMsg='NOT ENOUGH MOLECULES — '+u.name+' LV'+(lv+1)+' costs '+cost+'c, you have '+Math.floor(w)+'c.';renderShop();return;}
+  bankCoins(-cost);
+  UP[k]=lv+1;saveUpgrades();applyUpgradesToTown();
+  shopMsg='';beep(880,.15);
+  renderShop();
+};
+window.pickDriver=function(i){selDriver=i;renderMenu();};
+window.startDrive=function(){
+  S=createWorld(selDriver);countT=0;paused=false;hideOv();
+  /* No countdown gate: this is an open world, not a race start — input is
+     live from the first frame. The old 200-frame countdown showed a bare
+     number and ignored GAS/BRK the whole time. */
+  S.msg='GO!';S.msgT=40;beep(880,.2);
+};
+window.startRace=window.startDrive;
+window.rematch=function(){startDrive();};
+window.toMenu=function(){if(S)saveBest(S.coins);S=null;renderMenu();};
+window.resumeGame=function(){paused=false;hideOv();lastTs=0;acc=0;};
+window.endRun=function(){if(S)saveBest(S.coins);S=null;paused=false;renderMenu();};
+function setPaused(v){
+  if(!S||S.phase!=='drive')return;
+  paused=v;
+  if(v)showOv('PAUSED','Take a breath. Your molecules are already banked.','<button onclick="resumeGame()">▶ RESUME</button><button onclick="endRun()">■ END RUN</button>');
+  else hideOv();
+}
+function bindHold(el,on,off){
+  function dn(e){e.preventDefault();on();}
+  function up(e){e.preventDefault();off();}
+  el.addEventListener('pointerdown',dn);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  el.addEventListener('pointerleave',function(e){if(e.pointerType==='mouse')up(e);});
+  el.addEventListener('touchstart',function(e){e.preventDefault();on();},{passive:false});
+  el.addEventListener('touchend',function(e){e.preventDefault();off();},{passive:false});
+  el.addEventListener('touchcancel',function(e){off();},{passive:false});
+}
+bindHold($('bl'),function(){keys.left=true;},function(){keys.left=false;});
+bindHold($('br'),function(){keys.right=true;},function(){keys.right=false;});
+bindHold($('bg'),function(){keys.gas=true;},function(){keys.gas=false;});
+bindHold($('bb'),function(){keys.brake=true;},function(){keys.brake=false;});
+bindHold($('bi'),function(){keys.item=true;keys.itemEdge=true;},function(){keys.item=false;});
+bindHold($('bbst'),function(){keys.boost=true;},function(){keys.boost=false;});
+function bindPad(id,on,off){var el=$(id);if(el)bindHold(el,on,off);}
+/* Analog stick: X steers with magnitude (keys.steer, -1..1, read by stepKart
+   via effInp), Y sets gas/brake. Centered stick (steer 0) leaves the key
+   booleans in control. Travel radius 38px matches the CSS sizes. */
+var joyEl=$('joy'),joyNub=$('joyNub'),joyId=null,JOY_R=38;
+function joyPid(e){return e.pointerId===undefined?0:e.pointerId;}
+function joyMove(e){
+  var r=joyEl.getBoundingClientRect();
+  var dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+  var len=Math.hypot(dx,dy);
+  if(len>JOY_R){dx*=JOY_R/len;dy*=JOY_R/len;}
+  var nx=dx/JOY_R,ny=dy/JOY_R;
+  joyNub.style.transform='translate('+dx+'px,'+dy+'px)';
+  keys.steer=nx;keys.sLeft=nx<0;keys.sRight=nx>0;keys.sGas=ny<-0.3||Math.abs(nx)>0.3;
+  /* Brake only on a FIRM downward push (~23px, ny>0.6): the old 0.3 line
+     (~11px) braked the kart — and killed the auto-gas — on any slight
+     downward deflection while steering, so steering with the stick
+     slowed the car. Up = gas; the gas write is harmless under auto-gas.
+     The stick writes its own s* flags, never the shared keys.gas/brake/
+     left/right, so joyEnd can clear stick state without clobbering a
+     held GAS/BRK button or a keyboard key. */
+  keys.sBrake=ny>0.6;
+}
+function joyEnd(e){
+  if(joyId===null||joyPid(e)!==joyId)return;
+  joyId=null;keys.steer=0;keys.sLeft=false;keys.sRight=false;keys.sGas=false;keys.sBrake=false;
+  /* Releasing the stick cuts the stick's steer/gas/brake, so the kart
+     coasts to a stop unless GAS is held. The stick never touches the
+     shared keys.gas/brake/left/right, so a held GAS/BRK button or
+     keyboard key survives the release untouched. (An older build latched
+     gas on after any tap via keys.touch — removed: gas is hold-to-drive.) */
+  joyNub.style.transform='translate(0px,0px)';
+}
+if(joyEl&&joyNub){
+  joyNub.style.transform='translate(0px,0px)';
+  /* The stick drives while it is held: deflection sets the stick's own
+     sGas/sLeft/sRight flags (see joyMove), so the kart keeps its speed
+     while steering. Releasing the stick clears those flags and the kart
+     coasts to a stop unless GAS is held. */
+  joyEl.addEventListener('pointerdown',function(e){if(joyId!==null)return;e.preventDefault();joyId=joyPid(e);try{if(joyEl.setPointerCapture)joyEl.setPointerCapture(e.pointerId);}catch(err){}joyMove(e);});
+  joyEl.addEventListener('pointermove',function(e){if(joyId===null||joyPid(e)!==joyId)return;e.preventDefault();joyMove(e);});
+  joyEl.addEventListener('pointerup',joyEnd);
+  joyEl.addEventListener('pointercancel',joyEnd);
+}
+bindPad('padA',function(){keys.gas=true;},function(){keys.gas=false;});
+bindPad('padB',function(){keys.item=true;keys.itemEdge=true;},function(){keys.item=false;});
+bindPad('padC',function(){keys.boost=true;},function(){keys.boost=false;});
+document.addEventListener('keydown',function(e){
+  var c=kc(e);
+  if(c==='ArrowLeft'||c==='KeyA')keys.left=true;
+  if(c==='ArrowRight'||c==='KeyD')keys.right=true;
+  if(c==='ArrowUp'||c==='KeyW')keys.gas=true;
+  if(c==='ArrowDown'||c==='KeyS')keys.brake=true;
+  if(c==='Space'){keys.item=true;if(!e.repeat)keys.itemEdge=true;}
+  if(c==='ShiftLeft'||c==='ShiftRight')keys.boost=true;
+  if(c==='ArrowLeft'||c==='ArrowRight'||c==='ArrowUp'||c==='ArrowDown'||c==='Space'){if(e.preventDefault)e.preventDefault();}
+  if(c==='KeyP'&&S&&S.phase==='drive')setPaused(!paused);
+});
+document.addEventListener('keyup',function(e){
+  var c=kc(e);
+  if(c==='ArrowLeft'||c==='KeyA')keys.left=false;
+  if(c==='ArrowRight'||c==='KeyD')keys.right=false;
+  if(c==='ArrowUp'||c==='KeyW')keys.gas=false;
+  if(c==='ArrowDown'||c==='KeyS')keys.brake=false;
+  if(c==='Space')keys.item=false;
+  if(c==='ShiftLeft'||c==='ShiftRight')keys.boost=false;
+});
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){if(S&&S.phase==='drive'&&!paused)setPaused(true);}
+});
+function tapResume(){if(paused){paused=false;hideOv();lastTs=0;acc=0;}}
+cv.addEventListener('pointerdown',tapResume);
+$('msg').addEventListener('pointerdown',tapResume);
+function drawKart(k,player){
+  ctx.save();ctx.translate(k.x,k.y);ctx.rotate(k.a);
+  var D=DRIVERS[k.driver];
+  /* Pixel map, front = right. W wheel, B body, S white rally stripe,
+     G windshield glass, E headlight, T trim (spoiler + nose). */
+  var SPR=['WW......WW','WWBBBBBBWW','.BBBSSBBB.','.BBBSSGGE.','TBBBSSBBBT','TBBBSSBBBT','.BBBSSGGE.','.BBBSSBBB.','WWBBBBBBWW','WW......WW'];
+  var PAL={W:'#0a0a0a',B:D.body,S:'#f2f2f2',G:'#10161c',E:D.eye,T:D.trim};
+  for(var pr=0;pr<10;pr++){var row=SPR[pr];for(var pc=0;pc<10;pc++){var ch=row.charAt(pc);if(ch==='.')continue;ctx.fillStyle=PAL[ch];ctx.fillRect(-10+pc*2,-10+pr*2,2,2);}}
+  if(k.boost>0){ctx.fillStyle='#ff9a1f';ctx.beginPath();ctx.moveTo(-12,-4);ctx.lineTo(-22,0);ctx.lineTo(-12,4);ctx.closePath();ctx.fill();ctx.fillStyle='#ffd94d';ctx.beginPath();ctx.moveTo(-12,-2);ctx.lineTo(-18,0);ctx.lineTo(-12,2);ctx.closePath();ctx.fill();}
+  ctx.restore();
+  if(player){ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(k.x,k.y-20);ctx.lineTo(k.x-5,k.y-27);ctx.lineTo(k.x+5,k.y-27);ctx.closePath();ctx.fill();}
+  ctx.fillStyle='#fff';ctx.font='7px monospace';ctx.textAlign='center';ctx.fillText(DRIVERS[k.driver].n.split(' ')[0],k.x,k.y-30);
+}
+function missionText(S){
+  var m=S.mission,def=m.def,tg=missionTarget(S),pl=S.karts[0];
+  var d=tg?Math.round(Math.hypot(pl.x-tg.x,pl.y-tg.y)/10):0;
+  var tgtName=tg?tg.name:'';
+  var s=def.t+' → '+tgtName+' '+d+'m • +'+missionReward(def)+'c';
+  if(def.kind==='timed')s+=' • '+fmtTime(Math.max(0,m.timeLeft));
+  if(def.kind==='race'){
+    var rank=1;
+    for(var ri=1;ri<S.karts.length;ri++)if(Math.hypot(S.karts[ri].x-tg.x,S.karts[ri].y-tg.y)<Math.hypot(pl.x-tg.x,pl.y-tg.y))rank++;
+    var suf=rank===1?'ST':rank===2?'ND':rank===3?'RD':'TH';
+    s=def.t+' → '+tgtName+' • '+rank+suf+' • '+d+'m • +'+missionReward(def)+'c';
+  }
+  return s;
+}
+function draw(){
+  var pl=S.karts[0];
+  var camX=Math.max(0,Math.min(TOWN.W-480,pl.x-240)),camY=Math.max(0,Math.min(TOWN.H-270,pl.y-135));
+  ctx.fillStyle='#101018';ctx.fillRect(0,0,480,270);
+  ctx.fillStyle='rgba(0,0,0,.18)';
+  for(var sx0=Math.floor(camX/120)*120;sx0<camX+480+120;sx0+=120)ctx.fillRect(sx0-camX,0,2,270);
+  for(var sy0=Math.floor(camY/120)*120;sy0<camY+270+120;sy0+=120)ctx.fillRect(0,sy0-camY,480,2);
+  ctx.save();ctx.translate(-camX,-camY);
+  /* Roads. */
+  ctx.fillStyle='#33333d';
+  for(var h=0;h<TOWN.roadsH.length;h++)ctx.fillRect(0,TOWN.roadsH[h]-60,TOWN.W,120);
+  for(var v=0;v<TOWN.roadsV.length;v++)ctx.fillRect(TOWN.roadsV[v]-60,0,120,TOWN.H);
+  ctx.strokeStyle='#ffcc33';ctx.lineWidth=2;
+  for(var h2=0;h2<TOWN.roadsH.length;h2++){ctx.beginPath();ctx.moveTo(0,TOWN.roadsH[h2]-60);ctx.lineTo(TOWN.W,TOWN.roadsH[h2]-60);ctx.moveTo(0,TOWN.roadsH[h2]+60);ctx.lineTo(TOWN.W,TOWN.roadsH[h2]+60);ctx.stroke();}
+  for(var v2=0;v2<TOWN.roadsV.length;v2++){ctx.beginPath();ctx.moveTo(TOWN.roadsV[v2]-60,0);ctx.lineTo(TOWN.roadsV[v2]-60,TOWN.H);ctx.moveTo(TOWN.roadsV[v2]+60,0);ctx.lineTo(TOWN.roadsV[v2]+60,TOWN.H);ctx.stroke();}
+  ctx.strokeStyle='#f5f5f5';ctx.lineWidth=3;ctx.setLineDash([14,18]);
+  for(var h3=0;h3<TOWN.roadsH.length;h3++){ctx.beginPath();ctx.moveTo(0,TOWN.roadsH[h3]);ctx.lineTo(TOWN.W,TOWN.roadsH[h3]);ctx.stroke();}
+  for(var v3=0;v3<TOWN.roadsV.length;v3++){ctx.beginPath();ctx.moveTo(TOWN.roadsV[v3],0);ctx.lineTo(TOWN.roadsV[v3],TOWN.H);ctx.stroke();}
+  ctx.setLineDash([]);
+  /* City wall (civilization growth): stone at city 6, gold trim at
+     city 12. The gate sits on the x=1300 road at the south edge. */
+  if(wallLevel()>=1){
+    ctx.fillStyle='#3a3a46';
+    ctx.fillRect(0,0,TOWN.W,12);ctx.fillRect(0,0,12,TOWN.H);ctx.fillRect(TOWN.W-12,0,12,TOWN.H);
+    ctx.fillRect(0,TOWN.H-12,1240,12);ctx.fillRect(1360,TOWN.H-12,TOWN.W-1360,12);
+    ctx.fillStyle='#24242e';ctx.fillRect(1224,TOWN.H-28,16,28);ctx.fillRect(1360,TOWN.H-28,16,28);
+    ctx.fillStyle='#ffcc33';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('GATE',1300,TOWN.H-34);
+    if(wallLevel()>=2){
+      ctx.strokeStyle='#ffcc33';ctx.lineWidth=2;
+      ctx.strokeRect(2,2,TOWN.W-4,TOWN.H-4);
+      ctx.fillStyle='#ffd94d';ctx.fillRect(1224,TOWN.H-28,16,4);ctx.fillRect(1360,TOWN.H-28,16,4);
+    }
+  }
+  /* Buildings with lit windows. */
+  for(var b=0;b<TOWN.buildings.length;b++){
+    var bd=TOWN.buildings[b];
+    if(bd.dc&&districtBuildingLevel()>=3){ctx.fillStyle='rgba(255,204,51,.18)';ctx.fillRect(bd.x-6,bd.y-6,bd.w+12,bd.h+12);}
+    ctx.fillStyle=bd.c;ctx.fillRect(bd.x,bd.y,bd.w,bd.h);
+    ctx.strokeStyle='#0a0a14';ctx.lineWidth=2;ctx.strokeRect(bd.x,bd.y,bd.w,bd.h);
+    if(bd.dc&&districtBuildingLevel()>=2){ctx.strokeStyle='#ffcc33';ctx.lineWidth=2;ctx.strokeRect(bd.x+2,bd.y+2,bd.w-4,bd.h-4);}
+    if(bd.house){
+      /* A resident's house: pitched roof, door, one lit window, and a
+         resident standing by the door. */
+      ctx.fillStyle='#8a2a2a';ctx.beginPath();ctx.moveTo(bd.x-4,bd.y);ctx.lineTo(bd.x+bd.w/2,bd.y-22);ctx.lineTo(bd.x+bd.w+4,bd.y);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#0a0a14';ctx.fillRect(bd.x+bd.w/2-7,bd.y+bd.h-26,14,26);
+      ctx.fillStyle='#ffd94d';ctx.fillRect(bd.x+12,bd.y+14,10,12);
+      ctx.fillStyle='#ffd94d';ctx.beginPath();ctx.arc(bd.x+bd.w+12,bd.y+bd.h/2-6,4,0,7);ctx.fill();
+      ctx.fillStyle='#c9d4dd';ctx.fillRect(bd.x+bd.w+9,bd.y+bd.h/2-2,6,12);
+    }else if(bd.dc&&bd.kind==='park'){
+      /* GOLD GARDENS is a park, not an office: trees + a pond, no windows. */
+      for(var ty2=bd.y+22;ty2<bd.y+bd.h-10;ty2+=44)for(var tx2=bd.x+24;tx2<bd.x+bd.w-10;tx2+=52){
+        ctx.fillStyle='#5a3a1a';ctx.fillRect(tx2-1,ty2,3,7);
+        ctx.fillStyle='#2a5a2a';ctx.beginPath();ctx.arc(tx2,ty2-2,7,0,7);ctx.fill();
+      }
+      ctx.fillStyle='#1a3a5a';ctx.beginPath();ctx.ellipse(bd.x+bd.w-62,bd.y+bd.h-42,34,18,0,0,7);ctx.fill();
+    }else{
+      for(var wy=bd.y+8;wy<bd.y+bd.h-8;wy+=22)for(var wx=bd.x+8;wx<bd.x+bd.w-8;wx+=18){
+        var hh=((wx*7349+wy*9117)%100+100)%100;
+        ctx.fillStyle=hh<litAt()?'#ffd94d':'#0a0a14';
+        ctx.fillRect(wx,wy,7,9);
+      }
+    }
+    if(bd.dc){
+      ctx.fillStyle='#ffcc33';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(bd.name,bd.x+bd.w/2,bd.y-6);
+      var bl=districtBuildingLevel(),stars='';
+      for(var st=0;st<bl;st++)stars+='★';
+      ctx.fillStyle='#ffd94d';ctx.font='bold 11px monospace';ctx.fillText(stars,bd.x+bd.w/2,bd.y-20);
+      if(bd.kind==='shop'){
+        /* NEON ARCADE: striped awning over the front. */
+        for(var aw=0;aw<10;aw++){ctx.fillStyle=aw%2?'#ffcc33':'#ff4040';ctx.fillRect(bd.x+8+aw*28,bd.y+bd.h-16,28,12);}
+      }else if(bd.kind==='tower'){
+        /* SKY TOWER: rooftop box + antenna. */
+        ctx.fillStyle='#0a0a14';ctx.fillRect(bd.x+bd.w/2-24,bd.y-14,48,14);
+        ctx.strokeStyle='#ffcc33';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bd.x+bd.w/2,bd.y-14);ctx.lineTo(bd.x+bd.w/2,bd.y-34);ctx.stroke();
+        ctx.fillStyle='#ff4040';ctx.beginPath();ctx.arc(bd.x+bd.w/2,bd.y-36,3,0,7);ctx.fill();
+      }
+    }
+  }
+  /* Empty plots: dashed outlines on the district sites not built yet,
+     so the town visibly shows what is next. A built plot loses its
+     outline — the building fills it in. */
+  for(var pi=0;pi<DISTRICTS.length;pi++){
+    if(pi<UP.district)continue;
+    var pp=DISTRICTS[pi];
+    ctx.save();ctx.setLineDash([6,6]);ctx.strokeStyle='rgba(255,204,51,.55)';ctx.lineWidth=2;
+    ctx.strokeRect(pp.px+4,pp.py+4,pp.pw-8,pp.ph-8);ctx.restore();
+    ctx.fillStyle='rgba(255,204,51,.75)';ctx.font='bold 9px monospace';ctx.textAlign='center';
+    ctx.fillText('EMPTY PLOT',pp.px+pp.pw/2,pp.py+pp.ph/2);
+  }
+  /* Driveways: a paved strip from each district building to its road,
+     so the new buildings read as connected to the town. */
+  for(var di2=0;di2<UP.district&&di2<DISTRICTS.length;di2++){
+    var dd2=DISTRICTS[di2];
+    ctx.fillStyle='#33333d';ctx.fillRect(dd2.px,dd2.y+dd2.h/2-10,45,20);
+    ctx.strokeStyle='#ffcc33';ctx.lineWidth=1;ctx.beginPath();
+    ctx.moveTo(dd2.px,dd2.y+dd2.h/2-10);ctx.lineTo(dd2.px+45,dd2.y+dd2.h/2-10);
+    ctx.moveTo(dd2.px,dd2.y+dd2.h/2+10);ctx.lineTo(dd2.px+45,dd2.y+dd2.h/2+10);ctx.stroke();
+  }
+  /* Street lamps (city upgrade): gold glow along the roads. */
+  for(var li2=0;li2<TOWN.lamps.length;li2++){var lm=TOWN.lamps[li2];
+    ctx.fillStyle='rgba(255,204,51,'+(UP.lights>=3?0.35:0.22)+')';ctx.beginPath();ctx.arc(lm.x,lm.y-2,UP.lights>=3?14:8,0,7);ctx.fill();
+    ctx.fillStyle='#0a0a14';ctx.fillRect(lm.x-1,lm.y,2,10);
+    ctx.fillStyle='#ffd94d';ctx.beginPath();ctx.arc(lm.x,lm.y-2,3,0,7);ctx.fill();}
+  /* Decor (city upgrade): trees, billboards, signs. Visual only. */
+  for(var dt=0;dt<TOWN.decor.trees.length;dt++){var tr=TOWN.decor.trees[dt];
+    ctx.fillStyle='#5a3a1a';ctx.fillRect(tr.x-1,tr.y,3,7);
+    ctx.fillStyle='#2a5a2a';ctx.beginPath();ctx.arc(tr.x,tr.y-2,6,0,7);ctx.fill();
+    ctx.fillStyle='#3a7a3a';ctx.beginPath();ctx.arc(tr.x-2,tr.y-4,3,0,7);ctx.fill();}
+  for(var db=0;db<TOWN.decor.boards.length;db++){var bb=TOWN.decor.boards[db];
+    ctx.fillStyle='#15151c';ctx.fillRect(bb.x-12,bb.y-14,24,14);
+    ctx.strokeStyle='#ffcc33';ctx.lineWidth=1;ctx.strokeRect(bb.x-12,bb.y-14,24,14);
+    ctx.fillStyle='#ffcc33';ctx.fillRect(bb.x-8,bb.y-10,16,3);
+    ctx.fillStyle='#39d353';ctx.fillRect(bb.x-8,bb.y-5,10,3);}
+  for(var ds=0;ds<TOWN.decor.signs.length;ds++){var sg=TOWN.decor.signs[ds];
+    ctx.fillStyle='#c9d4dd';ctx.fillRect(sg.x-1,sg.y-10,2,12);
+    ctx.fillStyle='#ffcc33';ctx.beginPath();ctx.moveTo(sg.x+1,sg.y-10);ctx.lineTo(sg.x+12,sg.y-6);ctx.lineTo(sg.x+1,sg.y-2);ctx.closePath();ctx.fill();}
+  /* World gates: gold PET GATE, purple DUNGEON GATE (gold arch
+     once Delve floor 3 is reached). */
+  var _wld=worldLoad();
+  for(var _gi=0;_gi<WORLD_GATES.length;_gi++){
+    var _gg=WORLD_GATES[_gi];
+    ctx.strokeStyle=_gg.c;ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(_gg.x,_gg.y,26+Math.sin(S.time*0.1)*3,0,7);ctx.stroke();
+    ctx.fillStyle=_gg.c;ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText(_gg.name,_gg.x,_gg.y-34);
+    if(_gg.to==='wraith-dungeon.html'&&_wld.missions['delve:floor:3']){
+      ctx.strokeStyle='#ffcc33';ctx.lineWidth=4;
+      ctx.beginPath();ctx.arc(_gg.x,_gg.y,40,Math.PI,0);ctx.stroke();
+    }
+  }
+  /* Mission beacon: pulsing ring + light beam + spot name. */
+  var tg=missionTarget(S);
+  if(tg){
+    var pulse=1+Math.sin(S.time*0.12)*0.2;
+    ctx.fillStyle='rgba(255,204,51,.12)';ctx.fillRect(tg.x-5,tg.y-130,10,130);
+    ctx.strokeStyle='#ffcc33';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(tg.x,tg.y,26*pulse,0,7);ctx.stroke();
+    ctx.fillStyle='#ffcc33';ctx.font='bold 11px monospace';ctx.textAlign='center';
+    ctx.fillText(tg.name,tg.x,tg.y-34);
+  }
+  /* Loot. */
+  for(var li=0;li<S.loot.length;li++){
+    var L=S.loot[li],LT=LOOT_TYPES[L.type],bob=Math.sin(S.time*0.1+L.ph)*2;
+    ctx.save();ctx.translate(L.x,L.y+bob);
+    if(L.type==='coin'){ctx.fillStyle='#ffcc33';ctx.beginPath();ctx.arc(0,0,8,0,7);ctx.fill();ctx.fillStyle='#000';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('$',0,3);}
+    else if(L.type==='fuel'){ctx.fillStyle='#ff4040';ctx.fillRect(-6,-7,12,14);ctx.fillStyle='#fff';ctx.fillRect(-2,-10,4,4);ctx.fillStyle='#000';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('F',0,4);}
+    else if(L.type==='part'){ctx.fillStyle='#c9d4dd';ctx.beginPath();ctx.arc(0,0,8,0,7);ctx.fill();ctx.fillStyle='#333';ctx.beginPath();ctx.arc(0,0,3,0,7);ctx.fill();}
+    else{ctx.fillStyle='#39d353';ctx.beginPath();ctx.moveTo(2,-9);ctx.lineTo(-5,1);ctx.lineTo(0,1);ctx.lineTo(-2,9);ctx.lineTo(6,-2);ctx.lineTo(1,-2);ctx.closePath();ctx.fill();}
+    ctx.restore();
+  }
+  if(visS!==S){visS=S;visPrev=[];skids.length=0;puffs.length=0;}
+  if(S.phase==='drive'&&countT<=0&&!paused){
+    for(var vi=0;vi<S.karts.length;vi++){var vk=S.karts[vi];
+      if(visPrev[vi]){
+        if(vk.driftOn&&Math.abs(vk.sp)>1.5){
+          skids.push({x1:visPrev[vi].x,y1:visPrev[vi].y,x2:vk.x,y2:vk.y,a:0});
+          if(skids.length>300)skids.splice(0,skids.length-300);
+          if(S.time%3===0){puffs.push({x:vk.x-Math.cos(vk.a)*10,y:vk.y-Math.sin(vk.a)*10,r:3,a:0});if(puffs.length>80)puffs.splice(0,puffs.length-80);}
+        }
+      }
+      visPrev[vi]={x:vk.x,y:vk.y};
+    }
+  }
+  for(var si=0;si<skids.length;si++)skids[si].a++;
+  for(var pi=0;pi<puffs.length;pi++)puffs[pi].a++;
+  skids=skids.filter(function(s){return s.a<160;});
+  puffs=puffs.filter(function(p){return p.a<26;});
+  ctx.strokeStyle='rgba(18,18,22,.4)';ctx.lineWidth=3;ctx.beginPath();
+  for(var sj=0;sj<skids.length;sj++){ctx.moveTo(skids[sj].x1,skids[sj].y1);ctx.lineTo(skids[sj].x2,skids[sj].y2);}
+  ctx.stroke();
+  for(var pj=0;pj<puffs.length;pj++){var pf=puffs[pj];ctx.fillStyle='rgba(225,225,225,'+(0.5*(1-pf.a/26)).toFixed(3)+')';ctx.beginPath();ctx.arc(pf.x,pf.y,pf.r+pf.a*0.5,0,7);ctx.fill();}
+  for(var k=0;k<S.karts.length;k++)drawKart(S.karts[k],S.karts[k]===pl);
+  ctx.restore();
+  /* Minimap (screen space, bottom-right): roads, buildings, loot, mission target, karts. */
+  var mw=116,mh=87,mx=480-mw-6,my=270-mh-6,sx=mw/TOWN.W,sy=mh/TOWN.H;
+  ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(mx-2,my-2,mw+4,mh+4);
+  ctx.strokeStyle='#ffcc33';ctx.lineWidth=1;ctx.strokeRect(mx-2,my-2,mw+4,mh+4);
+  ctx.fillStyle='#3a3a46';
+  for(var mh2=0;mh2<TOWN.roadsH.length;mh2++)ctx.fillRect(mx,my+TOWN.roadsH[mh2]*sy-2,mw,4);
+  for(var mv2=0;mv2<TOWN.roadsV.length;mv2++)ctx.fillRect(mx+TOWN.roadsV[mv2]*sx-2,my,4,mh);
+  ctx.fillStyle='#0a0a14';
+  for(var mb=0;mb<TOWN.buildings.length;mb++){var mbl=TOWN.buildings[mb];ctx.fillRect(mx+mbl.x*sx,my+mbl.y*sy,Math.max(1,mbl.w*sx),Math.max(1,mbl.h*sy));}
+  /* Minimap plots: faint outlines where the next districts will fill in. */
+  ctx.strokeStyle='rgba(255,204,51,.5)';ctx.lineWidth=1;
+  for(var mp=0;mp<DISTRICTS.length;mp++){if(mp<UP.district)continue;var pp2=DISTRICTS[mp];ctx.strokeRect(mx+pp2.px*sx,my+pp2.py*sy,Math.max(2,pp2.pw*sx),Math.max(2,pp2.ph*sy));}
+  ctx.fillStyle='#ffcc33';
+  for(var ml=0;ml<S.loot.length;ml++)ctx.fillRect(mx+S.loot[ml].x*sx-1,my+S.loot[ml].y*sy-1,2,2);
+  for(var _mg=0;_mg<WORLD_GATES.length;_mg++){ctx.fillStyle=WORLD_GATES[_mg].c;ctx.fillRect(mx+WORLD_GATES[_mg].x*sx-2,my+WORLD_GATES[_mg].y*sy-2,4,4);}
+  if(tg){var mp=1+Math.sin(S.time*0.12)*0.4;ctx.strokeStyle='#ff4040';ctx.lineWidth=2;ctx.beginPath();ctx.arc(mx+tg.x*sx,my+tg.y*sy,4*mp,0,7);ctx.stroke();}
+  ctx.fillStyle='#8a8f96';
+  for(var mk=1;mk<S.karts.length;mk++)ctx.fillRect(mx+S.karts[mk].x*sx-1,my+S.karts[mk].y*sy-1,3,3);
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(mx+pl.x*sx,my+pl.y*sy,3,0,7);ctx.fill();
+  /* Gold arrow ON the minimap: points from the player dot toward the
+     mission target, so the direction reads on the map itself. */
+  if(tg){
+    var apx=mx+pl.x*sx,apy=my+pl.y*sy,atx=mx+tg.x*sx,aty=my+tg.y*sy;
+    var aang=Math.atan2(aty-apy,atx-apx);
+    ctx.save();ctx.translate(apx+Math.cos(aang)*10,apy+Math.sin(aang)*10);ctx.rotate(aang);
+    ctx.fillStyle='#ffcc33';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-5,-5);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+  /* Off-screen mission arrow (screen space). */
+  if(tg){
+    var tx2=tg.x-camX,ty2=tg.y-camY;
+    if(tx2<20||tx2>460||ty2<20||ty2>250){
+      var ax=Math.max(20,Math.min(460,tx2)),ay=Math.max(20,Math.min(250,ty2));
+      var ang=Math.atan2(ty2-ay,tx2-ax);
+      ctx.save();ctx.translate(ax,ay);ctx.rotate(ang);
+      ctx.fillStyle='#ffcc33';ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-6,-7);ctx.lineTo(-6,7);ctx.closePath();ctx.fill();
+      ctx.restore();
+      ctx.fillStyle='#ffcc33';ctx.font='bold 10px monospace';ctx.textAlign='center';
+      ctx.fillText(Math.round(Math.hypot(pl.x-tg.x,pl.y-tg.y)/10)+'m',ax,ay+18);
+    }
+  }
+  if(S.msgT>0)$('msg').textContent=S.msg;
+  else if(pl.driftOn&&pl.drift>=15)$('msg').textContent='DRIFT…';
+  else $('msg').textContent='';
+}
+function hud(){
+  var pl=S.karts[0];
+  $('hm').textContent=missionText(S);
+  $('hc').textContent=Math.floor(S.coins);
+  $('hl').textContent=S.lootN;
+  $('hi').textContent=pl.item||'—';
+  $('hf').textContent=Math.max(0,Math.round(pl.fuel||0));
+  $('hb').textContent=Math.round(pl.boostM||0);
+  $('bstbar').style.width=Math.min(100,Math.round(pl.boostM||0))+'%';
+  var kmh=Math.round(Math.abs(pl.sp)*36);
+  $('hs').textContent=kmh;
+  $('spdnum').textContent=kmh;
+  $('spdbar').style.width=Math.min(100,Math.round(kmh/180*100))+'%';
+}
+function loop(ts){
+  requestAnimationFrame(loop);
+  /* City auto-earn: district buildings bank coins while the page is
+     open (menu or driving — never offline). Every 60 frames banks one
+     second of earnings at the current rate. Fractions are kept: the
+     wallet stores String(number) and reads parseFloat, never floored. */
+  autoEarnFrames++;
+  if(autoEarnFrames>=60){
+    autoEarnFrames=0;
+    var er=autoEarnRate();
+    if(er>0){bankCoins(er);autoEarned+=er;}
+  }
+  if(!S)return;
+  if(countT>0){
+    countT--;
+    if(countT>0){S.msg=String(Math.ceil(countT/60));S.msgT=2;if(countT===120||countT===60)beep(440,.12);}
+    else{S.msg='GO!';S.msgT=40;beep(880,.2);}
+    draw();hud();return;
+  }
+  if(paused){draw();hud();return;}
+  if(S.phase==='gate'){if(!S.gateOvShown){S.gateOvShown=true;var _gg=WORLD_GATES[S.gateIdx||0];showOv(_gg.name,'Travel to '+(_gg.to==='wraith-pet.html'?'the Pet world':'the Delve')+'?','<button onclick="goGate('+(S.gateIdx||0)+')">GO</button><button onclick="stayGate()">STAY</button>');}draw();hud();return;}
+  if(S.phase==='drive'){
+    var dt=lastTs?ts-lastTs:0;lastTs=ts;acc+=Math.min(dt,100);
+    var steps=0;
+    while(acc>=16.67&&steps<4){stepWorld(S,effInp());acc-=16.67;steps++;}
+    if(steps===4)acc=0;
+    if(keys.itemEdge){keys.itemEdge=false;fireItem(S);beep(700,.06);}
+  }
+  draw();hud();
+}
+ROOT.__KART__.keys=keys;ROOT.__KART__.loop=loop;ROOT.__KART__.getS=function(){return S;};
+ROOT.__KART__.buyUpgrade=buyUpgrade;ROOT.__KART__.showShop=showShop;ROOT.__KART__.renderMenu=renderMenu;ROOT.__KART__.renderShop=renderShop;
+ROOT.__KART__.missionText=missionText;ROOT.__KART__.getAutoEarned=function(){return autoEarned;};
+renderMenu();
+requestAnimationFrame(function(ts){lastTs=ts;requestAnimationFrame(loop);});
+}
+</script>
+</body></html>
