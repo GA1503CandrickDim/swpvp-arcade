@@ -1,0 +1,41 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FREE MOVIES — SAVAGE WRAITH</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Syne:wght@800&display=swap" rel="stylesheet"><style>
+:root{--red:#ff1a1a;--green:#00ff88;--gold:#D4AF37;--purple:#a855ff;--blue:#0084ff;--bg:#050505;--text:#e8e8e8;--muted:#888}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(600px at 15% 10%,rgba(255,26,26,.22),transparent 70%),radial-gradient(500px at 85% 20%,rgba(168,85,255,.22),transparent 70%),radial-gradient(600px at 30% 90%,rgba(0,255,136,.16),transparent 70%)}
+h1,h2{font-family:'Syne',sans-serif}h2{margin:0 0 16px;font-size:11px;letter-spacing:4px;color:var(--accent,var(--red))}
+.muted{font-size:11px;color:var(--muted)}.center{text-align:center}
+main{max-width:900px;margin:0 auto;padding:20px;position:relative}
+@keyframes popIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.card{position:relative;overflow:hidden;background:linear-gradient(180deg,#121212,#0a0a0a);border:1px solid #1c1c1c;border-radius:20px;padding:24px;margin:18px 0;box-shadow:0 0 30px -8px var(--accent,rgba(255,26,26,.55))}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,#ff1a1a,#a855ff,#00ff88,#ffd700,#00d2ff,#fff)}
+.card.accent{border-color:var(--accent,var(--red))}
+.btn{display:block;background:#fff;color:#000;text-align:center;padding:12px;border-radius:100px;font-weight:800;text-decoration:none;margin:6px 0;font-size:12px}
+.btn-gold{background:var(--gold)}
+button,.btn{transition:transform .16s ease,box-shadow .3s ease,filter .25s ease}
+button:active,.btn:active{transform:scale(.95);filter:brightness(1.2)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:1000;flex-direction:column;overflow-y:auto;padding:180px 0 40px;box-sizing:border-box}
+.modal.show{display:flex}
+.modal-header{padding:16px;display:flex;justify-content:space-between;border-bottom:1px solid #3a3b3c}
+.modal-header .close{cursor:pointer;padding:10px 14px}
+.modal-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px}
+.modal-body input,.modal-body textarea{background:#3a3b3c;border:0;border-radius:10px;padding:12px;color:#e4e6eb;outline:none}
+.modal-body button{background:var(--blue);border:0;border-radius:20px;padding:12px;color:#fff;font-weight:600;cursor:pointer}
+.backbar{display:flex;align-items:center;gap:14px;padding:4px 0 0}
+.backbar a{color:var(--gold);text-decoration:none;font-weight:800;font-size:12px;letter-spacing:2px}
+.backbar h1{margin:0;font-size:18px;letter-spacing:6px}
+</style></head><body><main>
+<div class="backbar"><a href="/index.html">&larr; BACK TO ARCADE</a><h1>FREE MOVIES</h1></div>
+<div class="card accent" style="--accent:var(--gold);margin-bottom:16px"><h2 style="color:var(--gold)">FREE MOVIES</h2><p class="muted">Free and legal — no sign-in, no sketchy pop-up ads.</p><a class="btn btn-gold" style="cursor:pointer" onclick="proj('mv-tubi',1)">TUBI</a><a class="btn" style="cursor:pointer" onclick="proj('mv-pluto',1)">PLUTO TV</a><a class="btn" style="cursor:pointer" onclick="proj('mv-yt',1)">YOUTUBE — FREE MOVIES</a><a class="btn" style="cursor:pointer" onclick="proj('mv-archive',1)">INTERNET ARCHIVE</a><a class="btn" style="cursor:pointer" onclick="proj('mv-plex',1)">PLEX</a><h2 style="color:var(--gold);margin-top:14px">ANIME — FREE TOO</h2><a class="btn" style="cursor:pointer" onclick="proj('mv-crunchy',1)">CRUNCHYROLL — FREE TIER</a><a class="btn" style="cursor:pointer" onclick="proj('mv-tubianime',1)">TUBI ANIME</a><a class="btn" style="cursor:pointer" onclick="proj('mv-retro',1)">RETROCRUSH — CLASSIC ANIME</a><a class="btn" style="cursor:pointer" onclick="proj('mv-plutoanime',1)">PLUTO TV ANIME</a><h2 style="color:var(--gold);margin-top:14px">WATCH ANY MOVIE</h2><p class="muted">No one free service has every movie — search any title on JustWatch and filter by free to see where it streams legally.</p><a class="btn btn-gold" style="cursor:pointer" onclick="proj('mv-justwatch',1)">JUSTWATCH — SEARCH ANY MOVIE</a></div><div class="modal" id="mv-tubi"><div class="modal-header"><span>TUBI</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Free movies and TV, no sign-in — just press play.</p><a class="btn btn-gold" href="https://tubitv.com" target="_blank" rel="noopener">OPEN TUBI →</a></div></div><div class="modal" id="mv-pluto"><div class="modal-header"><span>PLUTO TV</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Free live TV and movies, no sign-in.</p><a class="btn" href="https://pluto.tv" target="_blank" rel="noopener">OPEN PLUTO TV →</a></div></div><div class="modal" id="mv-yt"><div class="modal-header"><span>YOUTUBE — FREE MOVIES</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Free movies on YouTube, no sign-in.</p><a class="btn" href="https://www.youtube.com/feed/storefront" target="_blank" rel="noopener">OPEN YOUTUBE — FREE MOVIES →</a></div></div><div class="modal" id="mv-archive"><div class="modal-header"><span>INTERNET ARCHIVE</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Classic and public-domain films, free forever.</p><a class="btn" href="https://archive.org/details/feature_films" target="_blank" rel="noopener">OPEN INTERNET ARCHIVE →</a></div></div><div class="modal" id="mv-plex"><div class="modal-header"><span>PLEX</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Free movies and TV on Plex, no sign-in.</p><a class="btn" href="https://watch.plex.tv" target="_blank" rel="noopener">OPEN PLEX →</a></div></div><div class="modal" id="mv-crunchy"><div class="modal-header"><span>CRUNCHYROLL — FREE TIER</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Anime free with ads, no paid plan needed.</p><a class="btn" href="https://www.crunchyroll.com" target="_blank" rel="noopener">OPEN CRUNCHYROLL — FREE TIER →</a></div></div><div class="modal" id="mv-tubianime"><div class="modal-header"><span>TUBI ANIME</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Free anime on Tubi, no sign-in.</p><a class="btn" href="https://tubitv.com/category/anime" target="_blank" rel="noopener">OPEN TUBI ANIME →</a></div></div><div class="modal" id="mv-retro"><div class="modal-header"><span>RETROCRUSH — CLASSIC ANIME</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Classic anime films, free to watch.</p><a class="btn" href="https://www.retrocrush.tv" target="_blank" rel="noopener">OPEN RETROCRUSH — CLASSIC ANIME →</a></div></div><div class="modal" id="mv-plutoanime"><div class="modal-header"><span>PLUTO TV ANIME</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Free anime on Pluto TV, no sign-in.</p><a class="btn" href="https://pluto.tv/en/live-tv/anime" target="_blank" rel="noopener">OPEN PLUTO TV ANIME →</a></div></div><div class="modal" id="mv-justwatch"><div class="modal-header"><span>JUSTWATCH — SEARCH ANY MOVIE</span><span class="close">X</span></div><div class="modal-body"><p class="muted">Search any title, filter by free, see where it streams legally.</p><a class="btn btn-gold" href="https://www.justwatch.com" target="_blank" rel="noopener">OPEN JUSTWATCH — SEARCH ANY MOVIE →</a></div></div>
+
+</main>
+<script>
+const $ = id => document.getElementById(id);
+var _pj=['mv-tubi','mv-pluto','mv-yt','mv-archive','mv-plex','mv-crunchy','mv-tubianime','mv-retro','mv-plutoanime','mv-justwatch'];
+function proj(i,s){var m=$(i);if(m)m.classList[s?'add':'remove']('show');}
+_pj.forEach(function(i){var m=$(i);if(!m)return;m.addEventListener('click',function(e){if(e.target===m||(e.target.classList&&e.target.classList.contains('close')))proj(i,0);});});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){_pj.forEach(function(i){proj(i,0);});}});
+</script>
+
+<script src="/swpvp-skins.js" defer></script>
+</body></html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>THE VAULT — SAVAGE WRAITH</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Syne:wght@800&display=swap" rel="stylesheet"><style>
+:root{--red:#ff1a1a;--green:#00ff88;--gold:#D4AF37;--purple:#a855ff;--blue:#0084ff;--bg:#050505;--text:#e8e8e8;--muted:#888}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(600px at 15% 10%,rgba(255,26,26,.22),transparent 70%),radial-gradient(500px at 85% 20%,rgba(168,85,255,.22),transparent 70%),radial-gradient(600px at 30% 90%,rgba(0,255,136,.16),transparent 70%)}
+h1,h2{font-family:'Syne',sans-serif}h2{margin:0 0 16px;font-size:11px;letter-spacing:4px;color:var(--accent,var(--red))}
+.muted{font-size:11px;color:var(--muted)}.center{text-align:center}
+main{max-width:900px;margin:0 auto;padding:20px;position:relative}
+@keyframes popIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.card{position:relative;overflow:hidden;background:linear-gradient(180deg,#121212,#0a0a0a);border:1px solid #1c1c1c;border-radius:20px;padding:24px;margin:18px 0;box-shadow:0 0 30px -8px var(--accent,rgba(255,26,26,.55))}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,#ff1a1a,#a855ff,#00ff88,#ffd700,#00d2ff,#fff)}
+.card.accent{border-color:var(--accent,var(--red))}
+.btn{display:block;background:#fff;color:#000;text-align:center;padding:12px;border-radius:100px;font-weight:800;text-decoration:none;margin:6px 0;font-size:12px}
+.btn-gold{background:var(--gold)}.btn-green{background:var(--green);color:#000}
+button,.btn,.hideout-btn{transition:transform .16s ease,box-shadow .3s ease,filter .25s ease}
+button:active,.btn:active,.hideout-btn:active{transform:scale(.95);filter:brightness(1.2)}
+.blog-app{width:100%;background:#000;border:1px solid #3a3b3c;display:flex;flex-direction:column;border-radius:20px;overflow:hidden;position:relative}
+.topbar{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3a3b3c;font-weight:700;font-size:13px}
+.feed-empty{padding:28px 20px;text-align:center;color:#b0b3b8}
+@keyframes flicker{0%,100%{opacity:1;text-shadow:0 0 8px var(--green),0 0 20px var(--green)}5%{opacity:.3}10%{opacity:1}15%{opacity:.6;text-shadow:none}20%{opacity:1}50%{opacity:.9}80%{opacity:1;text-shadow:0 0 8px var(--green)}}
+.enc-title{font-family:monospace;letter-spacing:3px;color:var(--green);animation:flicker 2s infinite}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:1000;flex-direction:column;overflow-y:auto;padding:180px 0 40px;box-sizing:border-box}
+.modal.show{display:flex}
+.modal-header{padding:16px;display:flex;justify-content:space-between;border-bottom:1px solid #3a3b3c}
+.modal-header .close{cursor:pointer;padding:10px 14px}
+.modal-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px}
+.modal-body input,.modal-body textarea{background:#3a3b3c;border:0;border-radius:10px;padding:12px;color:#e4e6eb;outline:none}
+.modal-body button{background:var(--blue);border:0;border-radius:20px;padding:12px;color:#fff;font-weight:600;cursor:pointer}
+.msg-row{display:flex;gap:10px;align-items:center;padding:10px 6px;border-bottom:1px solid #222;cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-top:0;color:#fff;text-align:left;font:inherit}
+.msg-row b{display:block;font-size:14px}
+.pm-form{display:flex;gap:8px;margin-top:12px;align-items:center}
+.pm-form input[type=text]{flex:1;background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:12px;color:#fff;min-width:0}
+.pm-form button{background:var(--red);border:0;border-radius:20px;padding:12px 20px;color:#fff;font-weight:800;cursor:pointer}
+.backbar{display:flex;align-items:center;gap:14px;padding:4px 0 0}
+.backbar a{color:var(--gold);text-decoration:none;font-weight:800;font-size:12px;letter-spacing:2px}
+.backbar h1{margin:0;font-size:18px;letter-spacing:6px}
+.player-slot{border:1px dashed #333;border-radius:16px;padding:18px;text-align:center;color:var(--muted);font-size:12px;letter-spacing:2px;margin:18px 0}
+</style><style>
+.hideout-btn{width:100%;background:#121212;border:1px solid #1c1c1c;border-radius:16px;padding:18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin:10px 0;color:#fff;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:4px}
+.hideout-btn small{color:var(--muted);font-size:10px}
+.hideout-content{display:none;margin:0 0 18px;border:1px solid #222;border-top:none;border-radius:0 0 16px 16px;overflow:hidden;background:#000}
+.hideout-content.open{display:block;animation:popIn .3s}
+#hey-body{display:none}#hey-body.open{display:block;animation:popIn .3s}#hey-btns.hey-closed{display:none}#sc-body{display:none}#sc-body.open{display:block;animation:popIn .3s}
+</style></head><body><main>
+<div class="backbar"><a href="/index.html">&larr; BACK TO ARCADE</a><h1>THE VAULT</h1></div>
+
+<div id="ion-card-vault" class="card accent" style="--accent:var(--green);cursor:pointer" onclick="location.href='/tavern.html'"><h2 style="color:var(--green);margin:0 0 6px">⚛ ATOMS</h2><div style="font-size:42px;font-weight:900;color:var(--gold);line-height:1"><span id="mol-count">25</span></div><p class="muted" style="margin:8px 0 0">Your atoms.</p><div class="blog-app"><div class="topbar"><span class="enc-title" id="ion-enc-title-vault">1010101010010101 // MULTIPLAYER_</span></div><div style="padding:16px"><div class="feed-empty" id="ion-status-vault">✓ DECRYPTED — ATOMS: MULTIPLAYER UNLOCKED</div></div></div></div><div class="card accent" id="hideout-now-card" style="--accent:var(--green);margin-bottom:16px;cursor:pointer" onclick="vsLoad()"><h2>NOW PLAYING</h2><p id="hideout-now-song"><b>8</b> — Billie Eilish</p><p class="muted" id="hideout-now-time">▶ Playing at 2:52 / 2:53</p></div><div class="card accent" id="ion-wallet-card" style="--accent:#00ff88;margin-bottom:16px"><h2 style="color:#00ff88">⚡ ATOM WALLET</h2><p class="muted">Packs cost atoms now. Paste your wallet code from the Tavern to spend them here.</p><div style="display:flex;gap:6px;margin:6px 0"><input id="ionCodeInput" type="text" placeholder="ATOM1-…-…" style="flex:1;min-width:0;background:#1a1a20;color:#fff;border:2px solid #333;border-radius:8px;padding:10px"><button class="btn btn-gold" id="ionLinkBtn" type="button">LINK</button><button class="btn" id="ionUnlinkBtn" type="button" style="display:none">UNLINK</button></div><p class="muted" id="ion-wallet-line" style="margin:8px 0 0">No ion wallet linked yet.</p></div><div class="card accent" id="hideout-playlists-card" style="--accent:var(--green);margin-bottom:16px"><button class="hideout-btn" id="hey-heading" style="--accent:var(--green);border-color:var(--green)" onclick="toggleHey()"><span><span style="color:var(--green)">●</span> hey</span> <small id="hey-state">[ CLICK TO UNLOCK ]</small></button><div id="hey-body"><p class="muted">Shawty's Spotify playlists — one pack, all fourteen. Unlock with atoms.</p><div id="zxc-pack-locked"><p style="margin:0 0 8px"><a href="https://open.spotify.com/playlist/46xAcFtUVU8vyorxOTjzaP" target="_blank" rel="noopener" style="color:#fff"><b>zxc 1</b></a><br><a href="https://open.spotify.com/playlist/5jaWPmE82CT2CVKlfhJcrI" target="_blank" rel="noopener" style="color:#fff"><b>zxc 2</b></a><br><a href="https://open.spotify.com/playlist/1AFAnIvk6nJ8kkDgLAvbHv" target="_blank" rel="noopener" style="color:#fff"><b>zxc 3</b></a><br><a href="https://open.spotify.com/playlist/0jDomWPDrMOQly9wSbzJjC" target="_blank" rel="noopener" style="color:#fff"><b>ONEBLOOD</b></a><br><a href="https://open.spotify.com/playlist/3JutZoHAWjnmbeZJoijO6m" target="_blank" rel="noopener" style="color:#fff"><b>Stans</b></a><br><a href="https://open.spotify.com/playlist/1BV53rd1YZVkuh6AnKzfPF" target="_blank" rel="noopener" style="color:#fff"><b>._.</b></a><br><a href="https://open.spotify.com/playlist/3U6rFQEgNvtIzwLMxsHwfL" target="_blank" rel="noopener" style="color:#fff"><b>.;';</b></a><br><a href="https://open.spotify.com/playlist/4xJGAz1nBXjjma44GOiN6y" target="_blank" rel="noopener" style="color:#fff"><b>☝️☺️🤦‍♂️</b></a><br><a href="https://open.spotify.com/playlist/792R6upjvvzxJ7H7rYjqhj" target="_blank" rel="noopener" style="color:#fff"><b>☝️😮‍💨😌📍</b></a><br><a href="https://open.spotify.com/playlist/49t7oJ9h1LAsKPlDnMFT54" target="_blank" rel="noopener" style="color:#fff"><b>☝️🐶🥰😪</b></a><br><a href="https://open.spotify.com/playlist/7wMzdUOrNKxNqW1iisDFry" target="_blank" rel="noopener" style="color:#fff"><b>☣️</b></a><br><a href="https://open.spotify.com/playlist/4jC9qBtdkCz6XXi4xfQ9XL" target="_blank" rel="noopener" style="color:#fff"><b>. _ .</b></a><br><a href="https://open.spotify.com/playlist/6uxd3i8Iw5H2lll2NEO3Cx" target="_blank" rel="noopener" style="color:#fff"><b>.</b></a><br><a href="https://open.spotify.com/playlist/1Zy0DPjsb1hZhOWpYM42J8" target="_blank" rel="noopener" style="color:#fff"><b>Xvvx</b></a></p><p class="muted" id="zxc-pack-balance" style="margin:0 0 8px">Link your atom wallet to unlock.</p><button class="btn btn-gold" id="zxc-mol-unlock" style="cursor:pointer" onclick="packUnlock('zxc')">UNLOCK FOR 2 ATOMS</button><p class="muted" id="zxc-pack-msg" style="margin:8px 0 0"></p><p class="muted" style="margin:8px 0 0">Spend atoms from your linked atom wallet.</p></div><div id="zxc-pack-unlocked" style="display:none"><div style="display:grid;gap:12px"><div><p style="margin:0 0 6px"><b>zxc 1</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/46xAcFtUVU8vyorxOTjzaP?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/46xAcFtUVU8vyorxOTjzaP" target="_blank" rel="noopener" style="color:var(--green)">Open zxc 1 in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>zxc 2</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/5jaWPmE82CT2CVKlfhJcrI?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/5jaWPmE82CT2CVKlfhJcrI" target="_blank" rel="noopener" style="color:var(--green)">Open zxc 2 in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>zxc 3</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/1AFAnIvk6nJ8kkDgLAvbHv?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/1AFAnIvk6nJ8kkDgLAvbHv" target="_blank" rel="noopener" style="color:var(--green)">Open zxc 3 in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>ONEBLOOD</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/0jDomWPDrMOQly9wSbzJjC?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/0jDomWPDrMOQly9wSbzJjC" target="_blank" rel="noopener" style="color:var(--green)">Open ONEBLOOD in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>Stans</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/3JutZoHAWjnmbeZJoijO6m?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/3JutZoHAWjnmbeZJoijO6m" target="_blank" rel="noopener" style="color:var(--green)">Open Stans in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>._.</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/1BV53rd1YZVkuh6AnKzfPF?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/1BV53rd1YZVkuh6AnKzfPF" target="_blank" rel="noopener" style="color:var(--green)">Open ._. in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>.;';</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/3U6rFQEgNvtIzwLMxsHwfL?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/3U6rFQEgNvtIzwLMxsHwfL" target="_blank" rel="noopener" style="color:var(--green)">Open .;'; in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>☝️☺️🤦‍♂️</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/4xJGAz1nBXjjma44GOiN6y?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/4xJGAz1nBXjjma44GOiN6y" target="_blank" rel="noopener" style="color:var(--green)">Open ☝️☺️🤦‍♂️ in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>☝️😮‍💨😌📍</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/792R6upjvvzxJ7H7rYjqhj?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/792R6upjvvzxJ7H7rYjqhj" target="_blank" rel="noopener" style="color:var(--green)">Open ☝️😮‍💨😌📍 in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>☝️🐶🥰😪</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/49t7oJ9h1LAsKPlDnMFT54?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/49t7oJ9h1LAsKPlDnMFT54" target="_blank" rel="noopener" style="color:var(--green)">Open ☝️🐶🥰😪 in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>☣️</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/7wMzdUOrNKxNqW1iisDFry?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/7wMzdUOrNKxNqW1iisDFry" target="_blank" rel="noopener" style="color:var(--green)">Open ☣️ in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>. _ .</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/4jC9qBtdkCz6XXi4xfQ9XL?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/4jC9qBtdkCz6XXi4xfQ9XL" target="_blank" rel="noopener" style="color:var(--green)">Open . _ . in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>.</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/6uxd3i8Iw5H2lll2NEO3Cx?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/6uxd3i8Iw5H2lll2NEO3Cx" target="_blank" rel="noopener" style="color:var(--green)">Open . in Spotify ↗</a></div><div><p style="margin:0 0 6px"><b>Xvvx</b></p><iframe data-zxc="1" style="border-radius:12px" data-src="https://open.spotify.com/embed/playlist/1Zy0DPjsb1hZhOWpYM42J8?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><a href="https://open.spotify.com/playlist/1Zy0DPjsb1hZhOWpYM42J8" target="_blank" rel="noopener" style="color:var(--green)">Open Xvvx in Spotify ↗</a></div></div></div></div></div><div id="hey-btns" class="hey-closed" style="margin-bottom:8px">
+<button class="hideout-btn" style="--accent:var(--purple);border-color:var(--purple)" onclick="toggleHideout('boo')">
+<span><span style="color:var(--purple)">●</span> BOO</span> <small id="boo-label">[ CLICK TO UNLOCK ]</small>
+</button>
+<div id="boo" class="hideout-content"><iframe src="https://open.spotify.com/embed/playlist/5BgacLLQHyjNFxefQGNGp1" width="100%" height="336" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen"></iframe></div>
+<button class="hideout-btn" style="border-color:var(--blue)" onclick="toggleHideout('wsp')">
+<span><span style="color:var(--blue)">●</span> WSP</span> <small id="wsp-label">[ CLICK TO UNLOCK ]</small>
+</button>
+<div id="wsp" class="hideout-content"><iframe src="https://open.spotify.com/embed/playlist/4QFNU7G5WvntqUym59KUaq" width="100%" height="336" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen"></iframe></div>
+<button class="hideout-btn" onclick="toggleHideout('ghost')">
+<span><span style="color:var(--red)">●</span> GHOST</span> <small id="ghost-label">[ CLICK TO UNLOCK ]</small>
+</button>
+<div id="ghost" class="hideout-content"><iframe src="https://open.spotify.com/embed/playlist/5QeF5p5oDIXSilip8CN1Bx" width="100%" height="336" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen"></iframe></div><div class="card accent" id="hideout-sc-card" style="--accent:#ff5500;margin-bottom:16px"><button class="hideout-btn" id="sc-heading" style="--accent:#ff5500;border-color:#ff5500" onclick="toggleSc()"><span><span style="color:#ff5500">●</span> SOUNDCLOUD PLAYLISTS</span> <small id="sc-state">[ OPEN ● ]</small></button><div id="sc-body" class="open"><p class="muted">Shawty's SoundCloud playlists — one pack, all three. Unlock with atoms.</p><div id="sc-pack-locked"><p style="margin:0 0 8px"><a href="https://soundcloud.com/candrick-james/sets/ilefa1f59cio" target="_blank" rel="noopener" style="color:#fff"><b>🙄</b></a><br><a href="https://soundcloud.com/candrick-james/sets/frfr" target="_blank" rel="noopener" style="color:#fff"><b>frfr</b></a><br><a href="https://soundcloud.com/candrick-james/sets/untitled-playlist" target="_blank" rel="noopener" style="color:#fff"><b>Untitled Playlist</b></a></p><p class="muted" id="sc-pack-balance" style="margin:0 0 8px">Link your atom wallet to unlock.</p><button class="btn btn-gold" id="sc-mol-unlock" style="cursor:pointer" onclick="packUnlock('sc')">UNLOCK FOR 2 ATOMS</button><p class="muted" id="sc-pack-msg" style="margin:8px 0 0"></p><p class="muted" style="margin:8px 0 0">Spend atoms from your linked atom wallet.</p></div><div id="sc-pack-unlocked" style="display:none"><div style="display:grid;gap:12px"><div><p style="margin:0 0 6px"><b>🙄</b></p><iframe style="border-radius:12px" data-src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/candrick-james/sets/ilefa1f59cio&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true" width="100%" height="152" frameborder="0" scrolling="no" loading="lazy"></iframe><a href="https://soundcloud.com/candrick-james/sets/ilefa1f59cio" target="_blank" rel="noopener" style="color:#ff5500">Open 🙄 on SoundCloud ↗</a></div><div><p style="margin:0 0 6px"><b>frfr</b></p><iframe style="border-radius:12px" data-src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/candrick-james/sets/frfr&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true" width="100%" height="152" frameborder="0" scrolling="no" loading="lazy"></iframe><a href="https://soundcloud.com/candrick-james/sets/frfr" target="_blank" rel="noopener" style="color:#ff5500">Open frfr on SoundCloud ↗</a></div><div><p style="margin:0 0 6px"><b>Untitled Playlist</b></p><iframe style="border-radius:12px" data-src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/candrick-james/sets/untitled-playlist&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true" width="100%" height="152" frameborder="0" scrolling="no" loading="lazy"></iframe><a href="https://soundcloud.com/candrick-james/sets/untitled-playlist" target="_blank" rel="noopener" style="color:#ff5500">Open Untitled Playlist on SoundCloud ↗</a></div></div></div></div></div>
+</div>
+<div class="card accent" id="player-slot" style="--accent:#1DB954"><h2 style="color:#1DB954">🎵 YOUR SPOTIFY</h2>
+<p class="muted" id="sp-status">Checking Spotify setup…</p>
+<div id="sp-connect" style="display:none"><p class="muted">Connect your own Spotify and play your music right here in the Vault.</p><p class="muted">Full songs need Spotify Premium — free accounts get 30-second previews.</p><a class="btn btn-green" id="sp-connect-btn" href="/api/spotify-auth">CONNECT YOUR SPOTIFY</a><p class="muted">Your Spotify login stays on your device — we never see your password, and your tokens never leave this browser.</p></div>
+<div id="sp-setup-missing" style="display:none"><p class="muted">🎵 Spotify player coming soon — the Spotify app isn't set up yet. The playlists below still work.</p></div>
+<div id="sp-player" style="display:none"><p id="sp-now"><b>Nothing playing</b></p><p class="muted" id="sp-now-time"></p><div id="sp-embed-wrap" style="display:none"><iframe id="sp-embed" style="border-radius:12px" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><p><a id="sp-open-link" href="#" target="_blank" rel="noopener" style="color:var(--green)">Open in Spotify ↗</a></p></div><div style="display:flex;gap:6px"><button class="btn" id="sp-prev" type="button" style="flex:1">⏮ PREV</button><button class="btn btn-green" id="sp-playpause" type="button" style="flex:1">▶ PLAY</button><button class="btn" id="sp-next" type="button" style="flex:1">NEXT ⏭</button></div><p class="muted" id="sp-who"></p><button class="btn" id="sp-disconnect" type="button">DISCONNECT SPOTIFY</button></div>
+</div>
+
+
+
+
+<div style="height:44px"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeUrl = u => /^https?:\/\//i.test(u || '') ? u : '';
+const firebaseConfig = {
+  apiKey: "AIzaSyB1ERnGB2hAGclij5GN8H184U6jN_tVrKA",
+  authDomain: "swvp-721a0.firebaseapp.com",
+  projectId: "swvp-721a0",
+  messagingSenderId: "1068856275039",
+  appId: "1:1068856275039:web:77f79ebc6aefedb6252bea",
+  measurementId: "G-ECZN9Y71TT"
+};
+</script>
+<script>(function(){window.fmtAtoms=function(n){var v=Number(n);if(isNaN(v))v=0;return String(Math.floor(v));};function molBal(){try{var v=parseInt(localStorage.getItem('sw_sav_molecules'),10);if(isNaN(v)||v<0)v=25;return v;}catch(e){return 25;}}function updateMolCount(){var el=document.getElementById('mol-count');if(!el)return;var ion=window.__ionPacks||{};if(ion.uid&&typeof ion.bal==='number'){el.textContent=fmtAtoms(ion.bal);return;}el.textContent=fmtAtoms(molBal());}window.updateMolCount=updateMolCount;document.addEventListener('DOMContentLoaded',updateMolCount);window.addEventListener('storage',function(e){if(!e||e.key==='sw_sav_molecules')updateMolCount();});var hb=document.getElementById('b-home');if(hb)hb.addEventListener('click',function(){setTimeout(updateMolCount,50);});setInterval(updateMolCount,1000);updateMolCount();})();</script>
+<script>
+/* PLAYLIST PACKS — Spotify + SoundCloud, now priced in ATOMS.
+   No $, no Cash App, no keys. The atom wallet (wallet-code bridge).
+   Spotify pack: 14 playlists. SoundCloud pack: 3 playlists.
+   Each pack starts at 2 atoms. Every successful unlock raises the price by 2
+   atoms (2, 4, 6, ...), per pack, priced independently. After 24 hours the
+   price goes back to 2 atoms.
+   Price state lives in localStorage (sw_pack_step_<p> = buys in the current
+   24h window, sw_pack_win_<p> = window start, epoch ms) and is mirrored in
+   Firestore (shop/zxc-price and shop/sc-price, fields step + win). The newer
+   window wins; same window keeps the higher count; a load never blocks on
+   Firestore and an unlock never blocks on a Firestore write.
+   Unlock is paid from the linked ion wallet (Firestore ion_wallets, doc id =
+   the uid decoded from the wallet code ATOM1-<b64(uid)>-<djb2> (ION1- also accepted)). The buy runs
+   a Firestore transaction: deduct the ion price and record the unlock in the
+   wallet's owned list (pack-zxc / pack-sc) — the unlock persists in the
+   cloud, not device-only. A locked pack hides BOTH the web-player embeds
+   and the Open links — both live inside the unlocked div, shown only after
+   unlock. */
+var PACK_BASE={zxc:2,sc:2};
+var PACK_STEP=2;
+function fmtAtoms(n){var v=Number(n);if(isNaN(v))v=0;return String(Math.floor(v));}
+var PACK_UNIT={zxc:'atoms',sc:'atoms'};
+var PACK_WIN_MS=86400000; /* 24 hours */
+/* Atom wallet state, shared with the wallet-code bridge script below.
+   Created here so packShow/packUnlock can read it before that script runs. */
+window.__ionPacks=window.__ionPacks||{uid:null,code:'',bal:null,packs:[],ready:false,err:'',db:null};
+function packStepKey(p){return 'sw_pack_step_'+p;}
+function packWinKey(p){return 'sw_pack_win_'+p;}
+function packUnlockKey(p){return 'sw_pack_unlocked_'+p;}
+function packStep(p){try{var v=parseInt(localStorage.getItem(packStepKey(p)),10);if(isNaN(v)||v<0)v=0;return v;}catch(e){return 0;}}
+function packSetStep(p,s){try{localStorage.setItem(packStepKey(p),String(s));}catch(e){}}
+function packWin(p){try{var v=parseInt(localStorage.getItem(packWinKey(p)),10);if(isNaN(v)||v<0)v=0;return v;}catch(e){return 0;}}
+function packSetWin(p,t){try{localStorage.setItem(packWinKey(p),String(t));}catch(e){}}
+function packUnitWord(n){return n===1?'atom':'atoms';}
+/* Buys in the current 24h window. Resets the count (and the window) when the
+   window is older than 24h — or when a count exists with no window (legacy
+   pre-window state), which also restarts fresh at 0. */
+function packWindow(p){
+  var c=packStep(p),w=packWin(p),now=Date.now();
+  if(c>0&&(w<=0||now-w>=PACK_WIN_MS)){packSetStep(p,0);packSetWin(p,0);return 0;}
+  return c;
+}
+function packPrice(p){return (PACK_BASE[p]||2)+PACK_STEP*packWindow(p);}
+function packUnit(p){return PACK_UNIT[p]||'ions';}
+function packIsUnlocked(p){
+  try{if(localStorage.getItem(packUnlockKey(p))==='1')return true;}catch(e){}
+  var ion=window.__ionPacks||{};
+  return !!(ion.packs&&ion.packs.indexOf('pack-'+p)>=0);
+}
+function packShow(p){
+  var price=packPrice(p);
+  var unit=packUnit(p);
+  var uw=packUnitWord(price);
+  var pe=document.getElementById(p+'-pack-price');if(pe)pe.textContent=fmtAtoms(price)+' '+uw;
+  var ion=window.__ionPacks||{};
+  var be=document.getElementById(p+'-pack-balance');
+  if(be){
+    if(ion.uid&&typeof ion.bal==='number')be.textContent='Your balance: '+fmtAtoms(ion.bal)+' atoms';
+    else if(ion.uid)be.textContent='Atom wallet linked — loading balance…';
+    else be.textContent='Link your atom wallet to unlock.';
+  }
+  var btn=document.getElementById(p+'-mol-unlock');if(btn)btn.textContent='UNLOCK FOR '+fmtAtoms(price)+' '+uw.toUpperCase();
+  var l=document.getElementById(p+'-pack-locked');var u=document.getElementById(p+'-pack-unlocked');
+  if(packIsUnlocked(p)){
+    if(l)l.style.display='none';
+    if(u){u.style.display='';var fr=u.querySelectorAll('iframe');for(var i=0;i<fr.length;i++){var f=fr[i];if(f.dataset&&f.dataset.src&&!f.src)f.src=f.dataset.src;}}
+  }
+}
+function packMsg(p,t){var m=document.getElementById(p+'-pack-msg');if(m)m.textContent=t;}
+function packUnlock(p){
+  if(packIsUnlocked(p)){packShow(p);return;}
+  var price=packPrice(p);
+  var ion=window.__ionPacks||{};
+  if(!ion.uid||!ion.code){packMsg(p,'Link your atom wallet first — paste your wallet code above.');packShow(p);return;}
+  if(!ion.db){packMsg(p,'Atom wallet still loading — try again in a moment.');packShow(p);return;}
+  if(typeof ion.bal!=='number'){packMsg(p,'Atom wallet still loading — try again in a moment.');packShow(p);return;}
+  if(ion.bal<price){packMsg(p,'Not enough atoms — you need '+fmtAtoms(price)+', you have '+fmtAtoms(ion.bal)+'.');packShow(p);return;}
+  var ref=ion.db.collection('ion_wallets').doc(ion.uid);
+  var code=ion.code,uid=ion.uid,item='pack-'+p;
+  return ion.db.runTransaction(function(tx){
+    return tx.get(ref).then(function(doc){
+      if(!doc.exists)throw new Error('no-wallet');
+      var d=doc.data()||{};
+      var bal=(typeof d.atoms==='number')?d.atoms:(typeof d.ions==='number'?d.ions:0);
+      if(bal<price)throw new Error('insufficient');
+      var owned=Array.isArray(d.owned)?d.owned.slice():[];
+      if(owned.indexOf(item)<0)owned.push(item);
+      var upd={owned:owned,code:code,uid:uid,ts:Date.now()};if(typeof d.atoms==='number')upd.atoms=bal-price;if(typeof d.ions==='number')upd.ions=bal-price;if(typeof d.atoms!=='number'&&typeof d.ions!=='number')upd.ions=bal-price;tx.update(ref,upd);
+      return bal-price;
+    });
+  }).then(function(newBal){
+    ion.bal=newBal;
+    if(ion.packs.indexOf(item)<0)ion.packs.push(item);
+    try{localStorage.setItem(packUnlockKey(p),'1');}catch(e){}
+    var c=packWindow(p),w=packWin(p);
+    if(w<=0)w=Date.now();
+    packSetStep(p,c+1);packSetWin(p,w);
+    packSaveState(p);
+    packShow(p);
+    packMsg(p,'Unlocked — enjoy the playlists. ('+fmtAtoms(price)+' '+packUnitWord(price)+' spent, '+fmtAtoms(newBal)+' left.)');
+    if(typeof ionRenderLine==='function')ionRenderLine();
+  }).catch(function(err){
+    var m=(err&&err.message)?String(err.message):'';
+    var cd=(err&&err.code)?String(err.code):'';
+    if(m==='no-wallet'){packMsg(p,'Wallet not found — open the Tavern once, then link again.');}
+    else if(m==='insufficient'){packMsg(p,'Not enough atoms — your balance changed. Check the Tavern.');}
+    else if(cd==='permission-denied'||m.indexOf('permission')>=0){packMsg(p,'Atom wallet refused — open the Tavern once to refresh your wallet, then try again.');}
+    else{packMsg(p,'Ion buy failed — try again.');}
+    packShow(p);
+  });
+}
+function packSaveState(p){
+  try{
+    if(typeof db==='undefined'||!db||!db.collection)return;
+    db.collection('shop').doc(p+'-price').set({step:packStep(p),win:packWin(p)},{merge:true}).catch(function(){});
+  }catch(e){}
+}
+function packLoadStep(p){
+  try{
+    if(typeof db==='undefined'||!db||!db.collection){packShow(p);return;}
+    db.collection('shop').doc(p+'-price').get().then(function(d){
+      var dd=(d&&d.exists&&d.data())?d.data():null;
+      var s=(dd&&typeof dd.step==='number')?Math.floor(dd.step):-1;
+      var w=(dd&&typeof dd.win==='number')?Math.floor(dd.win):0;
+      if(!(s>=0))s=-1;
+      if(!(w>0))w=0;
+      if(w>0){
+        /* Newer window wins; same window keeps the higher count. */
+        var lw=packWin(p),lc=packStep(p);
+        if(w>lw){packSetStep(p,s<0?0:s);packSetWin(p,w);}
+        else if(w===lw&&s>lc){packSetStep(p,s);}
+      }
+      /* A Firestore doc with no win field is legacy (pre-window) — ignore it. */
+      packShow(p);
+    }).catch(function(){packShow(p);});
+  }catch(e){packShow(p);}
+}
+function packInit(){packLoadStep('zxc');packLoadStep('sc');}
+try{packInit();}catch(e){}
+try{if(document&&document.addEventListener)document.addEventListener('DOMContentLoaded',packInit);}catch(e){}
+</script>
+<script>
+/* ATOM WALLET — wallet-code bridge for the playlist packs.
+   Same codec as the Tavern + arcade pet shop (djb2 checksum + base64url,
+   no padding). The code carries the ion uid, so this site can read/write
+   THAT wallet even though it signs in anonymously on a different origin
+   (different uid). The code IS the link — treat it like a save code.
+   Format: ATOM1-<b64(uid)>-<hash8> (ION1- also accepted). The raw uid is never printed. */
+var ION_CODE_B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+var ION_CODE_KEY='wraith_ion_code_v1';
+function ionCodeHash(s){var h=5381;for(var i=0;i<s.length;i++){h=(((h<<5)+h)+s.charCodeAt(i))>>>0;}var hex=h.toString(16);while(hex.length<8)hex='0'+hex;return hex;}
+function ionCodeUtf8(s){var out=[];for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c<128)out.push(c);else if(c<2048)out.push(192|(c>>6),128|(c&63));else out.push(224|(c>>12),128|((c>>6)&63),128|(c&63));}return out;}
+function ionCodeB64e(bytes){var out='';for(var i=0;i<bytes.length;i+=3){var b0=bytes[i],b1=(i+1<bytes.length)?bytes[i+1]:0,b2=(i+2<bytes.length)?bytes[i+2]:0;out+=ION_CODE_B64.charAt(b0>>2);out+=ION_CODE_B64.charAt(((b0&3)<<4)|(b1>>4));if(i+1<bytes.length)out+=ION_CODE_B64.charAt(((b1&15)<<2)|(b2>>6));if(i+2<bytes.length)out+=ION_CODE_B64.charAt(b2&63);}return out;}
+function ionCodeB64d(s){var vals={},i;for(i=0;i<ION_CODE_B64.length;i++)vals[ION_CODE_B64.charAt(i)]=i;var out=[];var acc=0,nbits=0;for(i=0;i<s.length;i++){var v=vals[s.charAt(i)];if(v===undefined)return null;acc=(acc<<6)|v;nbits+=6;if(nbits>=8){nbits-=8;out.push((acc>>nbits)&255);}}return out;}
+function ionCodeFromUtf8(bytes){var out='',i=0;while(i<bytes.length){var b=bytes[i++];if(b<128)out+=String.fromCharCode(b);else if(b>=192&&b<224&&i<bytes.length)out+=String.fromCharCode(((b&31)<<6)|(bytes[i++]&63));else if(b>=224&&b<240&&i+1<bytes.length){out+=String.fromCharCode(((b&15)<<12)|((bytes[i]&63)<<6)|((bytes[i+1]&63)));i+=2;}else out+='?';}return out;}
+function ionCodeFor(uid){if(!uid)return'';var b=ionCodeB64e(ionCodeUtf8(String(uid)));return 'ATOM1-'+b+'-'+ionCodeHash(b);}
+function ionUidFromCode(code){
+  if(!code)return null;
+  var c=String(code).trim().replace(/\s+/g,'');
+  var parts=c.split('-');
+  if(parts.length!==3||(parts[0]!=='ATOM1'&&parts[0]!=='ION1'))return null;
+  if(ionCodeHash(parts[1])!==parts[2].toLowerCase())return null;
+  var bytes=ionCodeB64d(parts[1]);
+  if(!bytes)return null;
+  var uid=ionCodeFromUtf8(bytes);
+  if(!uid||/[^A-Za-z0-9_-]/.test(uid))return null;
+  return uid;
+}
+var ionUnsub=null;
+function ionRenderLine(){
+  var ion=window.__ionPacks||{};
+  var lb=document.getElementById('ionLinkBtn');if(lb)lb.style.display=ion.uid?'none':'';
+  var ub=document.getElementById('ionUnlinkBtn');if(ub)ub.style.display=ion.uid?'':'none';
+  var inp=document.getElementById('ionCodeInput');if(inp&&ion.code)inp.value=ion.code;
+  var el=document.getElementById('ion-wallet-line');if(!el)return;
+  if(ion.err){el.textContent=ion.err;return;}
+  if(ion.mergeMsg&&typeof ion.bal==='number'&&ion.bal===ion.mergeBal){el.textContent=ion.mergeMsg;return;}
+  if(!ion.uid){el.textContent='No atom wallet linked yet.';return;}
+  if(typeof ion.bal==='number')el.textContent='Atom wallet linked — balance '+ion.bal+' atoms.';
+  else el.textContent='Atom wallet linked — loading balance…';
+}
+function ionSyncFromDoc(d){
+  var ion=window.__ionPacks||{};
+  if(typeof d.code==='string'&&d.code)ion.code=d.code;
+  if(typeof d.atoms==='number')ion.bal=d.atoms;else if(typeof d.ions==='number')ion.bal=d.ions;
+  if(Array.isArray(d.owned)){
+    ion.packs=d.owned.filter(function(x){return typeof x==='string'&&x.indexOf('pack-')===0;});
+    ion.packs.forEach(function(item){
+      var p=item.slice(5);
+      try{if(p==='zxc'||p==='sc')localStorage.setItem(packUnlockKey(p),'1');}catch(e){}
+    });
+  }
+  if(typeof window.updateMolCount==='function')window.updateMolCount();
+  ionMergeLocal();
+}
+function ionAttach(){
+  var ion=window.__ionPacks||{};
+  if(!ion.db||!ion.uid)return;
+  try{if(ionUnsub){ionUnsub();ionUnsub=null;}}catch(e){}
+  var ref=ion.db.collection('ion_wallets').doc(ion.uid);
+  try{
+    ionUnsub=ref.onSnapshot(function(doc){
+      if(doc&&doc.exists){ion.err='';ionSyncFromDoc(doc.data()||{});ionRenderLine();if(typeof packShow==='function'){packShow('zxc');packShow('sc');}}
+      else{ion.err='Wallet not found — open the Tavern once, then link again.';ionRenderLine();}
+    },function(){ionFetchOnce();});
+  }catch(e){ionFetchOnce();}
+}
+function ionFetchOnce(){
+  var ion=window.__ionPacks||{};
+  if(!ion.db||!ion.uid)return Promise.resolve(false);
+  return ion.db.collection('ion_wallets').doc(ion.uid).get().then(function(doc){
+    if(!doc.exists){ion.err='Wallet not found — open the Tavern once, then link again.';ionRenderLine();return false;}
+    ion.err='';ionSyncFromDoc(doc.data()||{});ionRenderLine();
+    if(typeof packShow==='function'){packShow('zxc');packShow('sc');}
+    return true;
+  }).catch(function(err){
+    var cd=(err&&err.code)?String(err.code):'';
+    if(cd==='permission-denied'){ion.err='Atom wallet refused — the wallet-code rules update hasn\'t landed yet.';}
+    else{ion.err='Could not reach the atom wallet — check your connection and try again.';}
+    ionRenderLine();return false;
+  });
+}
+function ionLink(code,quiet){
+  var ion=window.__ionPacks||{};
+  var uid=ionUidFromCode(code);
+  if(!uid){
+    if(!quiet){ion.err='That code doesn\'t look right — copy it from the Tavern (starts ATOM1- or ION1-).';ionRenderLine();}
+    return false;
+  }
+  ion.uid=uid;ion.code=ionCodeFor(uid);ion.bal=null;ion.packs=[];ion.err='';ion.mergeMsg='';ion.mergeBal=null;
+  try{localStorage.setItem(ION_CODE_KEY,ion.code);}catch(e){}
+  ionRenderLine();
+  if(ion.db){ionAttach();}else{ionFetchOnce();}
+  ionMergeLocal();
+  return true;
+}
+
+/* ONE-TIME MERGE (Cee 2026-11-01 19:55 EST): on link, the local atoms purse
+   moves into the cloud wallet — one balance everywhere. Runs once per device
+   (flag sw_atoms_merged_v1). If the wallet doc does not exist yet it is
+   created with the local balance; the live rules require auth.uid == doc uid
+   for create, which the main site cannot satisfy, so a missing doc fails
+   cleanly with "open the Tavern once first" and the flag stays unset so
+   the merge retries once the wallet exists. */
+function ionMergeLocal(){
+  var ion=window.__ionPacks||{};
+  if(!ion.uid||!ion.db||ion._merging)return;
+  var done=false;
+  try{done=localStorage.getItem('sw_atoms_merged_v1')==='1';}catch(e){}
+  if(done)return;
+  var local=25;
+  try{var v=parseInt(localStorage.getItem('sw_sav_molecules'),10);local=(isNaN(v)||v<0)?25:v;}catch(e){local=25;}
+  if(local<=0){try{localStorage.setItem('sw_atoms_merged_v1','1');}catch(e){}return;}
+  ion._merging=true;
+  var ref=ion.db.collection('ion_wallets').doc(ion.uid);
+  var code=ion.code,uid=ion.uid;
+  ion.db.runTransaction(function(tx){
+    return tx.get(ref).then(function(doc){
+      if(doc.exists){
+        var d=doc.data()||{};
+        var bal=(typeof d.atoms==='number')?d.atoms:(typeof d.ions==='number'?d.ions:0);
+        var scode=(typeof d.code==='string'&&d.code)?d.code:code;
+        var upd={code:scode,uid:uid,ts:Date.now()};
+        if(typeof d.atoms==='number')upd.atoms=bal+local;
+        if(typeof d.ions==='number')upd.ions=bal+local;
+        if(typeof d.atoms!=='number'&&typeof d.ions!=='number')upd.ions=bal+local;
+        tx.update(ref,upd);
+        return bal+local;
+      }
+      tx.set(ref,{uid:uid,code:code,atoms:local,ions:local,owned:[],equipped:[],lastDaily:0,ts:Date.now()});
+      return local;
+    });
+  }).then(function(newBal){
+    ion._merging=false;
+    try{localStorage.setItem('sw_atoms_merged_v1','1');}catch(e){}
+    ion.mergeMsg='Merged '+local+' atoms into your cloud wallet — new balance '+newBal+'.';
+    ion.mergeBal=newBal;
+    ion.err='';
+    ionRenderLine();
+    if(typeof window.updateMolCount==='function')window.updateMolCount();
+  }).catch(function(e){
+    ion._merging=false;
+    var cd=(e&&e.code)?String(e.code):'';
+    var m=String((e&&e.message)||'');
+    if(cd==='permission-denied'||m.indexOf('permission')>=0||cd==='not-found'||m==='not-found'){
+      ion.err='Cloud wallet not found — open the Tavern once first, then link again.';
+    }else{
+      ion.err='Merge failed — try again.';
+    }
+    ionRenderLine();
+  });
+}
+function ionUnlink(){
+  var ion=window.__ionPacks||{};
+  try{if(ionUnsub){ionUnsub();ionUnsub=null;}}catch(e){}
+  ion.uid=null;ion.code='';ion.bal=null;ion.packs=[];ion.err='';ion.mergeMsg='';ion.mergeBal=null;
+  try{localStorage.removeItem(ION_CODE_KEY);}catch(e){}
+  ionRenderLine();
+  if(typeof window.updateMolCount==='function')window.updateMolCount();
+  if(typeof packShow==='function'){packShow('zxc');packShow('sc');}
+}
+function ionBoot(){
+  var ion=window.__ionPacks||{};
+  if(typeof firebase==='undefined'){ion.err='Could not load Firebase — packs need the atom wallet.';ionRenderLine();return;}
+  try{
+    if(typeof firebaseConfig!=='undefined')firebase.initializeApp(firebaseConfig);
+  }catch(e){/* already initialized */}
+  try{ion.db=firebase.firestore();}catch(e){ion.err='Could not load Firebase — packs need the atom wallet.';ionRenderLine();return;}
+  try{
+    firebase.auth().signInAnonymously().then(function(){
+      ion.ready=true;
+      var saved='';try{saved=localStorage.getItem(ION_CODE_KEY)||'';}catch(e){}
+      if(saved){ionLink(saved,true);}
+      else{ionRenderLine();}
+    }).catch(function(){
+      ion.err='Could not sign in to the atom wallet — check your connection and try again.';ionRenderLine();
+    });
+  }catch(e){
+    ion.err='Could not sign in to the atom wallet — check your connection and try again.';ionRenderLine();
+  }
+}
+(function(){
+  var lb=document.getElementById('ionLinkBtn');
+  if(lb)lb.addEventListener('click',function(){
+    var inp=document.getElementById('ionCodeInput');
+    ionLink(inp?inp.value:'');
+  });
+  var ub=document.getElementById('ionUnlinkBtn');
+  if(ub)ub.addEventListener('click',function(){ionUnlink();});
+  if(document&&document.addEventListener)document.addEventListener('DOMContentLoaded',ionBoot);
+  else ionBoot();
+})();
+</script>
+<script>
+function toggleHideout(id){
+  const el=document.getElementById(id);
+  const label=document.getElementById(id+'-label');
+  const isOpen=el.classList.contains('open');
+  var bubble=document.getElementById('bubble-text');
+  if(bubble&&!bubble.dataset.orig)bubble.dataset.orig=bubble.textContent;
+  
+  document.querySelectorAll('.hideout-content').forEach(c=>{c.classList.remove('open');var f=c.querySelector('iframe');if(f){if(!f.dataset.src)f.dataset.src=f.src;f.src='about:blank';}});
+  document.querySelectorAll('[id$="-label"]').forEach(l=>l.textContent='[ CLICK TO UNLOCK ]');
+  if(!isOpen){
+    el.classList.add('open');
+    var of=el.querySelector('iframe');if(of&&of.dataset.src)of.src=of.dataset.src;
+    label.textContent='[ OPEN ● ]';
+    if(bubble)bubble.textContent='▶ NOW PLAYING: '+id.toUpperCase();
+    var _hs=document.getElementById('hideout-now-song');var _ht=document.getElementById('hideout-now-time');
+    if(_hs&&!_hs.dataset.orig)_hs.dataset.orig=_hs.innerHTML;
+    if(_ht&&!_ht.dataset.orig)_ht.dataset.orig=_ht.textContent;
+    if(_hs)_hs.innerHTML='<b>'+id.toUpperCase()+'</b>';
+    if(_ht)_ht.textContent='▶ Listening to '+id.toUpperCase()+' playlist';
+    var _hh=document.querySelector('#hideout-now-card h2');if(_hh)_hh.textContent='NOW LISTENING';
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+  } else {
+    if(bubble&&bubble.dataset.orig)bubble.textContent=bubble.dataset.orig;
+    var _hs2=document.getElementById('hideout-now-song');var _ht2=document.getElementById('hideout-now-time');
+    if(_hs2&&_hs2.dataset.orig)_hs2.innerHTML=_hs2.dataset.orig;
+    if(_ht2&&_ht2.dataset.orig)_ht2.textContent=_ht2.dataset.orig;
+    var _hh2=document.querySelector('#hideout-now-card h2');if(_hh2)_hh2.textContent='WAS LISTENING';
+  }
+}
+function toggleHey(){
+  var body=document.getElementById('hey-body');
+  var btns=document.getElementById('hey-btns');
+  var state=document.getElementById('hey-state');
+  var open=body&&body.classList.contains('open');
+  if(body)body.classList.toggle('open',!open);
+  if(btns)btns.classList.toggle('hey-closed',open);
+  if(state)state.textContent=open?'[ CLICK TO UNLOCK ]':'[ OPEN ● ]';
+  if(open){
+    document.querySelectorAll('.hideout-content').forEach(c=>{c.classList.remove('open');var f=c.querySelector('iframe');if(f){if(!f.dataset.src)f.dataset.src=f.src;f.src='about:blank';}});
+    document.querySelectorAll('[id$="-label"]').forEach(l=>l.textContent='[ CLICK TO UNLOCK ]');
+    var bubble=document.getElementById('bubble-text');if(bubble&&bubble.dataset.orig)bubble.textContent=bubble.dataset.orig;
+    var _hs=document.getElementById('hideout-now-song');var _ht=document.getElementById('hideout-now-time');
+    if(_hs&&_hs.dataset.orig)_hs.innerHTML=_hs.dataset.orig;
+    if(_ht&&_ht.dataset.orig)_ht.textContent=_ht.dataset.orig;
+    var _hh=document.querySelector('#hideout-now-card h2');if(_hh)_hh.textContent='WAS LISTENING';
+  } else {
+    var h=document.getElementById('hey-heading');if(h)h.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+function toggleSc(){
+  var body=document.getElementById('sc-body');
+  var state=document.getElementById('sc-state');
+  var open=body&&body.classList.contains('open');
+  if(body)body.classList.toggle('open',!open);
+  if(state)state.textContent=open?'[ CLICK TO UNLOCK ]':'[ OPEN ● ]';
+  if(open){
+    var sc=document.getElementById('sc-body');
+    if(sc)sc.querySelectorAll('iframe').forEach(f=>{if(!f.dataset.src)f.dataset.src=f.src;f.src='about:blank';});
+  } else {
+    var sc2=document.getElementById('sc-body');
+    if(sc2)sc2.querySelectorAll('iframe').forEach(f=>{if(f.dataset.src)f.src=f.dataset.src;});
+    var h2=document.getElementById('sc-heading');if(h2)h2.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+function vsLoad(){var m=$('vs');if(m){vsOpen();return;}var s=document.createElement('script');s.src='/vs-ui.js';s.onload=function(){vsOpen();};s.onerror=function(){alert('Video search is unavailable right now.');};document.body.appendChild(s);}
+</script>
+<script>
+
+(function(){
+  var last=0;
+  function fmt(ms){var s=Math.floor(ms/1000);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function setPair(songId,timeId,d){
+    var sEl=document.getElementById(songId),tEl=document.getElementById(timeId);
+    if(!sEl||!tEl)return;
+    sEl.innerHTML='<b>'+esc(d.name)+'</b> — '+esc(d.artist);
+    tEl.textContent=(d.playing?'▶ Playing ':'⏸ Paused at ')+fmt(d.progress_ms)+' / '+fmt(d.duration_ms);
+  }
+  function refresh(){
+    var now=Date.now(); if(now-last<30000)return; last=now;
+    var ctl=null;try{ctl=new AbortController();}catch(e){}
+    var to=null;if(ctl){to=setTimeout(function(){try{ctl.abort();}catch(e){}},8000);}
+    fetch('/api/now-playing',ctl?{signal:ctl.signal}:undefined).then(function(r){if(to)clearTimeout(to);return r.json();}).then(function(d){
+      if(!d||!d.name)return;
+      setPair('splash-now-song','splash-now-time',d);
+      if(!window.__spLive&&!document.querySelector('.hideout-content.open'))setPair('hideout-now-song','hideout-now-time',d);
+      setPair('fun-now-song','fun-now-time',d);
+    }).catch(function(){if(to)clearTimeout(to);});
+  }
+  refresh();
+  document.addEventListener('click',refresh);
+})();
+</script>
+<script>
+/* SPOTIFY PLAYER — Vault PLAYER SLOT (2026-11-03, Cee picked Spotify).
+   Visitors connect their OWN Spotify (Authorization Code flow).
+   Token exchange + refresh run in Vercel serverless functions
+   (/api/spotify-callback, /api/spotify-auth) — the client secret never
+   reaches the browser, and the VM never touches accounts.spotify.com
+   (its egress proxy blocks it). Tokens live in sessionStorage on the
+   visitor's device only, never in a shared server store.
+   Full songs need the visitor's Premium; free accounts get 30-sec previews
+   (the Spotify embed below plays previews for free accounts).
+   While a connected visitor is playing, the NOW PLAYING card follows THEM
+   (heading flips to NOW LISTENING). Otherwise it falls back to Cee's
+   snapshot from /api/now-playing ("8" — Billie Eilish). No YouTube player. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var store={
+    get:function(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},
+    set:function(k,v){try{sessionStorage.setItem(k,v);}catch(e){}},
+    del:function(k){try{sessionStorage.removeItem(k);}catch(e){}}
+  };
+  var K_ACCESS='sw_spotify_access',K_REFRESH='sw_spotify_refresh',K_EXP='sw_spotify_expires_at',K_NAME='sw_spotify_name';
+  var POLL_MS=15000;
+  var lastTrack=null,currentTrackId=null,timer=null,refreshing=null;
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fmt(ms){var s=Math.floor((ms||0)/1000);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+  function show(el,on){if(el)el.style.display=on?'':'none';}
+  function setStatus(t){var el=$('sp-status');if(el)el.textContent=t;}
+  function hideoutOpen(){try{return !!document.querySelector('.hideout-content.open');}catch(e){return false;}}
+  function tokens(){
+    var a=store.get(K_ACCESS),r=store.get(K_REFRESH),e=parseInt(store.get(K_EXP)||'0',10);
+    if(!a)return null;
+    return {access:a,refresh:r||'',exp:(isNaN(e)?0:e)};
+  }
+  function saveTokens(d){
+    store.set(K_ACCESS,d.access_token);
+    if(d.refresh_token)store.set(K_REFRESH,d.refresh_token);
+    store.set(K_EXP,String(Date.now()+((d.expires_in||3600)*1000)));
+  }
+  function clearTokens(){store.del(K_ACCESS);store.del(K_REFRESH);store.del(K_EXP);store.del(K_NAME);}
+  function refreshAccess(){
+    if(refreshing)return refreshing;
+    var tk=tokens();
+    if(!tk||!tk.refresh)return Promise.resolve(null);
+    refreshing=fetch('/api/spotify-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh_token:tk.refresh})})
+      .then(function(r){if(!r.ok)throw new Error('refresh-failed');return r.json();})
+      .then(function(d){if(!d||!d.access_token)throw new Error('refresh-failed');saveTokens(d);return d.access_token;})
+      .catch(function(){return null;});
+    refreshing.then(function(){refreshing=null;});
+    return refreshing;
+  }
+  function authedFetch(url,opts){
+    var tk=tokens();
+    if(!tk)return Promise.reject(new Error('no-token'));
+    function call(access){
+      var o={};for(var k in (opts||{}))o[k]=opts[k];
+      o.headers={};for(var h in ((opts||{}).headers||{}))o.headers[h]=opts.headers[h];
+      o.headers['Authorization']='Bearer '+access;
+      return fetch(url,o);
+    }
+    if(Date.now()>tk.exp-60000){
+      return refreshAccess().then(function(a){if(!a)throw new Error('refresh-failed');return call(a);});
+    }
+    return call(tk.access).then(function(r){
+      if(r.status!==401)return r;
+      return refreshAccess().then(function(a){if(!a)throw new Error('refresh-failed');return call(a);});
+    });
+  }
+  function cardHeading(){try{return document.querySelector('#hideout-now-card h2');}catch(e){return null;}}
+  function setLive(d){
+    var song=$('hideout-now-song'),time=$('hideout-now-time'),h=cardHeading();
+    if(!d){
+      window.__spLive=false;
+      if(hideoutOpen())return; /* a playlist view owns the card; it restores on close */
+      if(song&&song.dataset.orig!==undefined)song.innerHTML=song.dataset.orig;
+      if(time&&time.dataset.orig!==undefined)time.textContent=time.dataset.orig;
+      if(h&&h.dataset.orig)h.textContent=h.dataset.orig;
+      return;
+    }
+    if(hideoutOpen())return;
+    window.__spLive=true;
+    if(song&&song.dataset.orig===undefined)song.dataset.orig=song.innerHTML;
+    if(time&&time.dataset.orig===undefined)time.dataset.orig=time.textContent;
+    if(h&&!h.dataset.orig)h.dataset.orig=h.textContent;
+    if(song)song.innerHTML='<b>'+esc(d.name)+'</b> — '+esc(d.artist);
+    if(time)time.textContent=(d.playing?'▶ Playing ':'⏸ Paused at ')+fmt(d.progress_ms)+' / '+fmt(d.duration_ms);
+    if(h)h.textContent='NOW LISTENING';
+  }
+  function setPlayerTrack(track){
+    lastTrack=track;
+    var now=$('sp-now'),tm=$('sp-now-time'),wrap=$('sp-embed-wrap'),emb=$('sp-embed'),link=$('sp-open-link'),pp=$('sp-playpause');
+    if(!track){
+      if(now)now.innerHTML='<b>Nothing playing</b>';
+      if(tm)tm.textContent='Start something on Spotify and it\u2019ll show up here.';
+      if(wrap)wrap.style.display='none';
+      if(emb)emb.src='';
+      if(pp)pp.textContent='▶ PLAY';
+      return;
+    }
+    if(now)now.innerHTML='<b>'+esc(track.name)+'</b> — '+esc(track.artist);
+    if(tm)tm.textContent=(track.playing?'▶ Playing ':'⏸ Paused at ')+fmt(track.progress_ms)+' / '+fmt(track.duration_ms);
+    if(pp)pp.textContent=track.playing?'⏸ PAUSE':'▶ PLAY';
+    if(track.trackId&&track.trackId!==currentTrackId){
+      currentTrackId=track.trackId;
+      if(emb)emb.src='https://open.spotify.com/embed/track/'+encodeURIComponent(track.trackId)+'?utm_source=generator&theme=0';
+      if(link&&track.url)link.href=track.url;
+      if(wrap)wrap.style.display='';
+    }
+  }
+  function poll(){
+    if(!tokens())return Promise.resolve();
+    return authedFetch('https://api.spotify.com/v1/me/player/currently-playing')
+      .then(function(r){
+        if(r.status===204)return null;
+        if(!r.ok)throw new Error('player-'+r.status);
+        return r.json();
+      })
+      .then(function(d){
+        if(!d||!d.item||!d.is_playing){setPlayerTrack(null);setLive(null);return;}
+        var item=d.item;
+        var artists=(item.artists||[]).map(function(a){return a.name;}).join(', ');
+        var track={name:item.name||'',artist:artists,progress_ms:d.progress_ms||0,duration_ms:item.duration_ms||0,playing:!!d.is_playing,trackId:item.id||'',url:(item.external_urls&&item.external_urls.spotify)||''};
+        setPlayerTrack(track);
+        setLive(track);
+      })
+      .catch(function(){/* transient failure: leave the card alone, next poll retries */});
+  }
+  function control(path,method){
+    authedFetch('https://api.spotify.com/v1/me/player/'+path,{method:method||'POST'})
+      .then(function(){setTimeout(poll,800);})
+      .catch(function(){setStatus('Couldn\u2019t reach Spotify — check your connection and try again.');});
+  }
+  function disconnect(){
+    clearTokens();
+    currentTrackId=null;
+    if(timer){clearInterval(timer);timer=null;}
+    setPlayerTrack(null);
+    setLive(null);
+    setStatus('Disconnected — connect your Spotify to play your music here.');
+    render();
+  }
+  function render(){
+    var tk=tokens();
+    var configured=window.__spConfigured;
+    show($('sp-connect'),!tk&&configured!==false);
+    show($('sp-setup-missing'),!tk&&configured===false);
+    show($('sp-player'),!!tk);
+    if(tk){
+      var name=store.get(K_NAME);
+      var who=$('sp-who');
+      if(who)who.textContent=name?('Connected as '+name+' — the buttons below control your Spotify.'):'Connected — the buttons below control your Spotify.';
+    }
+  }
+  function probe(){
+    return fetch('/api/spotify-auth?probe=1').then(function(r){return r.json();}).then(function(d){
+      window.__spConfigured=!!(d&&d.configured);
+      render();
+    }).catch(function(){window.__spConfigured=true;render();});
+  }
+  function param(name){
+    try{var m=new RegExp('[?&]'+name+'=([^&#]*)').exec(location.search||'');return m?decodeURIComponent(m[1]):'';}catch(e){return '';}
+  }
+  function init(){
+    var st=param('spotify');
+    if(st==='connected')setStatus('Connected — your Spotify is linked.');
+    else if(st==='denied')setStatus('Spotify connection was cancelled — nothing changed.');
+    else if(st==='not_configured')setStatus('Spotify isn\u2019t set up on this site yet — the playlists below still work.');
+    else if(st==='error')setStatus('Spotify couldn\u2019t connect — try again in a moment.');
+    if(st){try{history.replaceState(null,'',location.pathname);}catch(e){}}
+    var pv=$('sp-prev');if(pv)pv.addEventListener('click',function(){control('previous');});
+    var nx=$('sp-next');if(nx)nx.addEventListener('click',function(){control('next');});
+    var pp=$('sp-playpause');if(pp)pp.addEventListener('click',function(){control(lastTrack&&lastTrack.playing?'pause':'play','PUT');});
+    var dc=$('sp-disconnect');if(dc)dc.addEventListener('click',disconnect);
+    probe();
+    if(tokens()){
+      render();
+      authedFetch('https://api.spotify.com/v1/me').then(function(r){return r.json();}).then(function(d){
+        if(d&&d.display_name){store.set(K_NAME,d.display_name);render();}
+      }).catch(function(){});
+      poll();
+      timer=setInterval(function(){if(!document.hidden)poll();},POLL_MS);
+    }else{
+      render();
+    }
+  }
+  window.__spotifyPlayer={poll:poll,render:render,disconnect:disconnect,tokens:tokens};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<script src="/swpvp-skins.js" defer></script>
+</body></html>

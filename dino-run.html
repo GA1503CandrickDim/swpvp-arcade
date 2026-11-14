@@ -6,8 +6,16 @@
 <title>DINO RUN — Wraith's Arcade</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:#0b0b0f;color:#f2f2f2;font-family:Arial,Helvetica,sans-serif;touch-action:none}
+html,body{background:#0b0b0f;color:#f2f2f2;font-family:Arial,Helvetica,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .wrap{max-width:720px;margin:0 auto;padding:10px 10px 18px}
+/*UI-FIT: flex column so the stage absorbs viewport slack and the
+   controls stay visible without scrolling; the canvas letterboxes via
+   object-fit:contain (input is swipe-delta / position-independent
+   pointerdown only, so no tap remap is needed).*/
+body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+.wrap{flex:1;display:flex;flex-direction:column;min-height:0;width:100%}
+.stage{flex:1;min-height:0}
+.stage canvas{width:100%;height:100%;object-fit:contain}
 h1{font-size:22px;letter-spacing:2px;text-align:center;margin:4px 0 8px}
 h1 b{color:#ffd23f}
 .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;font-size:14px;font-weight:bold}
@@ -28,22 +36,22 @@ canvas{display:block;width:100%;height:auto;touch-action:none;cursor:pointer}
 .controls{display:flex;gap:8px;margin-top:10px}
 .controls button{flex:1;padding:19px 4px;min-height:56px;font-size:16px;font-weight:bold;letter-spacing:1px;border:0;border-radius:12px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
 #btnJump{background:#ffd23f;color:#111}
-#btnSlide,#btnLeft,#btnRight{background:#2b2b35;color:#fff;border:2px solid #ffd23f}
+#btnSlide{background:#2b2b35;color:#fff;border:2px solid #ffd23f}
 #btnChomp{background:#7a2d2d;color:#fff;border:2px solid #ffd23f}
 .controls button:active{transform:scale(.97)}
 .retro-pad{display:none;margin:10px 0 0;justify-content:space-between;align-items:flex-end;pointer-events:none}
 .retro-pad .pad-dpad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);gap:6px;pointer-events:none}
 .retro-pad .pad-acts{display:flex;gap:8px;align-items:flex-end;pointer-events:none}
 .retro-pad button{pointer-events:auto;width:56px;height:56px;border-radius:14px;background:rgba(20,20,28,.82);color:#ffd23f;border:3px solid #ffd23f;font-size:20px;font-weight:bold;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.55)}
-.retro-pad .pad-acts button{width:62px;height:62px;border-radius:50%;font-size:17px}
+.retro-pad .pad-acts button{width:60px;height:60px;border-radius:50%;font-size:17px}
 .retro-pad #padA{color:#ffcc33;border-color:#ffcc33}
 .retro-pad #padB{color:#39d353;border-color:#39d353}
 .retro-pad #padC{background:rgba(20,20,28,.82);color:#ff4040;border-color:#ff4040}
 .retro-pad button:active{background:rgba(122,45,45,.92);transform:scale(.96)}
 .retro-pad #padUp{grid-column:2;grid-row:1}
+.retro-pad #padDown{grid-column:2;grid-row:3}
 .retro-pad #padLeft{grid-column:1;grid-row:2}
 .retro-pad #padRight{grid-column:3;grid-row:2}
-.retro-pad #padDown{grid-column:2;grid-row:3}
 @media (pointer:coarse){.retro-pad{display:flex}}
 @media (max-width:520px){
 /* START MENU: the overlay is inset:0 of the stage, so on a phone it is only
@@ -60,12 +68,35 @@ canvas{display:block;width:100%;height:auto;touch-action:none;cursor:pointer}
 #startOverlay #cameoLine:empty{display:none}
 #startOverlay button.start{position:sticky;bottom:0}
 }
+@media (max-width:360px){
+/*UI-FIT: narrow phones — tighten the HUD and the control labels so the
+   HUD wraps to 2 rows and "▼ SLIDE" fits its button without wrapping. */
+.hud{font-size:12px;gap:4px}
+.hud span{padding:5px 6px}
+.controls{gap:4px}
+.controls button{font-size:12px}
+}
+@media (max-height:600px){
+/*UI-FIT: short screens (320x568 portrait, short landscape) — shrink the
+   retro pad and hide the footer note so the column fits. */
+.retro-pad .pad-dpad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px)}
+.retro-pad button{width:44px;height:44px;font-size:17px}
+.retro-pad .pad-acts button{width:50px;height:50px;font-size:15px}
+.note{display:none}
+}
 @media (orientation:landscape) and (max-height:500px){
 /* Landscape phones: the column (title + HUD + canvas + controls + pad)
    is taller than the viewport — allow vertical panning so the controls
    below the canvas can be reached. Canvas and buttons keep
    touch-action:none, so swipes/taps still go straight to the game. */
 html,body{touch-action:pan-y}
+/*UI-FIT: with the flex column above, hide the title and the retro pad
+   (the .controls row already covers jump/slide/chomp) so the
+   stage + HUD + controls fit without scrolling; the start menu takes the
+   full viewport instead of the short stage. */
+.retro-pad{display:none}
+h1{display:none}
+#startOverlay{position:fixed;inset:0;z-index:50;justify-content:safe center;padding:12px 16px;gap:6px;touch-action:pan-y}
 }
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(5,5,10,.86);text-align:center;padding:16px;z-index:3;overflow:auto;touch-action:pan-y}
 .overlay[hidden]{display:none}
@@ -79,9 +110,50 @@ html,body{touch-action:pan-y}
 .overlay .row button.ghost{background:#2b2b35;color:#fff;border:2px solid #ffd23f}
 .back{display:block;text-align:center;color:#ffd23f;margin-top:12px;text-decoration:none;font-weight:bold}
 .note{text-align:center;color:#999;font-size:12px;margin-top:8px}
+
+/* MOBILE UI SIZING (Cee 2026-11-04): pick buttons were ~37px tall. */
+.pick button{min-height:44px}
+</style>
+<style>
+/*HUD-SHARED 2026-11-05: Fight-HUD language (gold #8a6d14 border, orange #ff8800 title, #ffd94d pill) + read-only molecules pill. See per-file note.*/
+#ckBar{border-bottom:2px solid #8a6d14;background:rgba(7,7,13,.97)}
+#ckBar button{background:#0d0d10;color:#fff;border:1px solid #8a6d14}
+#ckBar button:active{background:#3a2c05}
+.ck-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:1px 2px 5px}
+.ck-title{color:#ff8800;font-weight:800;font-size:13px;letter-spacing:2px;white-space:normal;overflow-wrap:anywhere}
+.ck-mol{margin-left:auto;flex:none;border:1px solid #8a6d14;background:#171106;color:#ffd94d;border-radius:999px;padding:4px 10px;font-size:12px;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+.ck-mol b{color:#fff}
+body{padding-top:102px!important}
 </style>
 </head>
 <body>
+<style>
+#ckBar{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(7,7,13,.97);border-bottom:2px solid #a86bff;padding:4px 6px 5px;box-sizing:border-box}
+#ckBar .ck-row{display:flex;gap:4px}
+#ckBar button{flex:1;min-width:0;min-height:44px;padding:6px 2px;background:#14141c;color:#fff;border:1px solid #7a2d8f;border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.5px;line-height:1.15;cursor:pointer;touch-action:manipulation;white-space:normal;overflow:hidden}
+#ckBar button:active{background:#2a1a33}
+#ckBar #ckHelp{flex:0 0 44px}
+#ckBest{text-align:center;color:#ffcc33;font-size:11px;letter-spacing:2px;padding-top:3px;font-family:inherit}
+.ck-ov{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.ck-ov.on{display:flex}
+.ck-box{background:#14141c;border:2px solid #a86bff;border-radius:12px;max-width:430px;width:100%;padding:18px;text-align:center;color:#fff;font-family:inherit;max-height:88vh;max-height:88dvh;overflow:auto}
+.ck-t{color:#ffcc33;font-size:20px;font-weight:700;letter-spacing:3px;margin-bottom:10px}
+.ck-b{color:#ddd;font-size:13px;line-height:1.6;margin-bottom:14px;text-align:left}
+.ck-b b{color:#ffcc33}
+.ck-btns{display:flex;flex-direction:column;gap:8px}
+.ck-btns button,.ck-box>button{padding:14px 18px;min-height:48px;background:linear-gradient(90deg,#ff2a2a,#a86bff);color:#fff;border:0;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.ck-btns button.ck-ghost,.ck-box>button.ck-ghost{background:#111;color:#7fd4ff;border:1px solid #3d5a76}
+#ckOffline{display:none;position:fixed;top:0;left:0;right:0;z-index:390;background:#7a2d2d;color:#fff;text-align:center;font-size:12px;letter-spacing:1px;padding:8px;box-sizing:border-box}
+body{padding-top:74px}
+</style>
+<div id="ckBar"><div class="ck-top"><span class="ck-title">DINO RUN</span><span class="ck-mol" id="ckMol">⚛ <b>0</b></span></div><div class="ck-row"><button id="ckPause" type="button">⏸ PAUSE</button><button id="ckRestart" type="button">↻ RESTART</button><button id="ckSound" type="button">🔊 SOUND ON</button><button id="ckFull" type="button">⛶ FULLSCREEN</button><button id="ckArcade" type="button">⌂ ARCADE</button><button id="ckHelp" type="button" aria-label="How to play">?</button></div><div id="ckBest">🏆 BEST: —</div></div>
+<div id="ckLoading" class="ck-ov on"><div class="ck-box"><div class="ck-t">LOADING…</div><div class="ck-b" style="text-align:center">Warming up the game…</div></div></div>
+<div id="ckOffline">⚠ OFFLINE — YOUR PROGRESS SAVES ON THIS DEVICE.</div>
+<div id="ckTut" class="ck-ov" role="dialog" aria-modal="true" aria-label="How to play"><div class="ck-box"><div class="ck-t">DINO RUN</div><div class="ck-b"><b>GOAL</b> — Run as far as you can down <b>THREE LANES</b> while the cave collapses behind you. Switch lanes to pick a path, jump and slide the rest.<br><b>CONTROLS</b> — ← → or A / D to switch lanes · ▲ JUMP button, Space, ↑ or W to jump · ▼ SLIDE button, ↓ or S to slide · CHOMP button, X, F or C to chomp. On touch: swipe left / right to switch lanes, swipe up / down to jump / slide, or use the retro pad.<br><b>HOW IT PLAYS</b> — JUMP clears spikes, gaps and walls. SLIDE smashes boulders and ducks under sweepers and flyers. CHOMP eats ground chasers. Grab the gold bolt for <b>RUSH</b> — smash through everything for a few seconds. Coins are +25, gems +100, eating a chaser is +250, smashing in RUSH is +150. You have 3 lives — but if the <b>COLLAPSE</b> catches you, the run ends no matter how many lives are left.<br><b>SCORING</b> — Score grows with distance + bonuses. Your <b>BEST</b> score is saved on this device.</div><div class="ck-btns"><button id="ckTutOk" type="button">GOT IT — PLAY!</button></div></div></div>
+<div id="ckPaused" class="ck-ov" role="dialog" aria-modal="true" aria-label="Paused"><div class="ck-box"><div class="ck-t">⏸ PAUSED</div><div class="ck-b" style="text-align:center">Take a breather — the game is frozen.</div><div class="ck-btns"><button id="ckResume" type="button">▶ RESUME</button><button id="ckQuit" type="button" class="ck-ghost">⌂ QUIT TO ARCADE</button></div></div></div>
+<div id="ckExit" class="ck-ov" role="dialog" aria-modal="true" aria-label="Exit game?"><div class="ck-box"><div class="ck-t">EXIT?</div><div class="ck-b" style="text-align:center">Your progress is saved.</div><div class="ck-btns"><button id="ckExitGo" type="button">EXIT</button><button id="ckExitStay" type="button" class="ck-ghost">STAY</button></div></div></div>
+<div id="ckError" class="ck-ov" role="dialog" aria-modal="true" aria-label="Something went wrong"><div class="ck-box"><div class="ck-t">SOMETHING WENT WRONG</div><div class="ck-b" style="text-align:center">The game hit a snag. Your progress is saved on this device.</div><div class="ck-btns"><button id="ckRetry" type="button">↻ RETRY</button><button id="ckKeepPlaying" type="button" class="ck-ghost">KEEP PLAYING</button></div></div></div>
+<script>window.addEventListener('error',function(ev){try{if(window.console&&console.error)console.error(ev&&ev.error||ev&&ev.message||'ck-error');}catch(e){}var o=document.getElementById('ckError');if(o)o.classList.add('on');var l=document.getElementById('ckLoading');if(l)l.classList.remove('on');});</script>
 <div class="wrap">
 <h1>DINO <b>RUN</b></h1>
 <div class="hud">
@@ -91,14 +163,15 @@ html,body{touch-action:pan-y}
 <span>MOLECULES <span class="gold" id="hudCoins">50</span></span>
 <span>GEMS <span class="gold" id="hudGems">0</span></span>
 <span id="hudLives">❤❤❤</span>
+<span id="hudCave">🪨 CAVE SAFE</span>
 <span id="hudZone">SUNSET TRAIL</span>
 </div>
 <div class="stage">
 <canvas id="game" width="960" height="540"></canvas>
 <div class="overlay" id="startOverlay">
 <h2>DINO <b>RUN</b></h2>
-<p>3 LANES — SWIPE OR ◀ ▶ TO SWITCH LANES. THREE VERBS ONLY: JUMP • SLIDE • CHOMP.</p>
-<p>SLIDE SMASHES BOULDERS. CHOMP EATS GROUND CHASERS. JUMP CLEARS SPIKES, GAPS + WALLS. SLIDE UNDER SWEEPERS.</p>
+<p>3 LANES — SWITCH LANES, JUMP, SLIDE, CHOMP. THE CAVE IS COLLAPSING BEHIND YOU — KEEP RUNNING.</p>
+<p>LEFT / RIGHT SWITCHES LANES. JUMP CLEARS SPIKES, GAPS + WALLS. SLIDE SMASHES BOULDERS AND DUCKS SWEEPERS. CHOMP EATS GROUND CHASERS. GRAB THE GOLD BOLT FOR RUSH — SMASH THROUGH EVERYTHING.</p>
 <div class="pick" id="zonePick">
 <button id="btnZoneSunset" type="button">SUNSET TRAIL<small>pits • spikes • crates</small></button>
 <button id="btnZoneRuins" type="button">RUIN STEPS<small>platforms • boulders • critters</small></button>
@@ -116,8 +189,8 @@ html,body{touch-action:pan-y}
 <h2>GAME <b>OVER</b></h2>
 <p class="big">SCORE <b id="finalScore" style="color:#ffd23f">0</b> &nbsp;•&nbsp; BEST <b id="finalBest" style="color:#ffd23f">0</b></p>
 <p>MOLECULES BANKED <span id="finalCoins">0</span> &nbsp;•&nbsp; GEMS <span id="finalGems">0</span> &nbsp;•&nbsp; DISTANCE <span id="finalDist">0</span>m</p>
-<p id="finalZone"></p>
-<div class="row"><button id="btnRestart" type="button">RESTART</button><button class="ghost" id="btnMenu" type="button">MENU</button></div>
+<p id="finalZone"></p><p style="color:#ffcc33;letter-spacing:2px;font-size:12px">TAP ANYWHERE TO GO BACK</p>
+<div class="row"><button class="ghost" id="btnMenu" type="button">← BACK TO ARCADE</button></div><div id="rv-box" style="display:none;margin:10px auto 0;max-width:340px;text-align:center"><button onclick="rvAtoms()" style="background:linear-gradient(90deg,#f0f,#0ff);color:#000;border:0;padding:14px 24px;margin:6px;width:90%;letter-spacing:2px;font-weight:700;cursor:pointer">◢ REVIVE // 15 ATOMS ◣</button><button onclick="rvMol()" style="background:linear-gradient(90deg,#0f0,#0ff);color:#000;border:0;padding:14px 24px;margin:6px;width:90%;letter-spacing:2px;font-weight:700;cursor:pointer">◢ REVIVE // 10 MOLECULES ◣</button><button onclick="rvIons()" style="background:linear-gradient(90deg,#fc0,#f0f);color:#000;border:0;padding:14px 24px;margin:6px;width:90%;letter-spacing:2px;font-weight:700;cursor:pointer">◢ REVIVE // 3 IONS ◣</button><div class="rv-usd" style="font-size:11px;color:#ffcc33;letter-spacing:2px;margin:2px 0 4px">3 IONS = $0.06</div><div id="vg-ion-box" style="margin:12px auto 0;text-align:left;border:1px solid #0ff;padding:8px"><div style="font-size:10px;color:#0ff;letter-spacing:2px">⚡ ATOM WALLET — REVIVE COSTS 15 ATOMS</div><div id="vg-ion-line" style="font-size:11px;color:#fff;line-height:1.5;margin:6px 0">Paste your wallet code from arcadio to link your atom wallet. $1 = 100 atoms.</div><div style="display:flex;gap:6px"><input id="vg-ion-code" type="text" placeholder="ATOM1-…-…" style="flex:1;min-width:0;background:#000;color:#0ff;border:1px solid #0ff;padding:10px;font-size:12px;font-family:inherit" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="vg-ion-link" type="button" style="padding:10px 14px">LINK</button><button id="vg-ion-unlink" type="button" style="padding:10px 14px;display:none">UNLINK</button></div></div><div id="vg-buy-box" style="margin:12px auto 0;text-align:center;border:1px solid #fc0;padding:8px"><div style="font-size:10px;color:#fc0;letter-spacing:2px">💰 BUY IONS + ATOMS — REAL MONEY (SANDBOX TEST)</div><div style="font-size:11px;color:#fff;line-height:1.5;margin:6px 0">$1 = 100 ATOMS (50 IONS) • $5 = 500 ATOMS (250 IONS)</div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap"><button type="button" onclick="vg_buy('ion1')" style="background:linear-gradient(90deg,#fc0,#f0f);color:#000;border:0;padding:12px 18px;letter-spacing:2px;font-weight:700;cursor:pointer">$1 — 100 ATOMS</button><button type="button" onclick="vg_buy('ion5')" style="background:linear-gradient(90deg,#fc0,#f0f);color:#000;border:0;padding:12px 18px;letter-spacing:2px;font-weight:700;cursor:pointer">$5 — 500 ATOMS</button></div><div style="font-size:10px;color:#aaa;line-height:1.5;margin-top:6px">PayPal sandbox test — no real money moves yet. Opens the Tavern buy card; pick the same pack there.</div></div></div>
 </div>
 <div class="overlay" id="pauseOverlay" hidden>
 <h2>PAUSED</h2>
@@ -129,17 +202,15 @@ html,body{touch-action:pan-y}
 <div class="chomplabel" id="chompLabel">CHOMP MODE — EAT THE MONSTERS!</div>
 <div class="powerlabel" id="powerLabel"></div>
 <div class="controls">
-<button id="btnLeft" type="button">◀</button>
 <button id="btnJump" type="button">▲ JUMP</button>
 <button id="btnSlide" type="button">▼ SLIDE</button>
 <button id="btnChomp" type="button">CHOMP</button>
-<button id="btnRight" type="button">▶</button>
 </div>
 <div class="retro-pad" id="retroPad" aria-label="RETRO PAD">
 <div class="pad-dpad">
 <button id="padUp" type="button" aria-label="Up, jump">▲</button>
-<button id="padLeft" type="button" aria-label="Left">◀</button>
-<button id="padRight" type="button" aria-label="Right">▶</button>
+<button id="padLeft" type="button" aria-label="Left, switch lane">◀</button>
+<button id="padRight" type="button" aria-label="Right, switch lane">▶</button>
 <button id="padDown" type="button" aria-label="Down, slide">▼</button>
 </div>
 <div class="pad-acts">
@@ -148,12 +219,12 @@ html,body{touch-action:pan-y}
 <button id="padC" type="button" aria-label="Chomp">✕</button>
 </div>
 </div>
-<a class="back" href="index.html">← BACK TO THE ARCADE</a>
+<a class="back" href="index.html" onclick="if(window.ckRequestExit){window.ckRequestExit();}else{goHub();}return false;">← BACK TO ARCADE</a>
 <p class="note">Original game. All art is drawn in code — no borrowed sprites or music.</p>
 </div>
-<script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script>
 'use strict';
-/* DINO RUN — merged 3-lane behind-view runner.
+/* DINO RUN — 1-lane behind-view runner (classic Dino Run: jump + slide only).
    Pure state + step function, kept DOM-free so the same constants can be
    checked outside a browser. Ruin content folds in here; the old side-view
    engine (and its ground-pinned spike flaw) is gone. */
@@ -165,6 +236,11 @@ var CFG={
   spikeClear:30,crateClear:26,wallClear:60,boulderClear:70,
   chompDuration:300,magnetDuration:360,multDuration:360,invulnDuration:90,
   coinScore:25,gemScore:100,eatScore:250,smashScore:150,stepScore:150,
+  /* COLLAPSING CAVE (Cee 2026-11-13, his pick): the cave falls away behind
+     you. collapseRate is a fraction of run speed — the cave always creeps
+     up, you outrun it while clean, a hit lets it surge. boostDuration is
+     the RUSH pickup window (smash through everything). */
+  collapseStart:-320,collapseRate:0.88,collapseSurge:60,boostDuration:360,boostScore:150,
   gemCoins:5,bestKey:'wraith_dino_best',walletKey:'wraith_coins',petKey:'wraith_pet_v1',
   startCoins:50
 };
@@ -233,13 +309,13 @@ function createState(zoneId,charId,store){
     coinsRun:0,gems:0,eaten:0,smashed:0,lives:3,
     speed:CFG.baseSpeed,gameOver:false,
     zoneId:zoneById(zoneId).id,charId:(charId==='runner'?'runner':'dino'),
-    lane:0,laneX:0,laneTimer:0,
+    lane:0,laneX:0,
     jumpY:0,vy:0,airborne:false,
     sliding:false,slideTimer:0,
-    invuln:0,chomp:0,magnet:0,mult:0,shield:false,
-    chompCd:0,chompFlash:0,
+    invuln:0,chomp:0,magnet:0,mult:0,shield:false,boost:0,
+    chompCd:0,chompFlash:0,laneCd:0,collapse:CFG.collapseStart,collapseDeath:false,
     entities:[],stumble:null,
-    spawnTimer:200,spawnIndex:0,autoSpawn:true,seed:12345,
+    spawnTimer:200,spawnIndex:0,autoSpawn:true,seed:12345,lastReq:null,
     shared:getSharedCoins(store),msg:''
   };
 }
@@ -247,7 +323,10 @@ function rng(s){s.seed=(s.seed*1103515245+12345)&0x7fffffff;return s.seed/0x7fff
 function multOf(s){return s.mult>0?2:1;}
 function addBonus(s,base){s.bonus+=base*multOf(s);}
 function hurt(s,cause){
-  if(s.invuln>0||s.gameOver)return false;
+  if(s.boost>0||s.invuln>0||s.gameOver)return false;
+  /* COLLAPSING CAVE: every hit lets the cave surge forward — stumble and
+     the collapse catches up. That is the game over, not just the obstacle. */
+  s.collapse+=CFG.collapseSurge;
   if(s.shield){s.shield=false;s.invuln=60;s.msg='SHIELD!';return false;}
   s.lives--;s.invuln=CFG.invulnDuration;s.msg=cause||'OUCH!';
   s.stumble={z:-90,t:200};
@@ -278,30 +357,42 @@ function spawnEvent(s){
   var zone=zoneById(s.zoneId),idx=s.spawnIndex++;
   var z=CFG.zMax,r=rng(s);
   if(idx%9===8){
-    var pk=['bone','magnet','mult','shield'][idx%4];
+    /* RUSH (boost) joins the powerup rotation — smash through everything
+       for a few seconds. */
+    var pk=['bone','magnet','mult','shield','boost'][idx%5];
     s.entities.push({kind:pk,lane:Math.floor(rng(s)*3)-1,z:z});
     return;
   }
   if(idx%5===4){
-    var fly=rng(s)<zone.flyerChance;
+    /* BUGFIX 2026-11-13: a flyer can only be dodged by sliding, and you
+       cannot slide while airborne — so a flyer right after a jump-required
+       hazard (spike/wall/pit/crate/chaser) was an unavoidable hit. If the
+       last hazard needed a jump, spawn a chaser (jumpable) instead. */
+    var fly=rng(s)<zone.flyerChance&&s.lastReq!=='jump';
     s.entities.push({kind:fly?'flyer':'chaser',lane:Math.floor(rng(s)*3)-1,z:z,bob:0,blocked:false});
+    s.lastReq='jump';
     return;
   }
-  if(idx%7===6){s.entities.push({kind:'wall',lane:Math.floor(rng(s)*3)-1,z:z});return;}
+  if(idx%7===6){s.entities.push({kind:'wall',lane:Math.floor(rng(s)*3)-1,z:z});s.lastReq='jump';return;}
   var h1=zone.hazards[Math.floor(rng(s)*zone.hazards.length)];
+  /* BUGFIX 2026-11-13 (same): a sweeper also needs a slide, so never put
+     one right after a jump-required hazard — re-pick a jumpable hazard. */
+  if(h1==='sweeper'&&s.lastReq==='jump'){
+    var jumpable=[];
+    for(var ji=0;ji<zone.hazards.length;ji++){if(zone.hazards[ji]!=='sweeper')jumpable.push(zone.hazards[ji]);}
+    if(jumpable.length)h1=jumpable[Math.floor(rng(s)*jumpable.length)];
+  }
+  /* 3 LANES: hazards sit in one lane — the other two stay open, so
+     there is always a path. The lastReq fairness rule (bugfix) still
+     applies: no slide-required hazard right after a jump-required one. */
   var l1=Math.floor(rng(s)*3)-1;
   var ent={kind:h1,lane:l1,z:z};
   if(h1==='pit')ent.zLen=90;
   if(h1==='platform')ent.cleared=false;
   s.entities.push(ent);
-  if(r<0.35){
-    var l2=(l1+1+Math.floor(rng(s)*2))%3-1;
-    var h2=zone.hazards[Math.floor(rng(s)*zone.hazards.length)];
-    var e2={kind:h2,lane:l2,z:z+30};
-    if(h2==='pit')e2.zLen=90;
-    if(h2==='platform')e2.cleared=false;
-    s.entities.push(e2);
-  }
+  s.lastReq=(h1==='sweeper')?'slide':'jump';
+  /* 1 LANE: no second hazard in another lane — a same-lane double-stack
+     at z and z+30 would be unfair, so hazards spawn one at a time. */
   if(r<0.55){
     var cl=Math.floor(rng(s)*3)-1,i;
     for(i=0;i<5;i++)s.entities.push({kind:'coin',lane:cl,z:z+50+i*60});
@@ -321,11 +412,19 @@ function stepGame(s,input,store){
   if(s.chomp>0)s.chomp--;
   if(s.magnet>0)s.magnet--;
   if(s.mult>0)s.mult--;
+  if(s.boost>0)s.boost--;
   if(s.chompCd>0)s.chompCd--;
   if(s.chompFlash>0)s.chompFlash--;
-  if(s.laneTimer>0)s.laneTimer--;
-  if(input.left&&s.laneTimer<=0){s.lane=Math.max(-1,s.lane-1);s.laneTimer=9;}
-  if(input.right&&s.laneTimer<=0){s.lane=Math.min(1,s.lane+1);s.laneTimer=9;}
+  if(s.laneCd>0)s.laneCd--;
+  /* 3 LANES: one press = one lane. Cooldown stops a held key / swipe from
+     hopping two lanes at once. */
+  if(input.left&&s.laneCd<=0){s.lane=Math.max(-1,s.lane-1);s.laneCd=12;}
+  if(input.right&&s.laneCd<=0){s.lane=Math.min(1,s.lane+1);s.laneCd=12;}
+  /* COLLAPSING CAVE: the cave front advances at a fraction of run speed,
+     so a clean run pulls ahead — but it gains extra ground while you
+     stumble, and every hit surges it (see hurt). Caught = game over. */
+  s.collapse+=s.speed*CFG.collapseRate+0.1+(s.stumble?1:0);
+  /* 1 LANE: lane is fixed at 0 — no lane switching. */
   var grounded=s.jumpY<=0&&!s.airborne;
   if(input.jump&&grounded){s.sliding=false;s.slideTimer=0;s.vy=CFG.jumpVel;s.airborne=true;}
   if(input.slide&&grounded){s.sliding=true;s.slideTimer=24;}
@@ -371,21 +470,27 @@ function stepGame(s,input,store){
   });
   if(s.autoSpawn){
     s.spawnTimer-=s.speed;
-    if(s.spawnTimer<=0){spawnEvent(s);s.spawnTimer=260+rng(s)*160;}
+    /* BUGFIX 2026-11-13 (same): the spawn gap is in z-units but is spent
+       at the run speed, so at max speed hazards arrived every 24 frames —
+       inside one jump's 36-frame airtime, so a hazard right after a jump
+       could not be answered. Scale the gap by speed so the TIME between
+       hazards stays the same at every speed. */
+    if(s.spawnTimer<=0){spawnEvent(s);s.spawnTimer=(260+rng(s)*160)*(s.speed/CFG.baseSpeed);}
   }
-  /* pickups + coins/gems (magnet reaches adjacent lanes) */
+  /* pickups + coins/gems (1 LANE: everything is in the player's lane) */
   for(i=s.entities.length-1;i>=0;i--){
     e=s.entities[i];
     var nearLane=(e.lane===s.lane)||(s.magnet>0&&Math.abs(e.lane-s.lane)<=1);
     if((e.kind==='coin'||e.kind==='gem')&&nearLane&&atPlayer(e)){
       bankPickup(s,e.kind);s.entities.splice(i,1);continue;
     }
-    if((e.kind==='bone'||e.kind==='magnet'||e.kind==='mult'||e.kind==='shield')&&nearLane&&atPlayer(e)){
+    if((e.kind==='bone'||e.kind==='magnet'||e.kind==='mult'||e.kind==='shield'||e.kind==='boost')&&nearLane&&atPlayer(e)){
       if(e.kind==='bone')s.chomp=CFG.chompDuration;
       else if(e.kind==='magnet')s.magnet=CFG.magnetDuration;
       else if(e.kind==='mult')s.mult=CFG.multDuration;
+      else if(e.kind==='boost'){s.boost=CFG.boostDuration;s.msg='RUSH!';}
       else s.shield=true;
-      s.msg=e.kind.toUpperCase()+'!';
+      if(e.kind!=='boost')s.msg=e.kind.toUpperCase()+'!';
       s.entities.splice(i,1);
     }
   }
@@ -400,6 +505,14 @@ function stepGame(s,input,store){
   for(i=s.entities.length-1;i>=0;i--){
     e=s.entities[i];
     if(e.lane!==s.lane)continue;
+    /* RUSH (boost): smash through every obstacle in your lane, run over
+       pits — the cave cannot touch you while it lasts. */
+    if(s.boost>0&&atPlayer(e)){
+      if(e.kind==='pit')continue;
+      if(e.kind==='spike'||e.kind==='crate'||e.kind==='wall'||e.kind==='boulder'||e.kind==='platform'||e.kind==='chaser'||e.kind==='flyer'||e.kind==='sweeper'){
+        s.entities.splice(i,1);s.smashed++;addBonus(s,CFG.boostScore);s.msg='SMASH!';continue;
+      }
+    }
     if(e.kind==='spike'){
       if(atPlayer(e)&&s.jumpY<CFG.spikeClear)hurt(s,'SPIKES!');
     }else if(e.kind==='pit'){
@@ -434,8 +547,10 @@ function stepGame(s,input,store){
       }
     }
   }
-  s.distance+=s.speed;
+  s.distance+=s.speed+(s.boost>0?2:0);
   s.score=Math.floor(s.distance/10)+s.bonus;
+  /* COLLAPSING CAVE: caught by the collapse = game over, even with lives left. */
+  if(s.collapse>=s.distance&&!s.gameOver){s.gameOver=true;s.collapseDeath=true;s.msg='THE CAVE COLLAPSED!';}
   return s;
 }
 globalThis.__MERGED_RUNNER__={CFG:CFG,ZONES:ZONES,CAMEO_TABLE:CAMEO_TABLE,EVO_NAMES:EVO_NAMES,createState:createState,stepGame:stepGame,zoneById:zoneById,resolveCameo:resolveCameo,getSharedCoins:getSharedCoins,setSharedCoins:setSharedCoins,addSharedCoins:addSharedCoins,defaultStore:defaultStore,chompStrike:chompStrike,hurt:hurt,spawnEvent:spawnEvent};
@@ -461,7 +576,7 @@ if(typeof document!=='undefined'&&document.getElementById){
   try{best=parseInt(storeGet(store,CFG.bestKey)||'0',10)||0;}catch(e){best=0;}
   var state=createState(selZone,selChar,store);
   var running=false,paused=false,raf=null;
-  var heldSlide=false,heldLeft=false,heldRight=false;
+  var heldSlide=false;
   function setText(n,v){if(n)n.textContent=v;}
   function markSel(){
     var map={btnZoneSunset:'sunset',btnZoneRuins:'ruins',btnZoneFrost:'frost',btnCharDino:'dino',btnCharRunner:'runner'};
@@ -483,6 +598,7 @@ if(typeof document!=='undefined'&&document.getElementById){
   function showBest(){setText(hudBest,best);setText(finalBest,best);}
   function start(){
     state=createState(selZone,selChar,store);
+    if(typeof ckRunStart==='function')ckRunStart();
     cameo=resolveCameo(store);
     running=true;paused=false;
     if(startOv)startOv.hidden=true;if(overOv)overOv.hidden=true;if(pauseOv)pauseOv.hidden=true;
@@ -496,12 +612,41 @@ if(typeof document!=='undefined'&&document.getElementById){
   function endGame(){
     running=false;
     if(state.score>best){best=state.score;storeSet(store,CFG.bestKey,String(best));}
+    if(typeof ckNoteScore==='function')ckNoteScore(state.score);
     showBest();
     setText(finalScore,state.score);setText(finalCoins,state.coinsRun);
     setText(finalGems,state.gems);setText(finalDist,Math.floor(state.distance/10));
-    setText(finalZone,zoneById(state.zoneId).name+' • '+(state.charId==='dino'?'DINO':'RUNNER'));
-    if(overOv)overOv.hidden=false;
+    setText(finalZone,(state.collapseDeath?'THE CAVE COLLAPSED! • ':'')+zoneById(state.zoneId).name+' • '+(state.charId==='dino'?'DINO':'RUNNER'));
+    if(overOv)overOv.hidden=false;rvShow(true);window.dinoOverAt=Date.now();
   }
+/* ---- REVIVE — 15 ATOMS / 10 MOLECULES / 3 IONS (Cee 2026-11-03) ----
+   Same three revive options as Tetris. A revive grants one more life, clears nearby hazards and gives brief invulnerability — score, distance and banked molecules are kept. */
+function rvShow(on){var e=document.getElementById('rv-box');if(e)e.style.display=on?'block':'none';}
+function rvSay(m){var e=document.getElementById('vg-ion-line');if(e)e.textContent=m;}
+function doRevive(){state.lives=1;state.invuln=180;state.gameOver=false;state.entities=state.entities.filter(function(e){return e.z>=250;});state.stumble=null;state.shared=getSharedCoins(store);running=true;paused=false;if(overOv)overOv.hidden=true;loop();}
+window.rvMol=function(){
+var bal=0;try{var v=parseFloat(localStorage.getItem('wraith_coins'));bal=(isNaN(v)||v<0)?0:v;}catch(e){bal=0;}
+if(bal<10){rvSay('NOT ENOUGH MOLECULES — YOU HAVE '+Math.floor(bal)+', REVIVE COSTS 10. EARN MORE IN THE GAMES.');return;}
+try{localStorage.setItem('wraith_coins',String(Math.max(0,bal-10)));}catch(e){}
+rvSay('REVIVED FOR 10 MOLECULES — BALANCE '+Math.floor(Math.max(0,bal-10))+'.');
+doRevive();
+};
+window.rvAtoms=function(){
+var T=window.__IONTETRIS;if(!T){rvSay('Atom wallet unavailable — check your connection and reload.');return;}
+var st=T.reviveState();
+if(!st.linked){rvSay('REVIVE NEEDS 15 ATOMS — paste your wallet code below to link your wallet.');return;}
+if(st.bal===null){rvSay('Wallet still loading — try again in a second.');return;}
+if(st.bal<15){rvSay('NOT ENOUGH ATOMS — YOU HAVE '+st.bal+', REVIVE COSTS 15.');return;}
+T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.');return;}doRevive();});
+};
+window.rvIons=function(){
+var T=window.__IONTETRIS;if(!T){rvSay('Ion wallet unavailable — check your connection and reload.');return;}
+var cost=(T.ionReviveCost||3);var st=T.reviveState();
+if(!st.linked){rvSay('REVIVE NEEDS '+cost+' IONS — paste your wallet code below to link your wallet.');return;}
+if(st.bal===null){rvSay('Wallet still loading — try again in a second.');return;}
+if(st.bal<cost){rvSay('NOT ENOUGH IONS — YOU HAVE '+st.bal+', REVIVE COSTS '+cost+'.');return;}
+T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.');return;}doRevive();},cost,'IONS');
+};
   function proj(z,lane){
     var t=clamp(1-z/CFG.zMax,0,1);
     return {x:CFG.width/2+lane*CFG.laneSpread*(0.25+0.75*t),
@@ -529,17 +674,17 @@ if(typeof document!=='undefined'&&document.getElementById){
       }
     }
     ctx.fillStyle=zone.ground;ctx.fillRect(0,CFG.horizonY,CFG.width,CFG.height-CFG.horizonY);
-    for(var l=-1;l<=1;l++){
-      var xTop=CFG.width/2+l*CFG.laneSpread*0.25,xBot=CFG.width/2+l*CFG.laneSpread;
-      ctx.fillStyle=zone.lane;
-      ctx.beginPath();ctx.moveTo(xTop-26,CFG.horizonY);ctx.lineTo(xTop+26,CFG.horizonY);
-      ctx.lineTo(xBot+92,CFG.height);ctx.lineTo(xBot-92,CFG.height);ctx.closePath();ctx.fill();
-    }
+    /* 3 LANES (Cee 2026-11-13): the runway spans all three lanes — lane
+       centers sit at -190/0/+190 at the player row and converge toward the
+       horizon, matching proj(). Dividers mark the lane boundaries. */
+    ctx.fillStyle=zone.lane;
+    ctx.beginPath();ctx.moveTo(CFG.width/2-71,CFG.horizonY);ctx.lineTo(CFG.width/2+71,CFG.horizonY);
+    ctx.lineTo(CFG.width/2+285,CFG.height);ctx.lineTo(CFG.width/2-285,CFG.height);ctx.closePath();ctx.fill();
     ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=2;
-    for(l=-1;l<=1;l++){
-      ctx.beginPath();ctx.moveTo(CFG.width/2+(l-0.5)*CFG.laneSpread*0.25,CFG.horizonY);
-      ctx.lineTo(CFG.width/2+(l-0.5)*CFG.laneSpread,CFG.height);ctx.stroke();
-    }
+    [-1.5,-0.5,0.5,1.5].forEach(function(off){
+      ctx.beginPath();ctx.moveTo(CFG.width/2+off*CFG.laneSpread*0.25,CFG.horizonY);
+      ctx.lineTo(CFG.width/2+off*CFG.laneSpread,CFG.height);ctx.stroke();
+    });
     var goff=state.distance%70;
     ctx.fillStyle=zone.accent;
     for(i=0;i<14;i++)ctx.fillRect(i*70-goff,CFG.playerY+34,30,4);
@@ -553,6 +698,11 @@ if(typeof document!=='undefined'&&document.getElementById){
     }else if(e.kind==='gem'){
       ctx.save();ctx.translate(x,y-s*0.5);ctx.rotate(Math.PI/4);ctx.scale(sc,sc);
       ctx.fillStyle='#3fe0ff';ctx.fillRect(-11,-11,22,22);ctx.restore();
+    }else if(e.kind==='boost'){
+      ctx.save();ctx.translate(x,y-s*0.5);
+      ctx.fillStyle='#ffd23f';ctx.shadowColor='#ffd23f';ctx.shadowBlur=14;
+      ctx.beginPath();ctx.moveTo(0,-20*sc-6);ctx.lineTo(-9*sc-3,2);ctx.lineTo(-1,2);ctx.lineTo(-4,20*sc+6);ctx.lineTo(10*sc+3,-4);ctx.lineTo(1,-4);ctx.closePath();ctx.fill();
+      ctx.restore();
     }else if(e.kind==='bone'||e.kind==='magnet'||e.kind==='mult'||e.kind==='shield'){
       ctx.fillStyle=e.kind==='bone'?'#fff7d6':(e.kind==='magnet'?'#ff6b6b':(e.kind==='mult'?'#7fd08a':'#a8e0ff'));
       ctx.beginPath();ctx.arc(x,y-s*0.5,14*sc+4,0,Math.PI*2);ctx.fill();
@@ -675,6 +825,16 @@ if(typeof document!=='undefined'&&document.getElementById){
       }
     }
     ctx.restore();ctx.globalAlpha=1;
+    if(state.boost>0){
+      ctx.strokeStyle='rgba(255,210,63,.9)';ctx.lineWidth=3;
+      ctx.shadowColor='#ffd23f';ctx.shadowBlur=12;
+      ctx.strokeRect(px-38,py-86,76,90);
+      ctx.shadowBlur=0;
+      ctx.strokeStyle='rgba(255,210,63,.5)';ctx.lineWidth=2;
+      for(var bi=0;bi<3;bi++){var by=py-20-bi*22;ctx.beginPath();ctx.moveTo(px-52-by*0.1,by);ctx.lineTo(px-70,by+8);ctx.stroke();}
+      ctx.fillStyle='#ffd23f';ctx.font='bold 18px Arial';ctx.textAlign='center';
+      ctx.fillText('RUSH!',CFG.width/2,70);
+    }
     if(state.chomp>0){
       ctx.strokeStyle='rgba(255,210,63,.8)';ctx.lineWidth=3;
       ctx.strokeRect(px-36,py-84,72,88);
@@ -688,6 +848,33 @@ if(typeof document!=='undefined'&&document.getElementById){
       ctx.fillText(state.msg,CFG.width/2,44);
     }
   }
+  function drawCollapse(){
+    /* COLLAPSING CAVE: a jagged dark mass creeps up from the bottom of the
+       screen as the gap closes. gap>=400: below the screen (hidden).
+       gap=0: at the player's feet — caught. */
+    var gap=state.distance-state.collapse;
+    if(gap>=400||state.gameOver&&!state.collapseDeath)return;
+    var rise=Math.max(0,Math.min(1,1-gap/400));
+    var edgeY=CFG.height-rise*70;
+    ctx.save();
+    ctx.fillStyle='#0a0505';
+    ctx.beginPath();ctx.moveTo(0,CFG.height);
+    var jx,seg=14;
+    for(var i=0;i<=seg;i++){jx=i/seg*CFG.width;var jy=edgeY+Math.sin(i*2.7+state.t*0.08)*10*(0.4+rise)-((i*37)%23);ctx.lineTo(jx,jy);}
+    ctx.lineTo(CFG.width,CFG.height);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(255,90,20,'+(0.35+0.5*rise)+')';ctx.lineWidth=3;
+    ctx.beginPath();
+    for(var k=0;k<=seg;k++){jx=k/seg*CFG.width;var jy2=edgeY+Math.sin(k*2.7+state.t*0.08)*10*(0.4+rise)-((k*37)%23);if(k===0)ctx.moveTo(jx,jy2);else ctx.lineTo(jx,jy2);}
+    ctx.stroke();
+    /* falling rocks + dust above the edge */
+    ctx.fillStyle='rgba(120,90,60,.9)';
+    for(var r=0;r<6;r++){var rx=((r*173+state.t*3)%CFG.width),ry=edgeY-8-((r*53+state.t*2)%70);ctx.fillRect(rx,ry,7,7);}
+    ctx.restore();
+    if(gap<120){
+      ctx.fillStyle=gap<60?'#ff4040':'#ffd23f';ctx.font='bold 20px Arial';ctx.textAlign='center';
+      ctx.fillText('⚠ THE CAVE IS COLLAPSING — RUN! ⚠',CFG.width/2,96);
+    }
+  }
   function draw(){
     var zone=zoneById(state.zoneId);
     ctx.clearRect(0,0,CFG.width,CFG.height);
@@ -695,6 +882,7 @@ if(typeof document!=='undefined'&&document.getElementById){
     var sorted=state.entities.slice().sort(function(a,b){return b.z-a.z;});
     sorted.forEach(drawEntity);
     drawPlayer();
+    drawCollapse();
   }
   function updateHud(){
     setText(hudScore,state.score);
@@ -702,6 +890,10 @@ if(typeof document!=='undefined'&&document.getElementById){
     setText(hudCoins,Math.floor(state.shared));
     setText(hudGems,state.gems);
     setText(hudLives,'❤'.repeat(state.lives)+'♡'.repeat(Math.max(0,3-state.lives)));
+    var gap=Math.max(0,Math.floor(state.distance-state.collapse));
+    var caveEl=el('hudCave');
+    if(caveEl)caveEl.textContent=gap>200?'🪨 CAVE SAFE':(gap>100?'🪨 CAVE CLOSING':'🪨 RUN!');
+    if(caveEl)caveEl.style.color=gap>200?'#7fd08a':(gap>100?'#ffd23f':'#ff4040');
     if(chompBar&&chompFill&&chompLabel){
       if(state.chomp>0){chompBar.classList.add('on');chompLabel.classList.add('on');chompFill.style.width=Math.round(state.chomp/CFG.chompDuration*100)+'%';}
       else{chompBar.classList.remove('on');chompLabel.classList.remove('on');}
@@ -710,6 +902,7 @@ if(typeof document!=='undefined'&&document.getElementById){
     if(state.magnet>0)parts.push('🧲 MAGNET');
     if(state.mult>0)parts.push('×2 EARNINGS');
     if(state.shield)parts.push('🛡 SHIELD');
+    if(state.boost>0)parts.push('⚡ RUSH '+Math.ceil(state.boost/60)+'s');
     if(state.chompFlash>0)parts.push('CHOMP!');
     setText(powerLabel,parts.join(' • '));
   }
@@ -728,11 +921,10 @@ if(typeof document!=='undefined'&&document.getElementById){
   function doChomp(){if(!running||paused)return;pending.chomp=true;}
   function doLeft(){if(!running||paused)return;pending.left=true;}
   function doRight(){if(!running||paused)return;pending.right=true;}
-  function resume(){paused=false;if(pauseOv)pauseOv.hidden=true;loop();}
-  function pauseGame(){if(!running||state.gameOver)return;paused=true;if(pauseOv)pauseOv.hidden=false;if(raf)cancelAnimationFrame(raf);}
+  function resume(){paused=false;if(pauseOv)pauseOv.hidden=true;if(typeof ckShowPaused==='function')ckShowPaused(false);loop();}
+  function pauseGame(){if(!running||state.gameOver)return;paused=true;if(pauseOv)pauseOv.hidden=true;if(raf)cancelAnimationFrame(raf);if(typeof ckShowPaused==='function')ckShowPaused(true);}
   bindClick('btnStart',start);
-  bindClick('btnRestart',start);
-  bindClick('btnMenu',toMenu);
+  bindClick('btnMenu',function(){goHub();});
   bindClick('btnResume',resume);
   function press(id,down,up){
     var b=el(id);if(!b)return;
@@ -745,13 +937,11 @@ if(typeof document!=='undefined'&&document.getElementById){
   press('btnJump',doJump);
   press('btnSlide',doSlide,function(){heldSlide=false;});
   press('btnChomp',doChomp);
-  press('btnLeft',doLeft);
-  press('btnRight',doRight);
   /* RETRO PAD: additive touch controls calling the same handlers above. */
-  press('padLeft',doLeft);
-  press('padRight',doRight);
   press('padUp',doJump);
   press('padDown',doSlide,function(){heldSlide=false;});
+  press('padLeft',doLeft);
+  press('padRight',doRight);
   press('padA',doJump);
   press('padB',doSlide,function(){heldSlide=false;});
   press('padC',doChomp);
@@ -762,7 +952,7 @@ if(typeof document!=='undefined'&&document.getElementById){
     },{passive:true});
     canvas.addEventListener('touchend',function(e){
       var t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
-      if(Math.abs(dx)>30&&Math.abs(dx)>Math.abs(dy)){if(dx<0)doLeft();else doRight();}
+      if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>30){if(dx<0)doLeft();else doRight();}
       else if(dy<-30)doJump();
       else if(dy>30)doSlide();
       else doJump();
@@ -772,16 +962,190 @@ if(typeof document!=='undefined'&&document.getElementById){
   document.addEventListener('keydown',function(e){
     if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){e.preventDefault();if(!running&&startOv&&!startOv.hidden){start();return;}doJump();}
     else if(e.code==='ArrowDown'||e.code==='KeyS'){e.preventDefault();doSlide();}
-    else if(e.code==='ArrowLeft'||e.code==='KeyA'){e.preventDefault();doLeft();}
-    else if(e.code==='ArrowRight'||e.code==='KeyD'){e.preventDefault();doRight();}
     else if(e.code==='KeyX'||e.code==='KeyF'||e.code==='KeyC'){e.preventDefault();doChomp();}
+    else if(e.code==='ArrowLeft'||e.code==='KeyA'){e.preventDefault();if(!e.repeat)doLeft();}
+    else if(e.code==='ArrowRight'||e.code==='KeyD'){e.preventDefault();if(!e.repeat)doRight();}
     else if(e.code==='KeyP'){if(paused)resume();else pauseGame();}
   });
   document.addEventListener('keyup',function(e){if(e.code==='ArrowDown'||e.code==='KeyS')heldSlide=false;});
   document.addEventListener('visibilitychange',function(){if(document.hidden)pauseGame();});
+/* ===== CHECKLIST KIT (finish-the-project, 2026-11-05) — toolbar, tutorial, pause, restart, mute, fullscreen, exit guard, local high scores, loading/offline/error, local-only analytics. No balance, scoring, control or economy changes. ===== */
+var CK_SLUG='dino-run',CK_HS_KEY='dino-run_highscores_v1',CK_MUTE_KEY='dino-run_muted_v1',CK_TUT_KEY='dino-run_tutorial_seen_v1',CK_PLAYS_KEY='sw_plays_dino-run',CK_UNIT='PTS',CK_LOWER=false;
+function ckEl(id){return document.getElementById(id);}
+function ckLSGet(k){try{return window.localStorage.getItem(k);}catch(e){return null;}}
+function ckLSSet(k,v){try{window.localStorage.setItem(k,v);}catch(e){}}
+function ckLoadHS(){try{var o=JSON.parse(ckLSGet(CK_HS_KEY)||'null');if(o&&typeof o==='object')return{best:(+o.best)||0,plays:(+o.plays)||0};}catch(e){}return{best:0,plays:0};}
+function ckSaveHS(o){ckLSSet(CK_HS_KEY,JSON.stringify(o));}
+function ckFmtBest(n){return n+' '+CK_UNIT;}
+function ckBestLine(){var h=ckLoadHS();return h.best>0?('\u{1F3C6} BEST: '+ckFmtBest(h.best)):'\u{1F3C6} BEST: \u2014';}
+function ckBestSuffix(){var h=ckLoadHS();return h.best>0?('<br>'+ckBestLine()):'';}
+function ckSyncBest(){var el=ckEl('ckBest');if(el)el.textContent=ckBestLine();}
+function ckBetter(n,cur){if(CK_LOWER)return cur<=0||n<cur;return n>cur;}
+function ckNoteScore(n){if(typeof n!=='number'||!isFinite(n))return;var h=ckLoadHS();if(ckBetter(n,h.best))h.best=n;ckSaveHS(h);ckSyncBest();}
+function ckRunStart(){try{var p=parseInt(ckLSGet(CK_PLAYS_KEY)||'0',10)||0;ckLSSet(CK_PLAYS_KEY,String(p+1));}catch(e){}var h=ckLoadHS();h.plays=(h.plays||0)+1;ckSaveHS(h);ckSyncBest();}
+function ckMuted(){try{return ckLSGet(CK_MUTE_KEY)==='1';}catch(e){return false;}}
+function ckSetMuted(m){ckLSSet(CK_MUTE_KEY,m?'1':'0');var b=ckEl('ckSound');if(b)b.textContent=m?'\u{1F507} MUTED':'\u{1F50A} SOUND ON';}
+function ckTutSeen(){try{return ckLSGet(CK_TUT_KEY)==='1';}catch(e){return false;}}
+function ckShowTut(){var o=ckEl('ckTut');if(o)o.classList.add('on');}
+function ckHideTut(){var o=ckEl('ckTut');if(o)o.classList.remove('on');}
+function ckDismissTut(){ckLSSet(CK_TUT_KEY,'1');ckHideTut();}
+function ckShowPaused(on){var o=ckEl('ckPaused');if(o)o.classList.toggle('on',!!on);var b=ckEl('ckPause');if(b)b.textContent=on?'\u25B6 RESUME':'\u23F8 PAUSE';}
+var ckExitOpen=false;
+function ckShowExit(on){var o=ckEl('ckExit');if(o)o.classList.toggle('on',!!on);ckExitOpen=!!on;}
+function ckDoExit(){try{if(typeof goHub==='function'){goHub();return;}}catch(e){}try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}try{window.location.href='index.html';}catch(e){}}
+function ckRequestExit(){if(ckRunActive())ckShowExit(true);else ckDoExit();}
+function ckToggleFs(){try{if(document.fullscreenElement){var p=document.exitFullscreen&&document.exitFullscreen();if(p&&p.catch)p.catch(function(){});}else if(document.documentElement.requestFullscreen){var q=document.documentElement.requestFullscreen();if(q&&q.catch)q.catch(function(){});}else if(document.documentElement.webkitRequestFullscreen){document.documentElement.webkitRequestFullscreen();}}catch(e){}}
+function ckSyncOffline(){var b=ckEl('ckOffline');if(!b)return;var off=false;try{off=!navigator.onLine;}catch(e){}b.style.display=off?'block':'none';}
+function ckReady(){var o=ckEl('ckLoading');if(o)o.classList.remove('on');ckSyncBest();ckSyncOffline();if(!ckTutSeen())ckShowTut();}
+
+function ckRunActive(){return (running&&state&&!state.gameOver);}
+function ckOnPauseBtn(){if(paused)resume();else pauseGame();}
+function ckOnResume(){resume();}
+(function(){
+  ckSetMuted(ckMuted());
+  var b;
+  b=ckEl('ckPause');if(b)b.addEventListener('click',function(){ckOnPauseBtn();});
+  b=ckEl('ckRestart');if(b)b.addEventListener('click',function(){start();});
+  b=ckEl('ckSound');if(b)b.addEventListener('click',function(){ckSetMuted(!ckMuted());});
+  b=ckEl('ckFull');if(b)b.addEventListener('click',function(){ckToggleFs();});
+  b=ckEl('ckArcade');if(b)b.addEventListener('click',function(){ckRequestExit();});
+  b=ckEl('ckHelp');if(b)b.addEventListener('click',function(){ckShowTut();});
+  b=ckEl('ckResume');if(b)b.addEventListener('click',function(){ckOnResume();});
+  b=ckEl('ckQuit');if(b)b.addEventListener('click',function(){ckOnResume();ckRequestExit();});
+  b=ckEl('ckTutOk');if(b)b.addEventListener('click',function(){ckDismissTut();});
+  b=ckEl('ckExitGo');if(b)b.addEventListener('click',function(){ckShowExit(false);ckDoExit();});
+  b=ckEl('ckExitStay');if(b)b.addEventListener('click',function(){ckShowExit(false);});
+  b=ckEl('ckRetry');if(b)b.addEventListener('click',function(){try{window.location.reload();}catch(e){}});
+  b=ckEl('ckKeepPlaying');if(b)b.addEventListener('click',function(){var o=ckEl('ckError');if(o)o.classList.remove('on');});
+  ['ckPause','ckRestart','ckSound','ckFull','ckArcade','ckHelp','ckResume','ckQuit','ckTutOk','ckExitGo','ckExitStay','ckRetry','ckKeepPlaying'].forEach(function(id){var el=ckEl(id);if(el)el.addEventListener('click',function(e){e.stopPropagation();});});
+  document.addEventListener('keydown',function(e){if(e&&e.key==='Escape'){if(ckExitOpen)ckShowExit(false);else if(typeof paused!=='undefined'&&paused)ckOnResume();}});
+  window.addEventListener('offline',function(){var b=ckEl('ckOffline');if(b)b.style.display='block';});
+  window.addEventListener('online',function(){var b=ckEl('ckOffline');if(b)b.style.display='none';});
+  window.ckRequestExit=ckRequestExit;
+  ckReady();
+})();
+
   markSel();showBest();updateHud();draw();
 })();
 }
 </script>
+<script>function goHub(){try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}try{if(localStorage.getItem('wraith_explore_resume')){window.top.location.href='wraith-pet.html';return;}}catch(e){}window.top.location.href='index.html';}function vg_buy(p){try{if(p){try{sessionStorage.setItem('vg-buy-pack',p);}catch(e){}}}catch(e){}var u='tavern.html#sale-card';try{if(window.top&&window.top!==window){window.top.location.href=u;return;}}catch(e){}window.location.href=u;}
+document.addEventListener('click',function(e){var o=document.getElementById('overOverlay');if(o&&!o.hidden&&Date.now()-(window.dinoOverAt||0)>600&&!(e.target&&e.target.closest&&e.target.closest('#rv-box')))goHub();});
+document.addEventListener('keydown',function(e){var o=document.getElementById('overOverlay');if(o&&!o.hidden&&Date.now()-(window.dinoOverAt||0)>600)goHub();});</script><script>
+/* ===== ATOM WALLET — revive costs 15 atoms (shared arcade wallet) =====
+   Locked rate (Cee 2026-11-01): $1 = 100 atoms (1 ion = 2 atoms). Same wallet-code bridge as
+   Wraith Pet: paste the code from arcadio once; it is saved in this
+   browser (localStorage, shared with the pet shop on the same origin) and
+   the atom wallet (Firestore ion_wallets) is read/written by uid from the
+   code. Until the wallet-code Firestore rules are published, linking fails
+   cleanly with "wallet refused" and the free RETRY still works. */
+(function(){
+if("undefined"===typeof document||"undefined"===typeof window)return;
+var ATOM_REVIVE_COST=15;
+var ION_REVIVE_COST=3;
+var ION_CODE_KEY="wraith_ion_code_v1";
+var ION_FIREBASE_CONFIG={apiKey:"AIzaSyB1ERnGB2hAGclij5GN8H184U6jN_tVrKA",authDomain:"swvp-721a0.firebaseapp.com",projectId:"swvp-721a0",storageBucket:"swvp-721a0.firebasestorage.app",messagingSenderId:"100192355951078",appId:"1:100192355951078:web:swvp721a0ion"};
+var ION_B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function ionHash(s){var h=5381;for(var i=0;i<s.length;i++){h=(((h<<5)+h)+s.charCodeAt(i))>>>0}var x=h.toString(16);while(x.length<8)x="0"+x;return x}
+function ionUtf8(s){var o=[];for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c<128)o.push(c);else if(c<2048)o.push(192|(c>>6),128|(c&63));else o.push(224|(c>>12),128|((c>>6)&63),128|(c&63))}return o}
+function ionB64e(b){var o="";for(var i=0;i<b.length;i+=3){var b0=b[i],b1=i+1<b.length?b[i+1]:0,b2=i+2<b.length?b[i+2]:0;o+=ION_B64.charAt(b0>>2);o+=ION_B64.charAt(((b0&3)<<4)|(b1>>4));if(i+1<b.length)o+=ION_B64.charAt(((b1&15)<<2)|(b2>>6));if(i+2<b.length)o+=ION_B64.charAt(b2&63)}return o}
+function ionB64d(s){var v={},i;for(i=0;i<ION_B64.length;i++)v[ION_B64.charAt(i)]=i;var o=[],acc=0,nb=0;for(i=0;i<s.length;i++){var x=v[s.charAt(i)];if(x===undefined)return null;acc=(acc<<6)|x;nb+=6;if(nb>=8){nb-=8;o.push((acc>>nb)&255)}}return o}
+function ionFromUtf8(b){var o="",i=0;while(i<b.length){var x=b[i++];if(x<128)o+=String.fromCharCode(x);else if(x>=192&&x<224&&i<b.length)o+=String.fromCharCode(((x&31)<<6)|(b[i++]&63));else if(x>=224&&x<240&&i+1<b.length){o+=String.fromCharCode(((x&15)<<12)|((b[i]&63)<<6)|(b[i+1]&63));i+=2}else o+="?"}return o}
+function ionCodeFor(uid){if(!uid)return"";var b=ionB64e(ionUtf8(String(uid)));return"ION1-"+b+"-"+ionHash(b)}
+function ionUidFromCode(code){if(!code)return null;var c=String(code).trim().replace(/\s+/g,""),p=c.split("-");if(p.length!==3||(p[0]!=="ION1"&&p[0]!=="ATOM1"))return null;if(ionHash(p[1])!==p[2].toLowerCase())return null;var b=ionB64d(p[1]);if(!b)return null;var u=ionFromUtf8(b);if(!u||/[^A-Za-z0-9_-]/.test(u))return null;return u}
+var ionUid=null,ionCode="",ionBal=null,ionDb=null,ionUnsub=null,ionErr=null;
+function vgIonEl(id){try{return document.getElementById(id)}catch(e){return null}}
+function vgIonSay(m){var e=vgIonEl("vg-ion-line");if(e)e.textContent=m}
+function vgIonLoadCode(){try{return localStorage.getItem(ION_CODE_KEY)||""}catch(e){return""}}
+function vgIonSaveCode(c){try{if(c)localStorage.setItem(ION_CODE_KEY,c);else localStorage.removeItem(ION_CODE_KEY)}catch(e){}}
+function vgIonRender(){var link=vgIonEl("vg-ion-link"),un=vgIonEl("vg-ion-unlink"),inp=vgIonEl("vg-ion-code");if(link)link.style.display=ionUid?"none":"";if(un)un.style.display=ionUid?"":"none";if(inp&&ionCode)inp.value=ionCode;if(ionErr){vgIonSay(ionErr);return}if(!ionUid){vgIonSay("Paste your wallet code from arcadio to link your atom wallet. $1 = 100 atoms.");return}if(ionBal===null){vgIonSay("Atom wallet linked — loading balance…");return}vgIonSay("⚡ "+ionBal+" ATOMS linked — revive costs 15. 1 atom = 13 sats.")}
+function vgIonDetach(){if(ionUnsub){try{ionUnsub()}catch(e){}}ionUnsub=null}
+function vgIonAttach(){vgIonDetach();if(!ionUid||!ionDb)return;var ref=ionDb.collection("ion_wallets").doc(ionUid);ionUnsub=ref.onSnapshot(function(doc){ionErr=null;if(doc.exists){var d=doc.data()||{};ionBal=(typeof d.ions==="number")?d.ions:0}else{ionBal=0;vgIonSay("Wallet not found yet — open arcadio once so it creates your wallet, then link again.")}vgIonRender()},function(err){ionBal=null;var code=err&&err.code?String(err.code):"";if(code.indexOf("permission-denied")>=0||code.indexOf("permission")>=0){ionErr="Atom wallet refused — the wallet-code rules update hasn't landed yet. RETRY (free) still works.";}else{ionErr="Couldn't open the atom wallet ("+(code||"connection")+"). Check the code and try again."}vgIonRender()})}
+function vgIonBoot(){if("undefined"===typeof firebase||!firebase||!firebase.firestore){vgIonSay("Atom wallet unavailable — Firebase didn't load. RETRY (free) still works.");return}try{if(!firebase.apps||!firebase.apps.length){firebase.initializeApp(ION_FIREBASE_CONFIG)}}catch(e){}try{ionDb=firebase.firestore()}catch(e){vgIonSay("Atom wallet unavailable — couldn't start Firebase.");return}try{firebase.auth().signInAnonymously().then(function(){var c=ionCode||vgIonLoadCode();if(c)vgIonLink(c,true)}).catch(function(){vgIonSay("Atom wallet unavailable — couldn't sign in.")})}catch(e){vgIonSay("Atom wallet unavailable — couldn't sign in.")}}
+function vgIonLink(code,silent){var uid=ionUidFromCode(code);if(!uid){if(!silent)vgIonSay("That wallet code doesn't look right — copy it from arcadio (starts ATOM1- or ION1-).");return false}ionUid=uid;ionCode=String(code).trim().replace(/\s+/g,"");ionBal=null;ionErr=null;vgIonSaveCode(ionCode);vgIonRender();if(ionDb){vgIonAttach()}else{vgIonBoot()}return true}
+function vgIonUnlink(){vgIonDetach();ionUid=null;ionCode="";ionBal=null;ionErr=null;vgIonSaveCode("");vgIonRender()}
+window.__IONTETRIS={
+reviveState:function(){return{linked:!!ionUid,bal:ionBal}},
+ionReviveCost:ION_REVIVE_COST,
+say:vgIonSay,
+spendRevive:function(cb,cost,unit){var c=(typeof cost==="number"&&cost>0)?cost:ATOM_REVIVE_COST;var u=unit||"ATOMS";if(!ionUid||!ionDb||ionBal===null){cb(false,"Atom wallet not linked.");return}var ref=ionDb.collection("ion_wallets").doc(ionUid);ionDb.runTransaction(function(tx){return tx.get(ref).then(function(doc){if(!doc.exists)throw new Error("no-wallet");var d=doc.data()||{};var bal=(typeof d.ions==="number")?d.ions:0;if(bal<c)throw new Error("insufficient");tx.update(ref,{ions:bal-c,code:ionCode,ts:Date.now()});return bal-c})}).then(function(bal){ionBal=bal;vgIonSay("REVIVED FOR "+c+" "+u+" — BALANCE "+bal+".");vgIonRender();cb(true)}).catch(function(err){var m=err&&err.message?String(err.message):"";if(m==="insufficient")cb(false,"NOT ENOUGH "+u+" — YOUR BALANCE CHANGED. CHECK ARCADIO.");else cb(false,"REVIVE FAILED — TRY AGAIN.")})},
+ionUidFromCode:ionUidFromCode,ionCodeFor:ionCodeFor,link:vgIonLink,unlink:vgIonUnlink,
+getState:function(){return{uid:ionUid,bal:ionBal}}
+};
+var lb=vgIonEl("vg-ion-link");if(lb)lb.addEventListener("click",function(){var inp=vgIonEl("vg-ion-code");vgIonLink(inp?inp.value:"")});
+var ub=vgIonEl("vg-ion-unlink");if(ub)ub.addEventListener("click",function(){vgIonUnlink()});
+var saved=vgIonLoadCode();var inp0=vgIonEl("vg-ion-code");if(inp0&&saved)inp0.value=saved;
+vgIonRender();vgIonBoot();
+})();
+</script>
+<script>/*HUD-MOL 2026-11-05: read-only molecules pill — shared wraith_coins balance, never writes.*/
+(function(){function u(){var e=document.getElementById('ckMol');if(!e)return;var v=0;try{v=parseFloat(localStorage.getItem('wraith_coins'))||0;}catch(_){}var b=e.querySelector('b');if(b)b.textContent=String(Math.floor(v));}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',u);}else{u();}
+window.addEventListener('storage',u);setInterval(u,2000);})();</script>
+<style id="arc-quality-styles">
+:root{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-low{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-medium{--arc-q-glow:0 0 9px rgba(80,160,255,.12);--arc-q-sat:1.04;--arc-q-contrast:1.015}
+body.arc-quality-high{--arc-q-glow:0 0 16px rgba(65,165,255,.22),0 0 34px rgba(90,95,255,.10);--arc-q-sat:1.13;--arc-q-contrast:1.04}
+body.arc-quality-ultra{--arc-q-glow:0 0 22px rgba(65,185,255,.32),0 0 52px rgba(105,85,255,.18);--arc-q-sat:1.22;--arc-q-contrast:1.07}
+body.arc-quality-low canvas{filter:none!important;box-shadow:none!important;image-rendering:pixelated}
+body.arc-quality-medium canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 5px rgba(92,190,255,.24));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-ultra canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 9px rgba(91,190,255,.38));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.14);outline-offset:1px}
+body.arc-quality-ultra canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.23);outline-offset:2px}
+#arc-quality-widget{position:fixed;z-index:2147483000;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));font:600 12px/1.3 system-ui,sans-serif;color:#f4f7ff}
+#arc-quality-toggle{border:1px solid #6288b9;background:rgba(10,17,31,.94);color:#fff;border-radius:999px;padding:9px 13px;box-shadow:0 4px 18px #0008;cursor:pointer;backdrop-filter:blur(10px)}
+#arc-quality-menu{display:none;position:absolute;right:0;bottom:44px;min-width:176px;padding:10px;background:rgba(9,15,28,.97);border:1px solid #456184;border-radius:14px;box-shadow:0 8px 28px #000a;backdrop-filter:blur(14px)}
+#arc-quality-menu[aria-hidden="false"]{display:block}
+#arc-quality-menu strong{display:block;margin:2px 4px 8px;color:#b9d8ff;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#arc-quality-menu button{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 10px;margin:3px 0;border:1px solid transparent;border-radius:9px;background:#18253a;color:#fff;text-align:left;cursor:pointer}
+#arc-quality-menu button[aria-pressed="true"]{border-color:#70b8ff;background:#203b5b}
+#arc-quality-menu small{display:block;color:#9eafc6;font-weight:400;margin:7px 4px 2px}
+#arc-quality-fx{position:fixed;inset:0;width:100%;height:100%;z-index:2147482000;pointer-events:none;mix-blend-mode:screen;opacity:.0;transition:opacity .35s ease}
+body.arc-quality-medium #arc-quality-fx{opacity:.22}body.arc-quality-high #arc-quality-fx{opacity:.48}body.arc-quality-ultra #arc-quality-fx{opacity:.72}
+@keyframes arcAura{0%,100%{filter:drop-shadow(0 0 5px rgba(60,160,255,.14))}50%{filter:drop-shadow(0 0 13px rgba(110,105,255,.26))}}
+body.arc-quality-high canvas{animation:arcAura 5s ease-in-out infinite}body.arc-quality-ultra canvas{animation:arcAura 3.5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){#arc-quality-widget *,#arc-quality-fx,body.arc-quality-high canvas,body.arc-quality-ultra canvas{animation:none!important;transition:none!important}}
+</style>
+<script id="arc-quality-controller">
+(()=>{
+ const KEY='arcadio.graphicsQuality.v1',levels=['low','medium','high','ultra'];
+ const labels={low:'Low',medium:'Medium',high:'High',ultra:'Ultra'};
+ const descriptions={low:'Minimal effects · best performance',medium:'Balanced color and ambient sparkle',high:'Animated glow, lighting and particle accents',ultra:'Maximum glow, denser particles and interaction bursts'};
+ const counts={low:0,medium:9,high:20,ultra:36};let current='medium';
+ try{const saved=localStorage.getItem(KEY);if(levels.includes(saved))current=saved;}catch(e){}
+ const widget=document.createElement('div');widget.id='arc-quality-widget';
+ widget.innerHTML='<button id="arc-quality-toggle" type="button" aria-expanded="false" aria-controls="arc-quality-menu">✦ Graphics: <span id="arc-quality-current">Medium</span></button><div id="arc-quality-menu" role="group" aria-label="Graphics quality" aria-hidden="true"><strong>Graphics quality</strong>'+levels.map(v=>'<button type="button" data-quality="'+v+'" aria-pressed="false"><span>'+labels[v]+'</span><span aria-hidden="true">'+(v==='low'?'◌':v==='medium'?'◐':v==='high'?'✧':'✦')+'</span></button>').join('')+'<small id="arc-quality-description"></small></div>';
+ document.body.appendChild(widget);
+ const fx=document.createElement('canvas');fx.id='arc-quality-fx';fx.setAttribute('aria-hidden','true');document.body.appendChild(fx);
+ const ctx=fx.getContext('2d');let w=0,h=0,dpr=1,particles=[],bursts=[],raf=0,last=0;
+ const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ function resize(){dpr=Math.min(window.devicePixelRatio||1,current==='ultra'?1.6:current==='high'?1.35:1.15);w=innerWidth;h=innerHeight;fx.width=Math.round(w*dpr);fx.height=Math.round(h*dpr);fx.style.width=w+'px';fx.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);}
+ function seed(){particles=Array.from({length:counts[current]},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:-(.08+Math.random()*.25),r:.5+Math.random()*(current==='ultra'?2:1.2),a:.12+Math.random()*.35,phase:Math.random()*6.28}));}
+ function burst(x,y){if(current==='low'||reduced)return;const n=current==='ultra'?22:current==='high'?13:6;for(let i=0;i<n;i++){const a=Math.PI*2*i/n+(Math.random()-.5)*.35,s=1+Math.random()*(current==='ultra'?3:2);bursts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,r:1+Math.random()*2});}}
+ function frame(t){raf=0;if(!ctx||document.hidden||current==='low'||reduced)return;if(t-last<32){raf=requestAnimationFrame(frame);return;}last=t;ctx.clearRect(0,0,w,h);
+  for(const p of particles){p.x+=p.vx;p.y+=p.vy;if(p.y<-5){p.y=h+5;p.x=Math.random()*w;}p.phase+=.018;ctx.globalAlpha=p.a*(.65+.35*Math.sin(p.phase));ctx.fillStyle=current==='ultra'?'#9fe7ff':'#8ecfff';ctx.shadowBlur=current==='ultra'?12:6;ctx.shadowColor='#63aaff';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+  ctx.shadowBlur=0;bursts=bursts.filter(p=>p.life>0);for(const p of bursts){p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=.025;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle='#b8eaff';ctx.shadowBlur=10;ctx.shadowColor='#72baff';ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.shadowBlur=0;
+  raf=requestAnimationFrame(frame);
+ }
+ function syncFrame(){if(document.hidden||current==='low'||reduced){if(raf)cancelAnimationFrame(raf);raf=0;}else if(!raf)raf=requestAnimationFrame(frame);}
+ document.addEventListener('visibilitychange',syncFrame);window.addEventListener('pageshow',syncFrame);
+ resize();addEventListener('resize',resize,{passive:true});
+ function apply(value,save=true){if(!levels.includes(value))return;current=value;document.body.classList.remove(...levels.map(v=>'arc-quality-'+v));document.body.classList.add('arc-quality-'+value);
+  widget.querySelector('#arc-quality-current').textContent=labels[value];widget.querySelector('#arc-quality-description').textContent=descriptions[value];widget.querySelectorAll('[data-quality]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.quality===value)));
+  document.querySelectorAll('canvas').forEach(c=>{try{const c2=c.getContext('2d');if(c2){c2.imageSmoothingEnabled=value!=='low';if('imageSmoothingQuality'in c2)c2.imageSmoothingQuality=value==='ultra'?'high':value==='high'?'high':'medium';}}catch(e){}});
+  if(save){try{localStorage.setItem(KEY,value)}catch(e){}}seed();if(value==='low'){if(raf)cancelAnimationFrame(raf);raf=0;ctx.clearRect(0,0,w,h);bursts=[];}syncFrame();window.dispatchEvent(new CustomEvent('arcadio:graphicsqualitychange',{detail:{quality:value}}));
+ }
+ const toggle=widget.querySelector('#arc-quality-toggle'),menu=widget.querySelector('#arc-quality-menu');toggle.addEventListener('click',()=>{const open=menu.getAttribute('aria-hidden')==='true';menu.setAttribute('aria-hidden',String(!open));toggle.setAttribute('aria-expanded',String(open));});
+ widget.querySelectorAll('[data-quality]').forEach(b=>b.addEventListener('click',()=>{apply(b.dataset.quality);menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}));
+ document.addEventListener('click',e=>{if(!widget.contains(e.target)){menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}});
+ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('canvas'))burst(e.clientX,e.clientY)},{passive:true});
+ document.addEventListener('keydown',e=>{if([' ','Enter','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){const c=document.querySelector('canvas');if(c){const r=c.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2)}}});
+ apply(current,false);if(reduced)fx.style.display='none';syncFrame();
+})();
+</script>
+
+<script src="/swpvp-skins.js" defer></script>
 </body>
 </html>

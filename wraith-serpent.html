@@ -16,24 +16,81 @@ canvas{display:block;width:100%;height:auto;background:#0a0a14;touch-action:none
 #ov p{margin:4px 0;color:#ccc;font-size:12px;line-height:1.5}
 #ov button{margin:4px;padding:16px 22px;min-height:56px;background:#ffcc33;color:#000;border:0;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
 #msg{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:14px;font-weight:700;color:#ffd94d;letter-spacing:2px;z-index:3;pointer-events:none;text-shadow:0 2px 6px #000}
+html,body{touch-action:none;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+/*UI-FIT: flex column so the stage absorbs viewport slack and the
+   controls anchor to the bottom edge; the canvas letterboxes via
+   object-fit:contain (input is swipe-delta only, so no tap remap).
+   NOTE: this sits BEFORE the landscape grid block below so the grid
+   display wins over flex in landscape (equal specificity, later wins). */
+body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+#wrap{flex:1;min-height:0}
+#wrap canvas{height:100%;object-fit:contain}
 @media (orientation:landscape) and (max-height:500px){
-/* Landscape phones: the column (HUD + 1:1 canvas + pad + hub link) is
-   taller than the viewport and body overflow is hidden, so the pad and
-   pause would be unreachable. Shrink the square stage so the whole
-   column fits: canvas = viewport height minus HUD + controls + hub. */
-#wrap{max-width:calc(100vh - 150px)}
-#hud{padding:4px 12px}
+/*UI-FIT: landscape phones — side-by-side stage + controls column so the
+   square canvas can use the full viewport height (the old cap shrank it
+   to 210px and the pad + hub link were cut off below the fold under body
+   overflow:hidden). Canvas letterboxes via object-fit:contain (input is
+   swipe-delta only, so no tap remap is needed). */
+body{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 1fr auto;gap:0 8px}
+#hud{grid-column:1/-1;grid-row:1;padding:4px 12px}
+#wrap{grid-column:1;grid-row:2;max-width:none;min-height:0}
+#ctl{grid-column:2;grid-row:2}
+body>div:last-of-type{grid-column:1/-1;grid-row:3}
 }
-html,body{touch-action:none;overscroll-behavior:none}
-</style></head><body>
+</style><style>
+/* CHECKLIST KIT 2026-11-05 — toolbar / overlays / best line (finish-the-project checklist) */
+body{padding-top:78px !important}
+.ck-bar{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;gap:6px;align-items:center;padding:6px 8px;background:rgba(5,5,10,.97);border-bottom:1px solid #f0f;box-sizing:border-box;overflow-x:auto;scrollbar-width:none}
+.ck-bar::-webkit-scrollbar{display:none}
+.ck-bar button{flex:0 0 auto;min-height:44px;min-width:44px;padding:8px 10px;font-size:13px;font-weight:700;background:#111;color:#0ff;border:1px solid #f0f;border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.ck-bar button:active{transform:translateY(1px)}
+#ckSound{min-width:118px}
+.ck-best{position:fixed;top:56px;left:0;right:0;z-index:299;text-align:center;font-size:12px;letter-spacing:2px;color:#ffe27a;background:rgba(5,5,10,.9);padding:3px 0;pointer-events:none}
+.ck-ov{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:20px;box-sizing:border-box}
+.ck-ov.on{display:flex}
+.ck-box{width:min(420px,94vw);max-height:86vh;max-height:86dvh;overflow:auto;background:#0b0b14;border:1px solid #f0f;border-radius:12px;padding:20px;text-align:center;color:#fff;box-sizing:border-box}
+.ck-box h2{margin:0 0 10px;font-size:20px;letter-spacing:3px;color:#0ff}
+.ck-box p{margin:8px 0;font-size:13px;line-height:1.6;color:#ddd}
+.ck-box .ck-keys{text-align:left;font-size:13px;line-height:1.8;color:#ddd;margin:10px 0}
+.ck-box button{min-height:44px;min-width:120px;padding:12px 20px;margin:6px 4px 0;background:#111;color:#0ff;border:1px solid #f0f;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.ck-box button.ck-primary{background:linear-gradient(90deg,#f0f,#0ff);color:#000;border:0}
+.ck-off{position:fixed;left:0;right:0;bottom:0;z-index:390;display:none;background:#7a1f1f;color:#fff;text-align:center;padding:10px 12px;font-size:13px;letter-spacing:1px}
+.ck-off.on{display:block}
+#ckLoading{background:rgba(0,0,0,.92);z-index:500}
+#ckLoading .ck-box{border-color:#0ff}
+</style><style>
+/*HUD-SHARED 2026-11-05: Fight-HUD language (gold #8a6d14 border, orange #ff8800 title, #ffd94d pill) + read-only molecules pill. See per-file note.*/
+.ck-bar{display:block;border-bottom:1px solid #8a6d14;background:rgba(7,7,13,.97);overflow-x:visible}
+.ck-bar .ck-row{display:flex;gap:4px}
+.ck-bar button{flex:1;min-width:0;min-height:44px;padding:6px 2px;font-size:11px;font-weight:700;background:#0d0d10;color:#fff;border:1px solid #8a6d14;border-radius:8px;cursor:pointer;font-family:inherit;white-space:normal;overflow:hidden;line-height:1.15;letter-spacing:.5px}
+.ck-bar button:active{background:#3a2c05}
+.ck-bar .ck-best{position:static;text-align:center;color:#ffcc33;font-size:11px;letter-spacing:2px;padding-top:3px;background:transparent;pointer-events:none}
+.ck-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:1px 2px 5px}
+.ck-title{color:#ff8800;font-weight:800;font-size:13px;letter-spacing:2px;white-space:normal;overflow-wrap:anywhere}
+.ck-mol{margin-left:auto;flex:none;border:1px solid #8a6d14;background:#171106;color:#ffd94d;border-radius:999px;padding:4px 10px;font-size:12px;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+.ck-mol b{color:#fff}
+body{padding-top:108px!important}
+</style>
+</head><body><!-- CHECKLIST KIT 2026-11-05 -->
+<div class="ck-bar" role="toolbar" aria-label="Game controls"><div class="ck-top"><span class="ck-title">WRAITH SERPENT</span><span class="ck-mol" id="ckMol">⚛ <b>0</b></span></div><div class="ck-row"><button type="button" id="ckPause">&#9208; PAUSE</button><button type="button" id="ckRestart">&#8635; RESTART</button><button type="button" id="ckSound">&#128266; SOUND ON</button><button type="button" id="ckFull">&#9974; FULLSCREEN</button><button type="button" id="ckArcade">&#8962; ARCADE</button><button type="button" id="ckHelp" aria-label="How to play">?</button></div><div class="ck-best" id="ckBest">BEST: 0</div></div>
+
+<div class="ck-ov on" id="ckLoading" role="status"><div class="ck-box"><h2>LOADING&hellip;</h2><p>Setting up the game.</p></div></div>
+<div class="ck-ov" id="ckTut" role="dialog" aria-modal="true" aria-label="How to play"><div class="ck-box"><h2>HOW TO PLAY</h2><p><b>GOAL:</b> Eat the glowing orbs, grow longer, and survive. Walls and your own tail end the run.</p>
+<div class="ck-keys">&#⌨;&#65039; <b>KEYBOARD:</b> Arrows / WASD to steer (no U-turns) &middot; P pause<br>&#128076; <b>TOUCH:</b> Swipe on the stage, or use the D-pad<br>&#127942; <b>SCORE:</b> 10 points per orb. The serpent gets faster with every orb.</div>
+<button type="button" class="ck-primary" id="ckTutOk">GOT IT &mdash; PLAY</button></div></div>
+<div class="ck-ov" id="ckPaused" role="dialog" aria-modal="true" aria-label="Paused"><div class="ck-box"><h2>&#9208; PAUSED</h2><p>The game is frozen.</p><button type="button" class="ck-primary" id="ckResume">&#9654; RESUME</button><button type="button" id="ckPauseQuit">&#8962; QUIT TO ARCADE</button></div></div>
+<div class="ck-ov" id="ckGuard" role="dialog" aria-modal="true" aria-label="Exit game"><div class="ck-box"><h2>EXIT?</h2><p>Your progress is saved.<br>The run in progress will end.</p><button type="button" class="ck-primary" id="ckGuardYes">EXIT</button><button type="button" id="ckGuardNo">STAY</button></div></div>
+<div class="ck-off" id="ckOffline">&#9888; YOU&rsquo;RE OFFLINE &mdash; your best score still saves on this device.</div>
+<div class="ck-ov" id="ckError" role="alertdialog" aria-modal="true" aria-label="Error"><div class="ck-box"><h2>&#9888; SOMETHING WENT WRONG</h2><p>The game hit a problem. Your best score is saved &mdash; try again.</p><button type="button" class="ck-primary" id="ckErrorRetry">&#8635; RETRY</button></div></div>
+
 <div id="hud"><span>SCORE <b id="hs">0</b></span><span>ORBS <b id="ho">0</b></span><span>BEST <b id="hb">0</b></span></div>
 <div id="wrap"><canvas id="cv" width="400" height="400"></canvas><div id="msg"></div>
-<div id="ov"><h1 id="ovt">WRAITH SERPENT</h1><p id="ovp"></p><div id="ovb"></div></div></div>
+<div id="ov"><h1 id="ovt">WRAITH SERPENT</h1><p id="ovp"></p><div id="ovb"></div><div id="rv-box" style="display:none;margin:10px auto 0;max-width:340px;text-align:center"><button onclick="rvAtoms()" style="background:linear-gradient(90deg,#f0f,#0ff);color:#000;border:0;padding:14px 24px;margin:6px;width:90%;letter-spacing:2px;font-weight:700;cursor:pointer">◢ REVIVE // 15 ATOMS ◣</button><button onclick="rvMol()" style="background:linear-gradient(90deg,#0f0,#0ff);color:#000;border:0;padding:14px 24px;margin:6px;width:90%;letter-spacing:2px;font-weight:700;cursor:pointer">◢ REVIVE // 10 MOLECULES ◣</button><button onclick="rvIons()" style="background:linear-gradient(90deg,#fc0,#f0f);color:#000;border:0;padding:14px 24px;margin:6px;width:90%;letter-spacing:2px;font-weight:700;cursor:pointer">◢ REVIVE // 3 IONS ◣</button><div class="rv-usd" style="font-size:11px;color:#ffcc33;letter-spacing:2px;margin:2px 0 4px">3 IONS = $0.06</div><div id="vg-ion-box" style="margin:12px auto 0;text-align:left;border:1px solid #0ff;padding:8px"><div style="font-size:10px;color:#0ff;letter-spacing:2px">⚡ ATOM WALLET — REVIVE COSTS 15 ATOMS</div><div id="vg-ion-line" style="font-size:11px;color:#fff;line-height:1.5;margin:6px 0">Paste your wallet code from arcadio to link your atom wallet. $1 = 100 atoms.</div><div style="display:flex;gap:6px"><input id="vg-ion-code" type="text" placeholder="ATOM1-…-…" style="flex:1;min-width:0;background:#000;color:#0ff;border:1px solid #0ff;padding:10px;font-size:12px;font-family:inherit" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="vg-ion-link" type="button" style="padding:10px 14px">LINK</button><button id="vg-ion-unlink" type="button" style="padding:10px 14px;display:none">UNLINK</button></div></div><div id="vg-buy-box" style="margin:12px auto 0;text-align:center;border:1px solid #fc0;padding:8px"><div style="font-size:10px;color:#fc0;letter-spacing:2px">💰 BUY IONS + ATOMS — REAL MONEY (SANDBOX TEST)</div><div style="font-size:11px;color:#fff;line-height:1.5;margin:6px 0">$1 = 100 ATOMS (50 IONS) • $5 = 500 ATOMS (250 IONS)</div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap"><button type="button" onclick="vg_buy('ion1')" style="background:linear-gradient(90deg,#fc0,#f0f);color:#000;border:0;padding:12px 18px;letter-spacing:2px;font-weight:700;cursor:pointer">$1 — 100 ATOMS</button><button type="button" onclick="vg_buy('ion5')" style="background:linear-gradient(90deg,#fc0,#f0f);color:#000;border:0;padding:12px 18px;letter-spacing:2px;font-weight:700;cursor:pointer">$5 — 500 ATOMS</button></div><div style="font-size:10px;color:#aaa;line-height:1.5;margin-top:6px">PayPal sandbox test — no real money moves yet. Opens the Tavern buy card; pick the same pack there.</div></div></div></div></div>
 <div id="ctl"><div id="pad" class="retro-pad" aria-label="RETRO PAD">
 <button id="bu" aria-label="Up" style="grid-column:2;grid-row:1">▲</button><button id="bl" aria-label="Left" style="grid-column:1;grid-row:2">◀</button><button id="br" aria-label="Right" style="grid-column:3;grid-row:2">▶</button><button id="bd" aria-label="Down" style="grid-column:2;grid-row:3">▼</button>
 </div><button id="bp">❚❚ PAUSE</button></div>
-<div style="text-align:center;padding:4px 0 10px"><a href="index.html" style="color:#ffcc33;text-decoration:none;font-size:12px">← ARCADE HUB</a></div>
-<script>
+<div style="text-align:center;padding:4px 0 10px"><a href="index.html" style="color:#ffcc33;text-decoration:none;font-size:12px" onclick="goHub();return false;">← ARCADE HUB</a></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script>
 'use strict';
 /* WRAITH SERPENT — original grid serpent. No borrowed characters, art, music or assets. */
 var GRID=20,CELL=20,BESTKEY='wraith_serpent_best';
@@ -84,11 +141,11 @@ var cv=(typeof document!=='undefined')?document.getElementById('cv'):null;
 if(cv){
 var ctx=cv.getContext('2d');
 var AC=null;
-function beep(f,d){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type='square';o.frequency.value=f;v.gain.value=.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
+function beep(f,d){if(window.__ckMuted&&window.__ckMuted())return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type='square';o.frequency.value=f;v.gain.value=.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
 function $(id){return document.getElementById(id);}
 var S=null,playing=false,paused=false,hidePaused=false,tsReset=false,lastTs=0,acc=0,best=loadBest();
-function showOv(t,p,h){$('ovt').innerHTML=t;$('ovp').innerHTML=p;$('ovb').innerHTML=h;$('ov').style.display='flex';}
-function hideOv(){$('ov').style.display='none';}
+function showOv(t,p,h){$('ovt').innerHTML=t;$('ovp').innerHTML=p;$('ovb').innerHTML=h;$('ov').style.display='flex';rvShow(false);}
+function hideOv(){$('ov').style.display='none';rvShow(false);}
 function hud(){$('hs').textContent=S?S.score:0;$('ho').textContent=S?S.orbs:0;$('hb').textContent=Math.max(best,S?S.score:0);}
 function showMenu(){
   S=null;playing=false;paused=false;hidePaused=false;best=loadBest();
@@ -103,9 +160,37 @@ function endGame(){
   var nb=S.score>best;
   if(nb){saveBest(S.score);best=S.score;}
   hud();
-  showOv('THE SERPENT FALLS','SCORE '+S.score+' • ORBS '+S.orbs+'<br>BEST '+best+(nb?'<br>★ NEW BEST! ★':''),'<button onclick="startGame()">↻ PLAY AGAIN</button><button onclick="toMenu()">MENU</button>');
+  showOv('THE SERPENT FALLS','SCORE '+S.score+' • ORBS '+S.orbs+'<br>BEST '+best+(nb?'<br>★ NEW BEST! ★':'')+'<br><span style="color:#ffcc33">TAP ANYWHERE TO GO BACK</span>','<button onclick="goHub()">← BACK TO ARCADE</button>');window.overAt=Date.now();rvShow(true);
   beep(160,.25);
 }
+/* ---- REVIVE — 15 ATOMS / 10 MOLECULES / 3 IONS (Cee 2026-11-03) ----
+   Same three revive options as Tetris. A revive respawns a short serpent in the centre with a fresh orb (the danger cleared) — score and orbs are kept. */
+function rvShow(on){var e=document.getElementById('rv-box');if(e)e.style.display=on?'block':'none';}
+function rvSay(m){var e=document.getElementById('vg-ion-line');if(e)e.textContent=m;}
+function doRevive(){S.snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];S.dir={x:1,y:0};S.next={x:1,y:0};S.over=false;S.dead=false;spawnOrb(S);playing=true;paused=false;hidePaused=false;acc=0;tsReset=true;hideOv();hud();}
+window.rvMol=function(){
+var bal=0;try{var v=parseFloat(localStorage.getItem('wraith_coins'));bal=(isNaN(v)||v<0)?0:v;}catch(e){bal=0;}
+if(bal<10){rvSay('NOT ENOUGH MOLECULES — YOU HAVE '+Math.floor(bal)+', REVIVE COSTS 10. EARN MORE IN THE GAMES.');return;}
+try{localStorage.setItem('wraith_coins',String(Math.max(0,bal-10)));}catch(e){}
+rvSay('REVIVED FOR 10 MOLECULES — BALANCE '+Math.floor(Math.max(0,bal-10))+'.');
+doRevive();
+};
+window.rvAtoms=function(){
+var T=window.__IONTETRIS;if(!T){rvSay('Atom wallet unavailable — check your connection and reload.');return;}
+var st=T.reviveState();
+if(!st.linked){rvSay('REVIVE NEEDS 15 ATOMS — paste your wallet code below to link your wallet.');return;}
+if(st.bal===null){rvSay('Wallet still loading — try again in a second.');return;}
+if(st.bal<15){rvSay('NOT ENOUGH ATOMS — YOU HAVE '+st.bal+', REVIVE COSTS 15.');return;}
+T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.');return;}doRevive();});
+};
+window.rvIons=function(){
+var T=window.__IONTETRIS;if(!T){rvSay('Ion wallet unavailable — check your connection and reload.');return;}
+var cost=(T.ionReviveCost||3);var st=T.reviveState();
+if(!st.linked){rvSay('REVIVE NEEDS '+cost+' IONS — paste your wallet code below to link your wallet.');return;}
+if(st.bal===null){rvSay('Wallet still loading — try again in a second.');return;}
+if(st.bal<cost){rvSay('NOT ENOUGH IONS — YOU HAVE '+st.bal+', REVIVE COSTS '+cost+'.');return;}
+T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.');return;}doRevive();},cost,'IONS');
+};
 function resumeGame(){if(!paused)return;paused=false;hidePaused=false;tsReset=true;acc=0;}
 function togglePause(){if(!S||!playing)return;paused=!paused;hidePaused=false;if(!paused){tsReset=true;acc=0;}}
 document.addEventListener('visibilitychange',function(){if(document.hidden){if(S&&playing&&!paused){paused=true;hidePaused=true;}}else if(hidePaused)resumeGame();});
@@ -123,7 +208,7 @@ document.addEventListener('keydown',function(e){
   else if(e.code==='ArrowLeft'||e.code==='KeyA'){turn(-1,0);e.preventDefault();}
   else if(e.code==='ArrowRight'||e.code==='KeyD'){turn(1,0);e.preventDefault();}
   else if(e.code==='KeyP'){togglePause();}
-  else if((e.code==='Space'||e.code==='Enter')&&!playing){startGame();e.preventDefault();}
+  else if((e.code==='Space'||e.code==='Enter')&&!playing){if(S&&S.over){if(Date.now()-(window.overAt||0)>600)goHub();}else startGame();e.preventDefault();}
 });
 var tx=0,ty=0;
 cv.addEventListener('touchstart',function(e){var t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;},{passive:true});
@@ -182,4 +267,186 @@ showMenu();
 requestAnimationFrame(function(ts){lastTs=ts;requestAnimationFrame(loop);});
 }
 </script>
+<script>function goHub(){try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}try{if(localStorage.getItem('wraith_explore_resume')){window.top.location.href='wraith-pet.html';return;}}catch(e){}window.top.location.href='index.html';}function vg_buy(p){try{if(p){try{sessionStorage.setItem('vg-buy-pack',p);}catch(e){}}}catch(e){}var u='tavern.html#sale-card';try{if(window.top&&window.top!==window){window.top.location.href=u;return;}}catch(e){}window.location.href=u;}
+document.addEventListener('click',function(e){if(window.S&&window.S.over&&Date.now()-(window.overAt||0)>600&&!(e.target&&e.target.closest&&e.target.closest('#rv-box')))goHub();});
+document.addEventListener('keydown',function(e){if(window.S&&window.S.over&&Date.now()-(window.overAt||0)>600)goHub();});</script><script>
+/* ===== ATOM WALLET — revive costs 15 atoms (shared arcade wallet) =====
+   Locked rate (Cee 2026-11-01): $1 = 100 atoms (1 ion = 2 atoms). Same wallet-code bridge as
+   Wraith Pet: paste the code from arcadio once; it is saved in this
+   browser (localStorage, shared with the pet shop on the same origin) and
+   the atom wallet (Firestore ion_wallets) is read/written by uid from the
+   code. Until the wallet-code Firestore rules are published, linking fails
+   cleanly with "wallet refused" and the free RETRY still works. */
+(function(){
+if("undefined"===typeof document||"undefined"===typeof window)return;
+var ATOM_REVIVE_COST=15;
+var ION_REVIVE_COST=3;
+var ION_CODE_KEY="wraith_ion_code_v1";
+var ION_FIREBASE_CONFIG={apiKey:"AIzaSyB1ERnGB2hAGclij5GN8H184U6jN_tVrKA",authDomain:"swvp-721a0.firebaseapp.com",projectId:"swvp-721a0",storageBucket:"swvp-721a0.firebasestorage.app",messagingSenderId:"100192355951078",appId:"1:100192355951078:web:swvp721a0ion"};
+var ION_B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function ionHash(s){var h=5381;for(var i=0;i<s.length;i++){h=(((h<<5)+h)+s.charCodeAt(i))>>>0}var x=h.toString(16);while(x.length<8)x="0"+x;return x}
+function ionUtf8(s){var o=[];for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c<128)o.push(c);else if(c<2048)o.push(192|(c>>6),128|(c&63));else o.push(224|(c>>12),128|((c>>6)&63),128|(c&63))}return o}
+function ionB64e(b){var o="";for(var i=0;i<b.length;i+=3){var b0=b[i],b1=i+1<b.length?b[i+1]:0,b2=i+2<b.length?b[i+2]:0;o+=ION_B64.charAt(b0>>2);o+=ION_B64.charAt(((b0&3)<<4)|(b1>>4));if(i+1<b.length)o+=ION_B64.charAt(((b1&15)<<2)|(b2>>6));if(i+2<b.length)o+=ION_B64.charAt(b2&63)}return o}
+function ionB64d(s){var v={},i;for(i=0;i<ION_B64.length;i++)v[ION_B64.charAt(i)]=i;var o=[],acc=0,nb=0;for(i=0;i<s.length;i++){var x=v[s.charAt(i)];if(x===undefined)return null;acc=(acc<<6)|x;nb+=6;if(nb>=8){nb-=8;o.push((acc>>nb)&255)}}return o}
+function ionFromUtf8(b){var o="",i=0;while(i<b.length){var x=b[i++];if(x<128)o+=String.fromCharCode(x);else if(x>=192&&x<224&&i<b.length)o+=String.fromCharCode(((x&31)<<6)|(b[i++]&63));else if(x>=224&&x<240&&i+1<b.length){o+=String.fromCharCode(((x&15)<<12)|((b[i]&63)<<6)|(b[i+1]&63));i+=2}else o+="?"}return o}
+function ionCodeFor(uid){if(!uid)return"";var b=ionB64e(ionUtf8(String(uid)));return"ION1-"+b+"-"+ionHash(b)}
+function ionUidFromCode(code){if(!code)return null;var c=String(code).trim().replace(/\s+/g,""),p=c.split("-");if(p.length!==3||(p[0]!=="ION1"&&p[0]!=="ATOM1"))return null;if(ionHash(p[1])!==p[2].toLowerCase())return null;var b=ionB64d(p[1]);if(!b)return null;var u=ionFromUtf8(b);if(!u||/[^A-Za-z0-9_-]/.test(u))return null;return u}
+var ionUid=null,ionCode="",ionBal=null,ionDb=null,ionUnsub=null,ionErr=null;
+function vgIonEl(id){try{return document.getElementById(id)}catch(e){return null}}
+function vgIonSay(m){var e=vgIonEl("vg-ion-line");if(e)e.textContent=m}
+function vgIonLoadCode(){try{return localStorage.getItem(ION_CODE_KEY)||""}catch(e){return""}}
+function vgIonSaveCode(c){try{if(c)localStorage.setItem(ION_CODE_KEY,c);else localStorage.removeItem(ION_CODE_KEY)}catch(e){}}
+function vgIonRender(){var link=vgIonEl("vg-ion-link"),un=vgIonEl("vg-ion-unlink"),inp=vgIonEl("vg-ion-code");if(link)link.style.display=ionUid?"none":"";if(un)un.style.display=ionUid?"":"none";if(inp&&ionCode)inp.value=ionCode;if(ionErr){vgIonSay(ionErr);return}if(!ionUid){vgIonSay("Paste your wallet code from arcadio to link your atom wallet. $1 = 100 atoms.");return}if(ionBal===null){vgIonSay("Atom wallet linked — loading balance…");return}vgIonSay("⚡ "+ionBal+" ATOMS linked — revive costs 15. 1 atom = 13 sats.")}
+function vgIonDetach(){if(ionUnsub){try{ionUnsub()}catch(e){}}ionUnsub=null}
+function vgIonAttach(){vgIonDetach();if(!ionUid||!ionDb)return;var ref=ionDb.collection("ion_wallets").doc(ionUid);ionUnsub=ref.onSnapshot(function(doc){ionErr=null;if(doc.exists){var d=doc.data()||{};ionBal=(typeof d.ions==="number")?d.ions:0}else{ionBal=0;vgIonSay("Wallet not found yet — open arcadio once so it creates your wallet, then link again.")}vgIonRender()},function(err){ionBal=null;var code=err&&err.code?String(err.code):"";if(code.indexOf("permission-denied")>=0||code.indexOf("permission")>=0){ionErr="Atom wallet refused — the wallet-code rules update hasn't landed yet. RETRY (free) still works.";}else{ionErr="Couldn't open the atom wallet ("+(code||"connection")+"). Check the code and try again."}vgIonRender()})}
+function vgIonBoot(){if("undefined"===typeof firebase||!firebase||!firebase.firestore){vgIonSay("Atom wallet unavailable — Firebase didn't load. RETRY (free) still works.");return}try{if(!firebase.apps||!firebase.apps.length){firebase.initializeApp(ION_FIREBASE_CONFIG)}}catch(e){}try{ionDb=firebase.firestore()}catch(e){vgIonSay("Atom wallet unavailable — couldn't start Firebase.");return}try{firebase.auth().signInAnonymously().then(function(){var c=ionCode||vgIonLoadCode();if(c)vgIonLink(c,true)}).catch(function(){vgIonSay("Atom wallet unavailable — couldn't sign in.")})}catch(e){vgIonSay("Atom wallet unavailable — couldn't sign in.")}}
+function vgIonLink(code,silent){var uid=ionUidFromCode(code);if(!uid){if(!silent)vgIonSay("That wallet code doesn't look right — copy it from arcadio (starts ATOM1- or ION1-).");return false}ionUid=uid;ionCode=String(code).trim().replace(/\s+/g,"");ionBal=null;ionErr=null;vgIonSaveCode(ionCode);vgIonRender();if(ionDb){vgIonAttach()}else{vgIonBoot()}return true}
+function vgIonUnlink(){vgIonDetach();ionUid=null;ionCode="";ionBal=null;ionErr=null;vgIonSaveCode("");vgIonRender()}
+window.__IONTETRIS={
+reviveState:function(){return{linked:!!ionUid,bal:ionBal}},
+ionReviveCost:ION_REVIVE_COST,
+say:vgIonSay,
+spendRevive:function(cb,cost,unit){var c=(typeof cost==="number"&&cost>0)?cost:ATOM_REVIVE_COST;var u=unit||"ATOMS";if(!ionUid||!ionDb||ionBal===null){cb(false,"Atom wallet not linked.");return}var ref=ionDb.collection("ion_wallets").doc(ionUid);ionDb.runTransaction(function(tx){return tx.get(ref).then(function(doc){if(!doc.exists)throw new Error("no-wallet");var d=doc.data()||{};var bal=(typeof d.ions==="number")?d.ions:0;if(bal<c)throw new Error("insufficient");tx.update(ref,{ions:bal-c,code:ionCode,ts:Date.now()});return bal-c})}).then(function(bal){ionBal=bal;vgIonSay("REVIVED FOR "+c+" "+u+" — BALANCE "+bal+".");vgIonRender();cb(true)}).catch(function(err){var m=err&&err.message?String(err.message):"";if(m==="insufficient")cb(false,"NOT ENOUGH "+u+" — YOUR BALANCE CHANGED. CHECK ARCADIO.");else cb(false,"REVIVE FAILED — TRY AGAIN.")})},
+ionUidFromCode:ionUidFromCode,ionCodeFor:ionCodeFor,link:vgIonLink,unlink:vgIonUnlink,
+getState:function(){return{uid:ionUid,bal:ionBal}}
+};
+var lb=vgIonEl("vg-ion-link");if(lb)lb.addEventListener("click",function(){var inp=vgIonEl("vg-ion-code");vgIonLink(inp?inp.value:"")});
+var ub=vgIonEl("vg-ion-unlink");if(ub)ub.addEventListener("click",function(){vgIonUnlink()});
+var saved=vgIonLoadCode();var inp0=vgIonEl("vg-ion-code");if(inp0&&saved)inp0.value=saved;
+vgIonRender();vgIonBoot();
+})();
+</script>
+<script>
+/* ===== CHECKLIST KIT 2026-11-05 — finish-the-project checklist (shared pattern) =====
+   Toolbar, tutorial, pause, restart, persisted mute, fullscreen, exit guard,
+   local high scores, loading/offline/error overlays, local-only play counts.
+   No game balance, controls, art, scoring or economy changed. */
+(function(){
+'use strict';
+var SLUG='serpent';
+var HSKEY=SLUG+'_highscores_v1',MUTEKEY=SLUG+'_muted_v1',TUTKEY=SLUG+'_tutorial_seen_v1',PLAYSKEY='sw_plays_'+SLUG;
+function $(id){return document.getElementById(id);}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function loadHS(){try{var o=JSON.parse(lsGet(HSKEY)||'null');if(o&&typeof o==='object')return{best:Math.max(0,parseInt(o.best,10)||0),plays:Math.max(0,parseInt(o.plays,10)||0)};}catch(e){}return{best:0,plays:0};}
+function saveHS(h){lsSet(HSKEY,JSON.stringify({best:h.best,plays:h.plays}));}
+function showBest(){var el=$('ckBest');if(el)el.textContent='BEST: '+loadHS().best;}
+function recordScore(v){v=Math.max(0,Math.floor(Number(v)||0));var h=loadHS();if(v>h.best){h.best=v;saveHS(h);}showBest();}
+function notePlay(){try{var n=parseInt(lsGet(PLAYSKEY)||'0',10)||0;lsSet(PLAYSKEY,String(n+1));}catch(e){}}
+var muted=lsGet(MUTEKEY)==='1';
+window.__ckMuted=function(){return muted;};
+function renderSound(){var b=$('ckSound');if(b)b.textContent=muted?'\uD83D\uDD07 MUTED':'\uD83D\uDD0A SOUND ON';}
+function syncPause(){var p=$('ckPaused');if(!p)return;try{if(CK_IS_PAUSED())p.classList.add('on');else p.classList.remove('on');}catch(e){p.classList.remove('on');}}
+function hideTut(){var t=$('ckTut');if(t)t.classList.remove('on');lsSet(TUTKEY,'1');}
+function showTut(){var t=$('ckTut');if(t)t.classList.add('on');}
+function doExit(){try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}try{if(window.top&&window.top!==window){window.top.location.href='index.html';return;}}catch(e){}window.location.href='index.html';}
+function askExit(){var g=$('ckGuard');try{if(CK_IS_ACTIVE()&&g){g.classList.add('on');return;}}catch(e){}doExit();}
+function on(id,ev,fn){var n=$(id);if(n)n.addEventListener(ev,function(e){try{e.stopPropagation();}catch(err){}fn(e);});}
+on('ckPause','click',function(){try{CK_TOGGLE_PAUSE();}catch(e){}setTimeout(syncPause,0);});
+on('ckResume','click',function(){try{if(CK_IS_PAUSED())CK_TOGGLE_PAUSE();}catch(e){}syncPause();});
+on('ckPauseQuit','click',function(){try{if(CK_IS_PAUSED())CK_TOGGLE_PAUSE();}catch(e){}syncPause();doExit();});
+on('ckRestart','click',function(){hideTut();try{CK_RESTART();}catch(e){}setTimeout(syncPause,0);});
+on('ckSound','click',function(){muted=!muted;lsSet(MUTEKEY,muted?'1':'0');renderSound();});
+on('ckFull','click',function(){try{var d=document.documentElement;if(document.fullscreenElement||document.webkitFullscreenElement){if(document.exitFullscreen)document.exitFullscreen();else if(document.webkitExitFullscreen)document.webkitExitFullscreen();}else if(d.requestFullscreen)d.requestFullscreen();else if(d.webkitRequestFullscreen)d.webkitRequestFullscreen();}catch(e){}});
+on('ckArcade','click',function(){askExit();});
+on('ckHelp','click',function(){showTut();});
+on('ckTutOk','click',function(){hideTut();});
+on('ckGuardYes','click',function(){var g=$('ckGuard');if(g)g.classList.remove('on');doExit();});
+on('ckGuardNo','click',function(){var g=$('ckGuard');if(g)g.classList.remove('on');});
+on('ckErrorRetry','click',function(){window.location.reload();});
+document.addEventListener('keydown',function(e){
+  if(e.code==='Escape'){try{if(CK_IS_PAUSED()){CK_TOGGLE_PAUSE();}}catch(err){}syncPause();}
+  else if(e.code==='KeyP'){setTimeout(syncPause,0);}
+});
+document.addEventListener('visibilitychange',function(){setTimeout(syncPause,50);});
+function updOffline(){var b=$('ckOffline');if(!b)return;try{if(navigator.onLine)b.classList.remove('on');else b.classList.add('on');}catch(e){}}
+/* Trust the event itself for show/hide (navigator.onLine can lag the event in some shells); the initial state comes from navigator.onLine. */
+window.addEventListener('offline',function(){var b=$('ckOffline');if(b)b.classList.add('on');});
+window.addEventListener('online',function(){var b=$('ckOffline');if(b)b.classList.remove('on');});
+updOffline();
+window.onerror=function(msg){try{if(window.console&&console.error)console.error(msg);}catch(e){}var e2=$('ckError');if(e2)e2.classList.add('on');return false;};
+function hideLoading(){var l=$('ckLoading');if(l)l.classList.remove('on');}
+if(document.readyState==='complete')hideLoading();else{window.addEventListener('load',hideLoading);setTimeout(hideLoading,1500);}
+
+/* --- SERPENT hooks: S/playing/paused are globals; endGame is block-scoped, so game-over is picked up by a 250ms poll. --- */
+var ckSerpentRecorded=false;
+function CK_IS_ACTIVE(){return window.playing===true;}
+function CK_IS_PAUSED(){return window.playing===true&&window.paused===true;}
+function CK_TOGGLE_PAUSE(){if(!window.S||!window.playing)return;var b=$('bp');if(b)b.click();syncPause();}
+function CK_RESTART(){ckSerpentRecorded=false;try{window.startGame();}catch(e){}syncPause();}
+if(typeof window.startGame==='function'){var _ckStart=window.startGame;window.startGame=function(){notePlay();ckSerpentRecorded=false;_ckStart();syncPause();};}
+setInterval(function(){try{if(window.S&&window.S.over&&!ckSerpentRecorded){ckSerpentRecorded=true;recordScore(window.S.score);}}catch(e){}},250);
+
+if(!lsGet(TUTKEY))showTut();
+showBest();renderSound();syncPause();
+})();
+</script><script>/*HUD-MOL 2026-11-05: read-only molecules pill — shared wraith_coins balance, never writes.*/
+(function(){function u(){var e=document.getElementById('ckMol');if(!e)return;var v=0;try{v=parseFloat(localStorage.getItem('wraith_coins'))||0;}catch(_){}var b=e.querySelector('b');if(b)b.textContent=String(Math.floor(v));}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',u);}else{u();}
+window.addEventListener('storage',u);setInterval(u,2000);})();</script>
+<style id="arc-quality-styles">
+:root{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-low{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-medium{--arc-q-glow:0 0 9px rgba(80,160,255,.12);--arc-q-sat:1.04;--arc-q-contrast:1.015}
+body.arc-quality-high{--arc-q-glow:0 0 16px rgba(65,165,255,.22),0 0 34px rgba(90,95,255,.10);--arc-q-sat:1.13;--arc-q-contrast:1.04}
+body.arc-quality-ultra{--arc-q-glow:0 0 22px rgba(65,185,255,.32),0 0 52px rgba(105,85,255,.18);--arc-q-sat:1.22;--arc-q-contrast:1.07}
+body.arc-quality-low canvas{filter:none!important;box-shadow:none!important;image-rendering:pixelated}
+body.arc-quality-medium canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 5px rgba(92,190,255,.24));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-ultra canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 9px rgba(91,190,255,.38));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.14);outline-offset:1px}
+body.arc-quality-ultra canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.23);outline-offset:2px}
+#arc-quality-widget{position:fixed;z-index:2147483000;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));font:600 12px/1.3 system-ui,sans-serif;color:#f4f7ff}
+#arc-quality-toggle{border:1px solid #6288b9;background:rgba(10,17,31,.94);color:#fff;border-radius:999px;padding:9px 13px;box-shadow:0 4px 18px #0008;cursor:pointer;backdrop-filter:blur(10px)}
+#arc-quality-menu{display:none;position:absolute;right:0;bottom:44px;min-width:176px;padding:10px;background:rgba(9,15,28,.97);border:1px solid #456184;border-radius:14px;box-shadow:0 8px 28px #000a;backdrop-filter:blur(14px)}
+#arc-quality-menu[aria-hidden="false"]{display:block}
+#arc-quality-menu strong{display:block;margin:2px 4px 8px;color:#b9d8ff;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#arc-quality-menu button{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 10px;margin:3px 0;border:1px solid transparent;border-radius:9px;background:#18253a;color:#fff;text-align:left;cursor:pointer}
+#arc-quality-menu button[aria-pressed="true"]{border-color:#70b8ff;background:#203b5b}
+#arc-quality-menu small{display:block;color:#9eafc6;font-weight:400;margin:7px 4px 2px}
+#arc-quality-fx{position:fixed;inset:0;width:100%;height:100%;z-index:2147482000;pointer-events:none;mix-blend-mode:screen;opacity:.0;transition:opacity .35s ease}
+body.arc-quality-medium #arc-quality-fx{opacity:.22}body.arc-quality-high #arc-quality-fx{opacity:.48}body.arc-quality-ultra #arc-quality-fx{opacity:.72}
+@keyframes arcAura{0%,100%{filter:drop-shadow(0 0 5px rgba(60,160,255,.14))}50%{filter:drop-shadow(0 0 13px rgba(110,105,255,.26))}}
+body.arc-quality-high canvas{animation:arcAura 5s ease-in-out infinite}body.arc-quality-ultra canvas{animation:arcAura 3.5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){#arc-quality-widget *,#arc-quality-fx,body.arc-quality-high canvas,body.arc-quality-ultra canvas{animation:none!important;transition:none!important}}
+</style>
+<script id="arc-quality-controller">
+(()=>{
+ const KEY='arcadio.graphicsQuality.v1',levels=['low','medium','high','ultra'];
+ const labels={low:'Low',medium:'Medium',high:'High',ultra:'Ultra'};
+ const descriptions={low:'Minimal effects · best performance',medium:'Balanced color and ambient sparkle',high:'Animated glow, lighting and particle accents',ultra:'Maximum glow, denser particles and interaction bursts'};
+ const counts={low:0,medium:9,high:20,ultra:36};let current='medium';
+ try{const saved=localStorage.getItem(KEY);if(levels.includes(saved))current=saved;}catch(e){}
+ const widget=document.createElement('div');widget.id='arc-quality-widget';
+ widget.innerHTML='<button id="arc-quality-toggle" type="button" aria-expanded="false" aria-controls="arc-quality-menu">✦ Graphics: <span id="arc-quality-current">Medium</span></button><div id="arc-quality-menu" role="group" aria-label="Graphics quality" aria-hidden="true"><strong>Graphics quality</strong>'+levels.map(v=>'<button type="button" data-quality="'+v+'" aria-pressed="false"><span>'+labels[v]+'</span><span aria-hidden="true">'+(v==='low'?'◌':v==='medium'?'◐':v==='high'?'✧':'✦')+'</span></button>').join('')+'<small id="arc-quality-description"></small></div>';
+ document.body.appendChild(widget);
+ const fx=document.createElement('canvas');fx.id='arc-quality-fx';fx.setAttribute('aria-hidden','true');document.body.appendChild(fx);
+ const ctx=fx.getContext('2d');let w=0,h=0,dpr=1,particles=[],bursts=[],raf=0,last=0;
+ const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ function resize(){dpr=Math.min(window.devicePixelRatio||1,current==='ultra'?1.6:current==='high'?1.35:1.15);w=innerWidth;h=innerHeight;fx.width=Math.round(w*dpr);fx.height=Math.round(h*dpr);fx.style.width=w+'px';fx.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);}
+ function seed(){particles=Array.from({length:counts[current]},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:-(.08+Math.random()*.25),r:.5+Math.random()*(current==='ultra'?2:1.2),a:.12+Math.random()*.35,phase:Math.random()*6.28}));}
+ function burst(x,y){if(current==='low'||reduced)return;const n=current==='ultra'?22:current==='high'?13:6;for(let i=0;i<n;i++){const a=Math.PI*2*i/n+(Math.random()-.5)*.35,s=1+Math.random()*(current==='ultra'?3:2);bursts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,r:1+Math.random()*2});}}
+ function frame(t){raf=0;if(!ctx||document.hidden||current==='low'||reduced)return;if(t-last<32){raf=requestAnimationFrame(frame);return;}last=t;ctx.clearRect(0,0,w,h);
+  for(const p of particles){p.x+=p.vx;p.y+=p.vy;if(p.y<-5){p.y=h+5;p.x=Math.random()*w;}p.phase+=.018;ctx.globalAlpha=p.a*(.65+.35*Math.sin(p.phase));ctx.fillStyle=current==='ultra'?'#9fe7ff':'#8ecfff';ctx.shadowBlur=current==='ultra'?12:6;ctx.shadowColor='#63aaff';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+  ctx.shadowBlur=0;bursts=bursts.filter(p=>p.life>0);for(const p of bursts){p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=.025;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle='#b8eaff';ctx.shadowBlur=10;ctx.shadowColor='#72baff';ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.shadowBlur=0;
+  raf=requestAnimationFrame(frame);
+ }
+ function syncFrame(){if(document.hidden||current==='low'||reduced){if(raf)cancelAnimationFrame(raf);raf=0;}else if(!raf)raf=requestAnimationFrame(frame);}
+ document.addEventListener('visibilitychange',syncFrame);window.addEventListener('pageshow',syncFrame);
+ resize();addEventListener('resize',resize,{passive:true});
+ function apply(value,save=true){if(!levels.includes(value))return;current=value;document.body.classList.remove(...levels.map(v=>'arc-quality-'+v));document.body.classList.add('arc-quality-'+value);
+  widget.querySelector('#arc-quality-current').textContent=labels[value];widget.querySelector('#arc-quality-description').textContent=descriptions[value];widget.querySelectorAll('[data-quality]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.quality===value)));
+  document.querySelectorAll('canvas').forEach(c=>{try{const c2=c.getContext('2d');if(c2){c2.imageSmoothingEnabled=value!=='low';if('imageSmoothingQuality'in c2)c2.imageSmoothingQuality=value==='ultra'?'high':value==='high'?'high':'medium';}}catch(e){}});
+  if(save){try{localStorage.setItem(KEY,value)}catch(e){}}seed();if(value==='low'){if(raf)cancelAnimationFrame(raf);raf=0;ctx.clearRect(0,0,w,h);bursts=[];}syncFrame();window.dispatchEvent(new CustomEvent('arcadio:graphicsqualitychange',{detail:{quality:value}}));
+ }
+ const toggle=widget.querySelector('#arc-quality-toggle'),menu=widget.querySelector('#arc-quality-menu');toggle.addEventListener('click',()=>{const open=menu.getAttribute('aria-hidden')==='true';menu.setAttribute('aria-hidden',String(!open));toggle.setAttribute('aria-expanded',String(open));});
+ widget.querySelectorAll('[data-quality]').forEach(b=>b.addEventListener('click',()=>{apply(b.dataset.quality);menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}));
+ document.addEventListener('click',e=>{if(!widget.contains(e.target)){menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}});
+ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('canvas'))burst(e.clientX,e.clientY)},{passive:true});
+ document.addEventListener('keydown',e=>{if([' ','Enter','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){const c=document.querySelector('canvas');if(c){const r=c.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2)}}});
+ apply(current,false);if(reduced)fx.style.display='none';syncFrame();
+})();
+</script>
+
+<script src="/swpvp-skins.js" defer></script>
 </body></html>

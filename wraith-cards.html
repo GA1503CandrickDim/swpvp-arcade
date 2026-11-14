@@ -1,5 +1,11 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>WRAITH CARDS — Wraith's Arcade</title><style>
-*{box-sizing:border-box}body{margin:0;background:#07070d;color:#fff;font-family:monospace}
+*{box-sizing:border-box}body{margin:0;background:#07070d;color:#fff;font-family:monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+/*UI-FIT: flex column so the grid stretches to fill the viewport (cards
+   grow instead of leaving dead space below); no canvas tap mapping here
+   (DOM buttons only), so grid resize is tap-safe. */
+body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+#wrap{flex:1;min-height:0}
+#grid{height:100%;grid-auto-rows:1fr}
 #hud{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;font-size:12px;letter-spacing:1px;color:#ffcc33;gap:6px;flex-wrap:wrap}
 #hud b{color:#fff}
 #pb{padding:14px 16px;min-height:56px;min-width:56px;background:#111;color:#ffcc33;border:1px solid #ffcc33;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
@@ -25,12 +31,69 @@
 #inst{text-align:center;padding:4px 10px 8px;color:#ccc;font-size:11px;line-height:1.5}
 #hub{text-align:center;padding:0 0 14px}
 #hub a{color:#ffcc33;text-decoration:none;font-size:12px}
-</style></head><body>
+@media (max-height:600px){
+/*UI-FIT: short screens (320x568 portrait, short landscape) — compact
+   face-up cards so the 3-row grid still fits: smaller sprite, smaller
+   stat text, ability lines hidden (name/type/stats stay). */
+.card canvas{width:34px;height:34px}
+.card{font-size:8px}
+.card .sp{display:none}
+#inst{font-size:10px}
+}
+@media (orientation:landscape) and (max-height:500px){
+/*UI-FIT: landscape phones — 6 cols x 2 rows so the whole grid fits
+   without scrolling; instructions hidden (the game is two taps per
+   turn), HUD tightened. */
+#grid{grid-template-columns:repeat(6,1fr)}
+#inst{display:none}
+#hud{padding:4px 10px}
+#pb{padding:10px 16px;min-height:48px}
+.card{min-height:96px}
+}
+</style><style>
+/*HUD-SHARED 2026-11-05: Fight-HUD language (gold #8a6d14 border, orange #ff8800 title, #ffd94d pill) + read-only molecules pill. See per-file note.*/
+#ckBar{border-bottom:2px solid #8a6d14;background:rgba(7,7,13,.97)}
+#ckBar button{background:#0d0d10;color:#fff;border:1px solid #8a6d14}
+#ckBar button:active{background:#3a2c05}
+.ck-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:1px 2px 5px}
+.ck-title{color:#ff8800;font-weight:800;font-size:13px;letter-spacing:2px;white-space:normal;overflow-wrap:anywhere}
+.ck-mol{margin-left:auto;flex:none;border:1px solid #8a6d14;background:#171106;color:#ffd94d;border-radius:999px;padding:4px 10px;font-size:12px;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+.ck-mol b{color:#fff}
+body{padding-top:102px!important}
+</style>
+</head><body>
+<style>
+#ckBar{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(7,7,13,.97);border-bottom:2px solid #a86bff;padding:4px 6px 5px;box-sizing:border-box}
+#ckBar .ck-row{display:flex;gap:4px}
+#ckBar button{flex:1;min-width:0;min-height:44px;padding:6px 2px;background:#14141c;color:#fff;border:1px solid #7a2d8f;border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.5px;line-height:1.15;cursor:pointer;touch-action:manipulation;white-space:normal;overflow:hidden}
+#ckBar button:active{background:#2a1a33}
+#ckBar #ckHelp{flex:0 0 44px}
+#ckBest{text-align:center;color:#ffcc33;font-size:11px;letter-spacing:2px;padding-top:3px;font-family:inherit}
+.ck-ov{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.ck-ov.on{display:flex}
+.ck-box{background:#14141c;border:2px solid #a86bff;border-radius:12px;max-width:430px;width:100%;padding:18px;text-align:center;color:#fff;font-family:inherit;max-height:88vh;max-height:88dvh;overflow:auto}
+.ck-t{color:#ffcc33;font-size:20px;font-weight:700;letter-spacing:3px;margin-bottom:10px}
+.ck-b{color:#ddd;font-size:13px;line-height:1.6;margin-bottom:14px;text-align:left}
+.ck-b b{color:#ffcc33}
+.ck-btns{display:flex;flex-direction:column;gap:8px}
+.ck-btns button,.ck-box>button{padding:14px 18px;min-height:48px;background:linear-gradient(90deg,#ff2a2a,#a86bff);color:#fff;border:0;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.ck-btns button.ck-ghost,.ck-box>button.ck-ghost{background:#111;color:#7fd4ff;border:1px solid #3d5a76}
+#ckOffline{display:none;position:fixed;top:0;left:0;right:0;z-index:390;background:#7a2d2d;color:#fff;text-align:center;font-size:12px;letter-spacing:1px;padding:8px;box-sizing:border-box}
+body{padding-top:74px}
+</style>
+<div id="ckBar"><div class="ck-top"><span class="ck-title">WRAITH CARDS</span><span class="ck-mol" id="ckMol">⚛ <b>0</b></span></div><div class="ck-row"><button id="ckPause" type="button">⏸ PAUSE</button><button id="ckRestart" type="button">↻ RESTART</button><button id="ckSound" type="button">🔊 SOUND ON</button><button id="ckFull" type="button">⛶ FULLSCREEN</button><button id="ckArcade" type="button">⌂ ARCADE</button><button id="ckHelp" type="button" aria-label="How to play">?</button></div><div id="ckBest">🏆 BEST: —</div></div>
+<div id="ckLoading" class="ck-ov on"><div class="ck-box"><div class="ck-t">LOADING…</div><div class="ck-b" style="text-align:center">Warming up the game…</div></div></div>
+<div id="ckOffline">⚠ OFFLINE — YOUR PROGRESS SAVES ON THIS DEVICE.</div>
+<div id="ckTut" class="ck-ov" role="dialog" aria-modal="true" aria-label="How to play"><div class="ck-box"><div class="ck-t">WRAITH CARDS</div><div class="ck-b"><b>GOAL</b> — Flip two cards per turn and match all <b>6 pairs</b> (12 cards). The 2nd Cinderkit pair is gold-framed ★ SHINY — same creature, different look.<br><b>CONTROLS</b> — Tap / click a card to flip it. Arrow keys move between cards, Enter or Space flips the focused card. <b>P</b> pauses, <b>R</b> restarts.<br><b>SCORING</b> — Every flipped pair counts as 1 move. Fewer moves is better — your <b>BEST</b> is the fewest moves to clear the board, and the clock runs too. Matched creatures join your ★ card collection (shared with the other games).</div><div class="ck-btns"><button id="ckTutOk" type="button">GOT IT — PLAY!</button></div></div></div>
+<div id="ckPaused" class="ck-ov" role="dialog" aria-modal="true" aria-label="Paused"><div class="ck-box"><div class="ck-t">⏸ PAUSED</div><div class="ck-b" style="text-align:center">Take a breather — the game is frozen.</div><div class="ck-btns"><button id="ckResume" type="button">▶ RESUME</button><button id="ckQuit" type="button" class="ck-ghost">⌂ QUIT TO ARCADE</button></div></div></div>
+<div id="ckExit" class="ck-ov" role="dialog" aria-modal="true" aria-label="Exit game?"><div class="ck-box"><div class="ck-t">EXIT?</div><div class="ck-b" style="text-align:center">Your progress is saved.</div><div class="ck-btns"><button id="ckExitGo" type="button">EXIT</button><button id="ckExitStay" type="button" class="ck-ghost">STAY</button></div></div></div>
+<div id="ckError" class="ck-ov" role="dialog" aria-modal="true" aria-label="Something went wrong"><div class="ck-box"><div class="ck-t">SOMETHING WENT WRONG</div><div class="ck-b" style="text-align:center">The game hit a snag. Your progress is saved on this device.</div><div class="ck-btns"><button id="ckRetry" type="button">↻ RETRY</button><button id="ckKeepPlaying" type="button" class="ck-ghost">KEEP PLAYING</button></div></div></div>
+<script>window.addEventListener('error',function(ev){try{if(window.console&&console.error)console.error(ev&&ev.error||ev&&ev.message||'ck-error');}catch(e){}var o=document.getElementById('ckError');if(o)o.classList.add('on');var l=document.getElementById('ckLoading');if(l)l.classList.remove('on');});</script>
 <div id="hud"><span>MOVES <b id="mv">0</b></span><span>TIME <b id="tm">0:00</b></span><span>PAIRS <b id="pr">0/6</b></span><span>BEST <b id="bs">—</b></span><button id="pb" aria-label="Pause">⏸</button></div>
 <div id="wrap"><div id="grid" aria-label="Card grid"></div>
 <div id="ov"><h1 id="ovt">WRAITH CARDS</h1><p id="ovp"></p><div id="ovb"></div></div></div>
 <p id="inst">FLIP TWO CARDS PER TURN · MATCH ALL 6 PAIRS<br>THE 2ND CINDERKIT PAIR IS GOLD-FRAMED + ★ SHINY — SAME CREATURE, DIFFERENT LOOK<br>MATCHED CREATURES JOIN YOUR ★ CARD COLLECTION (SHARED WITH THE OTHER GAMES)</p>
-<div id="hub"><a href="index.html">← BACK TO HUB</a></div>
+<div id="hub"><a href="index.html" onclick="if(window.ckRequestExit){window.ckRequestExit();}else{goHub();}return false;">← BACK TO HUB</a></div>
 <script>
 var CRET=[{n:'Cinderkit',t:0,hp:36,a:4,d:2,s:4,X:['FIRST FLARE','First attack each battle hits +50%.'],mv:[['Spark Nip',8,0],['Cinder Rush',12,0],['Ash Veil',10,1],['Flare Burst',18,0]]},{n:'Pebblit',t:1,hp:44,a:3,d:5,s:1,X:['STONE SKIN','Takes 1 less damage (min 1).'],mv:[['Rock Tap',8,1],['Stone Slam',13,1],['Dust Guard',9,2],['Quake Hit',17,1]]},{n:'Bloomimp',t:2,hp:34,a:3,d:3,s:3,X:['BLOOM DRAIN','Heals 3 HP after it attacks.'],mv:[['Petal Cut',9,2],['Vine Lash',12,2],['Spore Puff',10,3],['Bloom Burst',17,2]]},{n:'Galewing',t:3,hp:32,a:4,d:2,s:5,X:['TAILWIND','20% chance to strike twice.'],mv:[['Gust Peck',9,3],['Wind Dash',12,3],['Feather Fan',10,0],['Storm Dive',18,3]]}];
 var CTYP=['EMBER','STONE','BLOOM','GALE'];
@@ -56,7 +119,7 @@ var gridEl=(typeof document!=='undefined')?document.getElementById('grid'):null;
 if(gridEl){
 function $(id){return document.getElementById(id);}
 var AC=null;
-function beep(f,d){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type='square';o.frequency.value=f;v.gain.value=.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
+function beep(f,d){if(typeof ckMuted==='function'&&ckMuted())return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type='square';o.frequency.value=f;v.gain.value=.03;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d);}catch(e){}}
 var G=null,els=[],state='menu',paused=false,hidePaused=false,tsReset=false,lastTs=0,lastTm='';
 function bestText(){var b=loadBest(localStorage);return b?(b.moves+' MOVES · '+fmtTime(b.time)):'—';}
 function collCount(){var g=cardsGet(localStorage),n=0;CREATURES.forEach(function(c){if(g.indexOf(c.n)>=0)n++;});return n;}
@@ -65,11 +128,11 @@ function hideOv(){$('ov').style.display='none';}
 function hud(){$('mv').textContent=G?G.moves:0;$('pr').textContent=(G?G.pairs:0)+'/'+PAIRS.length;$('bs').textContent=bestText();}
 function updateCard(i){var c=G.deck[i],b=els[i];b.classList.toggle('up',c.up||c.matched);b.classList.toggle('matched',c.matched);b.classList.toggle('shiny',!!c.shiny);if(c.up||c.matched){var cr=CREATURES[c.k];b.innerHTML='<canvas width="64" height="64"></canvas><div class="nm">'+cr.n+(c.shiny?' ★':'')+'</div><div class="el">'+CTYP[cr.t]+' · HP '+cr.hp+'</div><div>ATK '+pips(cr.a)+' '+cr.a+'<br>DEF '+pips(cr.d)+' '+cr.d+'<br>SPD '+pips(cr.s)+' '+cr.s+'</div><div class="sp">★ '+cr.X[0]+'<br>'+cr.X[1]+'</div>'+(c.shiny?'<div class="shn">★ SHINY VARIANT — SAME CREATURE</div>':'');drawSpr(b.querySelector('canvas'),c.k,c.shiny);b.setAttribute('aria-label',cr.n+(c.shiny?' shiny variant':'')+', '+CTYP[cr.t]);}else{b.innerHTML='<div class="back">★<br>?</div>';b.setAttribute('aria-label','Face-down card '+(i+1));}}
 function renderDeal(){$('grid').innerHTML='';els=[];G.deck.forEach(function(c,i){var b=document.createElement('button');b.className='card';b.type='button';b.dataset.i=i;b.addEventListener('click',function(){onFlip(i);});$('grid').appendChild(b);els.push(b);updateCard(i);});}
-function onFlip(i){if(!G||state!=='play'||G.won||G.paused)return;var before=G.open.slice();var r=flipCard(G,i);if(r==='ignored')return;[i].concat(before).forEach(updateCard);hud();if(r==='flip')beep(520,.05);else if(r==='match')beep(880,.1);else beep(220,.08);if(G.won){state='won';beep(1320,.2);showOv('YOU WIN!','ALL 6 PAIRS MATCHED<br>MOVES '+G.moves+' · TIME '+fmtTime(G.elapsed)+(G.bestNew?'<br>★ NEW BEST! ★':'<br>BEST '+bestText())+'<br>COLLECTION '+collCount()+'/5 IN THIS BROWSER',[[ '↻ PLAY AGAIN',startGame],[ 'MENU',showMenu,true]]);}}
-function startGame(){G=createGame(null,localStorage);state='play';paused=false;hidePaused=false;tsReset=true;renderDeal();hud();hideOv();if(els[0])els[0].focus();}
+function onFlip(i){if(!G||state!=='play'||G.won||G.paused)return;var before=G.open.slice();var r=flipCard(G,i);if(r==='ignored')return;[i].concat(before).forEach(updateCard);hud();if(r==='flip')beep(520,.05);else if(r==='match')beep(880,.1);else beep(220,.08);if(G.won){state='won';beep(1320,.2);if(typeof ckNoteScore==='function')ckNoteScore(G.moves);showOv('YOU WIN!','ALL 6 PAIRS MATCHED<br>MOVES '+G.moves+' · TIME '+fmtTime(G.elapsed)+(G.bestNew?'<br>★ NEW BEST! ★':'<br>BEST '+bestText())+'<br>COLLECTION '+collCount()+'/5 IN THIS BROWSER',[[ '↻ PLAY AGAIN',startGame],[ 'MENU',showMenu,true]]);}}
+function startGame(){if(typeof ckRunStart==='function')ckRunStart();G=createGame(null,localStorage);state='play';paused=false;hidePaused=false;tsReset=true;renderDeal();hud();hideOv();if(els[0])els[0].focus();}
 function showMenu(){G=null;state='menu';paused=false;hidePaused=false;hud();showOv('WRAITH CARDS','FLIP TWO CARDS · MATCH THE PAIR<br>5 CREATURES · 6 PAIRS · 12 CARDS<br>BEST '+bestText()+' · COLLECTION '+collCount()+'/5 IN THIS BROWSER',[[ '▶ START',startGame]]);}
-function setPaused(p){paused=p;if(G)G.paused=p;if(p)showOv('PAUSED','TAP TO RESUME',[['▶ RESUME',resumeGame]]);else hideOv();}
-function resumeGame(){if(!paused)return;paused=false;hidePaused=false;if(G)G.paused=false;tsReset=true;hideOv();}
+function setPaused(p){paused=p;if(G)G.paused=p;if(typeof ckShowPaused==='function')ckShowPaused(p);else if(p)showOv('PAUSED','TAP TO RESUME',[['▶ RESUME',resumeGame]]);else hideOv();}
+function resumeGame(){if(!paused)return;paused=false;hidePaused=false;if(G)G.paused=false;tsReset=true;hideOv();if(typeof ckShowPaused==='function')ckShowPaused(false);}
 function pauseToggle(){if(state!=='play')return;if(paused)resumeGame();else{hidePaused=false;setPaused(true);}}
 $('pb').addEventListener('click',pauseToggle);
 document.addEventListener('visibilitychange',function(){if(document.hidden){if(state==='play'&&!paused){hidePaused=true;setPaused(true);}}else if(hidePaused)resumeGame();});
@@ -78,6 +141,131 @@ $('grid').addEventListener('keydown',function(e){var t=e.target;if(!t.dataset||t
 document.addEventListener('keydown',function(e){if(e.code==='KeyP')pauseToggle();if(e.code==='KeyR'&&(state==='play'||state==='won'))startGame();});
 function loop(ts){requestAnimationFrame(loop);if(!G)return;if(state==='play'&&!paused){var dt=ts-lastTs;lastTs=ts;if(tsReset){dt=0;tsReset=false;}dt=Math.min(dt,100);var pend=G.pending.slice(),wasLock=G.lock;tick(G,dt);if(wasLock&&!G.lock)pend.forEach(updateCard);var tm=fmtTime(G.elapsed);if(tm!==lastTm){lastTm=tm;$('tm').textContent=tm;}}else{lastTs=ts;}}
 showMenu();hud();
+/* ===== CHECKLIST KIT (finish-the-project, 2026-11-05) — toolbar, tutorial, pause, restart, mute, fullscreen, exit guard, local high scores, loading/offline/error, local-only analytics. No balance, scoring, control or economy changes. ===== */
+var CK_SLUG='cards',CK_HS_KEY='cards_highscores_v1',CK_MUTE_KEY='cards_muted_v1',CK_TUT_KEY='cards_tutorial_seen_v1',CK_PLAYS_KEY='sw_plays_cards',CK_UNIT='MOVES',CK_LOWER=true;
+function ckEl(id){return document.getElementById(id);}
+function ckLSGet(k){try{return window.localStorage.getItem(k);}catch(e){return null;}}
+function ckLSSet(k,v){try{window.localStorage.setItem(k,v);}catch(e){}}
+function ckLoadHS(){try{var o=JSON.parse(ckLSGet(CK_HS_KEY)||'null');if(o&&typeof o==='object')return{best:(+o.best)||0,plays:(+o.plays)||0};}catch(e){}return{best:0,plays:0};}
+function ckSaveHS(o){ckLSSet(CK_HS_KEY,JSON.stringify(o));}
+function ckFmtBest(n){return n+' '+CK_UNIT;}
+function ckBestLine(){var h=ckLoadHS();return h.best>0?('\u{1F3C6} BEST: '+ckFmtBest(h.best)):'\u{1F3C6} BEST: \u2014';}
+function ckBestSuffix(){var h=ckLoadHS();return h.best>0?('<br>'+ckBestLine()):'';}
+function ckSyncBest(){var el=ckEl('ckBest');if(el)el.textContent=ckBestLine();}
+function ckBetter(n,cur){if(CK_LOWER)return cur<=0||n<cur;return n>cur;}
+function ckNoteScore(n){if(typeof n!=='number'||!isFinite(n))return;var h=ckLoadHS();if(ckBetter(n,h.best))h.best=n;ckSaveHS(h);ckSyncBest();}
+function ckRunStart(){try{var p=parseInt(ckLSGet(CK_PLAYS_KEY)||'0',10)||0;ckLSSet(CK_PLAYS_KEY,String(p+1));}catch(e){}var h=ckLoadHS();h.plays=(h.plays||0)+1;ckSaveHS(h);ckSyncBest();}
+function ckMuted(){try{return ckLSGet(CK_MUTE_KEY)==='1';}catch(e){return false;}}
+function ckSetMuted(m){ckLSSet(CK_MUTE_KEY,m?'1':'0');var b=ckEl('ckSound');if(b)b.textContent=m?'\u{1F507} MUTED':'\u{1F50A} SOUND ON';}
+function ckTutSeen(){try{return ckLSGet(CK_TUT_KEY)==='1';}catch(e){return false;}}
+function ckShowTut(){var o=ckEl('ckTut');if(o)o.classList.add('on');}
+function ckHideTut(){var o=ckEl('ckTut');if(o)o.classList.remove('on');}
+function ckDismissTut(){ckLSSet(CK_TUT_KEY,'1');ckHideTut();}
+function ckShowPaused(on){var o=ckEl('ckPaused');if(o)o.classList.toggle('on',!!on);var b=ckEl('ckPause');if(b)b.textContent=on?'\u25B6 RESUME':'\u23F8 PAUSE';}
+var ckExitOpen=false;
+function ckShowExit(on){var o=ckEl('ckExit');if(o)o.classList.toggle('on',!!on);ckExitOpen=!!on;}
+function ckDoExit(){try{if(typeof goHub==='function'){goHub();return;}}catch(e){}try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}try{window.location.href='index.html';}catch(e){}}
+function ckRequestExit(){if(ckRunActive())ckShowExit(true);else ckDoExit();}
+function ckToggleFs(){try{if(document.fullscreenElement){var p=document.exitFullscreen&&document.exitFullscreen();if(p&&p.catch)p.catch(function(){});}else if(document.documentElement.requestFullscreen){var q=document.documentElement.requestFullscreen();if(q&&q.catch)q.catch(function(){});}else if(document.documentElement.webkitRequestFullscreen){document.documentElement.webkitRequestFullscreen();}}catch(e){}}
+function ckSyncOffline(){var b=ckEl('ckOffline');if(!b)return;var off=false;try{off=!navigator.onLine;}catch(e){}b.style.display=off?'block':'none';}
+function ckReady(){var o=ckEl('ckLoading');if(o)o.classList.remove('on');ckSyncBest();ckSyncOffline();if(!ckTutSeen())ckShowTut();}
+
+function ckRunActive(){return (state==='play'&&!!G&&!G.won);}
+function ckOnPauseBtn(){pauseToggle();}
+function ckOnResume(){resumeGame();}
+(function(){
+  ckSetMuted(ckMuted());
+  var b;
+  b=ckEl('ckPause');if(b)b.addEventListener('click',function(){ckOnPauseBtn();});
+  b=ckEl('ckRestart');if(b)b.addEventListener('click',function(){startGame();});
+  b=ckEl('ckSound');if(b)b.addEventListener('click',function(){ckSetMuted(!ckMuted());});
+  b=ckEl('ckFull');if(b)b.addEventListener('click',function(){ckToggleFs();});
+  b=ckEl('ckArcade');if(b)b.addEventListener('click',function(){ckRequestExit();});
+  b=ckEl('ckHelp');if(b)b.addEventListener('click',function(){ckShowTut();});
+  b=ckEl('ckResume');if(b)b.addEventListener('click',function(){ckOnResume();});
+  b=ckEl('ckQuit');if(b)b.addEventListener('click',function(){ckOnResume();ckRequestExit();});
+  b=ckEl('ckTutOk');if(b)b.addEventListener('click',function(){ckDismissTut();});
+  b=ckEl('ckExitGo');if(b)b.addEventListener('click',function(){ckShowExit(false);ckDoExit();});
+  b=ckEl('ckExitStay');if(b)b.addEventListener('click',function(){ckShowExit(false);});
+  b=ckEl('ckRetry');if(b)b.addEventListener('click',function(){try{window.location.reload();}catch(e){}});
+  b=ckEl('ckKeepPlaying');if(b)b.addEventListener('click',function(){var o=ckEl('ckError');if(o)o.classList.remove('on');});
+  ['ckPause','ckRestart','ckSound','ckFull','ckArcade','ckHelp','ckResume','ckQuit','ckTutOk','ckExitGo','ckExitStay','ckRetry','ckKeepPlaying'].forEach(function(id){var el=ckEl(id);if(el)el.addEventListener('click',function(e){e.stopPropagation();});});
+  document.addEventListener('keydown',function(e){if(e&&e.key==='Escape'){if(ckExitOpen)ckShowExit(false);else if(typeof paused!=='undefined'&&paused)ckOnResume();}});
+  window.addEventListener('offline',function(){var b=ckEl('ckOffline');if(b)b.style.display='block';});
+  window.addEventListener('online',function(){var b=ckEl('ckOffline');if(b)b.style.display='none';});
+  window.ckRequestExit=ckRequestExit;
+  ckReady();
+})();
+
 requestAnimationFrame(function(ts){lastTs=ts;requestAnimationFrame(loop);});
 }
-</script></body></html>
+</script><script>function goHub(){try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}try{if(localStorage.getItem('wraith_explore_resume')){location.href='wraith-pet.html';return;}}catch(e){}location.href='index.html';}</script><script>/*HUD-MOL 2026-11-05: read-only molecules pill — shared wraith_coins balance, never writes.*/
+(function(){function u(){var e=document.getElementById('ckMol');if(!e)return;var v=0;try{v=parseFloat(localStorage.getItem('wraith_coins'))||0;}catch(_){}var b=e.querySelector('b');if(b)b.textContent=String(Math.floor(v));}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',u);}else{u();}
+window.addEventListener('storage',u);setInterval(u,2000);})();</script>
+<style id="arc-quality-styles">
+:root{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-low{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-medium{--arc-q-glow:0 0 9px rgba(80,160,255,.12);--arc-q-sat:1.04;--arc-q-contrast:1.015}
+body.arc-quality-high{--arc-q-glow:0 0 16px rgba(65,165,255,.22),0 0 34px rgba(90,95,255,.10);--arc-q-sat:1.13;--arc-q-contrast:1.04}
+body.arc-quality-ultra{--arc-q-glow:0 0 22px rgba(65,185,255,.32),0 0 52px rgba(105,85,255,.18);--arc-q-sat:1.22;--arc-q-contrast:1.07}
+body.arc-quality-low canvas{filter:none!important;box-shadow:none!important;image-rendering:pixelated}
+body.arc-quality-medium canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 5px rgba(92,190,255,.24));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-ultra canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 9px rgba(91,190,255,.38));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.14);outline-offset:1px}
+body.arc-quality-ultra canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.23);outline-offset:2px}
+#arc-quality-widget{position:fixed;z-index:2147483000;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));font:600 12px/1.3 system-ui,sans-serif;color:#f4f7ff}
+#arc-quality-toggle{border:1px solid #6288b9;background:rgba(10,17,31,.94);color:#fff;border-radius:999px;padding:9px 13px;box-shadow:0 4px 18px #0008;cursor:pointer;backdrop-filter:blur(10px)}
+#arc-quality-menu{display:none;position:absolute;right:0;bottom:44px;min-width:176px;padding:10px;background:rgba(9,15,28,.97);border:1px solid #456184;border-radius:14px;box-shadow:0 8px 28px #000a;backdrop-filter:blur(14px)}
+#arc-quality-menu[aria-hidden="false"]{display:block}
+#arc-quality-menu strong{display:block;margin:2px 4px 8px;color:#b9d8ff;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#arc-quality-menu button{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 10px;margin:3px 0;border:1px solid transparent;border-radius:9px;background:#18253a;color:#fff;text-align:left;cursor:pointer}
+#arc-quality-menu button[aria-pressed="true"]{border-color:#70b8ff;background:#203b5b}
+#arc-quality-menu small{display:block;color:#9eafc6;font-weight:400;margin:7px 4px 2px}
+#arc-quality-fx{position:fixed;inset:0;width:100%;height:100%;z-index:2147482000;pointer-events:none;mix-blend-mode:screen;opacity:.0;transition:opacity .35s ease}
+body.arc-quality-medium #arc-quality-fx{opacity:.22}body.arc-quality-high #arc-quality-fx{opacity:.48}body.arc-quality-ultra #arc-quality-fx{opacity:.72}
+@keyframes arcAura{0%,100%{filter:drop-shadow(0 0 5px rgba(60,160,255,.14))}50%{filter:drop-shadow(0 0 13px rgba(110,105,255,.26))}}
+body.arc-quality-high canvas{animation:arcAura 5s ease-in-out infinite}body.arc-quality-ultra canvas{animation:arcAura 3.5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){#arc-quality-widget *,#arc-quality-fx,body.arc-quality-high canvas,body.arc-quality-ultra canvas{animation:none!important;transition:none!important}}
+</style>
+<script id="arc-quality-controller">
+(()=>{
+ const KEY='arcadio.graphicsQuality.v1',levels=['low','medium','high','ultra'];
+ const labels={low:'Low',medium:'Medium',high:'High',ultra:'Ultra'};
+ const descriptions={low:'Minimal effects · best performance',medium:'Balanced color and ambient sparkle',high:'Animated glow, lighting and particle accents',ultra:'Maximum glow, denser particles and interaction bursts'};
+ const counts={low:0,medium:9,high:20,ultra:36};let current='medium';
+ try{const saved=localStorage.getItem(KEY);if(levels.includes(saved))current=saved;}catch(e){}
+ const widget=document.createElement('div');widget.id='arc-quality-widget';
+ widget.innerHTML='<button id="arc-quality-toggle" type="button" aria-expanded="false" aria-controls="arc-quality-menu">✦ Graphics: <span id="arc-quality-current">Medium</span></button><div id="arc-quality-menu" role="group" aria-label="Graphics quality" aria-hidden="true"><strong>Graphics quality</strong>'+levels.map(v=>'<button type="button" data-quality="'+v+'" aria-pressed="false"><span>'+labels[v]+'</span><span aria-hidden="true">'+(v==='low'?'◌':v==='medium'?'◐':v==='high'?'✧':'✦')+'</span></button>').join('')+'<small id="arc-quality-description"></small></div>';
+ document.body.appendChild(widget);
+ const fx=document.createElement('canvas');fx.id='arc-quality-fx';fx.setAttribute('aria-hidden','true');document.body.appendChild(fx);
+ const ctx=fx.getContext('2d');let w=0,h=0,dpr=1,particles=[],bursts=[],raf=0,last=0;
+ const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ function resize(){dpr=Math.min(window.devicePixelRatio||1,current==='ultra'?1.6:current==='high'?1.35:1.15);w=innerWidth;h=innerHeight;fx.width=Math.round(w*dpr);fx.height=Math.round(h*dpr);fx.style.width=w+'px';fx.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);}
+ function seed(){particles=Array.from({length:counts[current]},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:-(.08+Math.random()*.25),r:.5+Math.random()*(current==='ultra'?2:1.2),a:.12+Math.random()*.35,phase:Math.random()*6.28}));}
+ function burst(x,y){if(current==='low'||reduced)return;const n=current==='ultra'?22:current==='high'?13:6;for(let i=0;i<n;i++){const a=Math.PI*2*i/n+(Math.random()-.5)*.35,s=1+Math.random()*(current==='ultra'?3:2);bursts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,r:1+Math.random()*2});}}
+ function frame(t){raf=0;if(!ctx||document.hidden||current==='low'||reduced)return;if(t-last<32){raf=requestAnimationFrame(frame);return;}last=t;ctx.clearRect(0,0,w,h);
+  for(const p of particles){p.x+=p.vx;p.y+=p.vy;if(p.y<-5){p.y=h+5;p.x=Math.random()*w;}p.phase+=.018;ctx.globalAlpha=p.a*(.65+.35*Math.sin(p.phase));ctx.fillStyle=current==='ultra'?'#9fe7ff':'#8ecfff';ctx.shadowBlur=current==='ultra'?12:6;ctx.shadowColor='#63aaff';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+  ctx.shadowBlur=0;bursts=bursts.filter(p=>p.life>0);for(const p of bursts){p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=.025;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle='#b8eaff';ctx.shadowBlur=10;ctx.shadowColor='#72baff';ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.shadowBlur=0;
+  raf=requestAnimationFrame(frame);
+ }
+ function syncFrame(){if(document.hidden||current==='low'||reduced){if(raf)cancelAnimationFrame(raf);raf=0;}else if(!raf)raf=requestAnimationFrame(frame);}
+ document.addEventListener('visibilitychange',syncFrame);window.addEventListener('pageshow',syncFrame);
+ resize();addEventListener('resize',resize,{passive:true});
+ function apply(value,save=true){if(!levels.includes(value))return;current=value;document.body.classList.remove(...levels.map(v=>'arc-quality-'+v));document.body.classList.add('arc-quality-'+value);
+  widget.querySelector('#arc-quality-current').textContent=labels[value];widget.querySelector('#arc-quality-description').textContent=descriptions[value];widget.querySelectorAll('[data-quality]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.quality===value)));
+  document.querySelectorAll('canvas').forEach(c=>{try{const c2=c.getContext('2d');if(c2){c2.imageSmoothingEnabled=value!=='low';if('imageSmoothingQuality'in c2)c2.imageSmoothingQuality=value==='ultra'?'high':value==='high'?'high':'medium';}}catch(e){}});
+  if(save){try{localStorage.setItem(KEY,value)}catch(e){}}seed();if(value==='low'){if(raf)cancelAnimationFrame(raf);raf=0;ctx.clearRect(0,0,w,h);bursts=[];}syncFrame();window.dispatchEvent(new CustomEvent('arcadio:graphicsqualitychange',{detail:{quality:value}}));
+ }
+ const toggle=widget.querySelector('#arc-quality-toggle'),menu=widget.querySelector('#arc-quality-menu');toggle.addEventListener('click',()=>{const open=menu.getAttribute('aria-hidden')==='true';menu.setAttribute('aria-hidden',String(!open));toggle.setAttribute('aria-expanded',String(open));});
+ widget.querySelectorAll('[data-quality]').forEach(b=>b.addEventListener('click',()=>{apply(b.dataset.quality);menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}));
+ document.addEventListener('click',e=>{if(!widget.contains(e.target)){menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}});
+ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('canvas'))burst(e.clientX,e.clientY)},{passive:true});
+ document.addEventListener('keydown',e=>{if([' ','Enter','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){const c=document.querySelector('canvas');if(c){const r=c.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2)}}});
+ apply(current,false);if(reduced)fx.style.display='none';syncFrame();
+})();
+</script>
+
+<script src="/swpvp-skins.js" defer></script>
+</body></html>

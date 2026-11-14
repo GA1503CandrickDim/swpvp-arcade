@@ -1,0 +1,905 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>WRAITH EXCHANGE — AETHERIS'S SHOP</title><style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#07070c;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+body{padding-top:74px;min-height:100vh;min-height:100dvh}
+.wrap{max-width:480px;margin:0 auto;padding:6px 10px 20px}
+h1{margin:4px 0 0;text-align:center;font-size:24px;letter-spacing:3px}
+h1 b{color:#ff2d55}
+.tag{text-align:center;font-size:11px;letter-spacing:2px;color:#b79cff;margin-top:2px}
+.playnote{text-align:center;font-size:11px;line-height:1.5;color:#8f7cc9;padding:6px 8px 0}
+.playnote b{color:#ffcc33}
+.sqref{text-align:center;font-size:11px;line-height:1.5;color:#8f7cc9;padding:10px 8px 0}
+.sqref a{color:#ffcc33;font-weight:700}
+#walletLine{display:flex;justify-content:space-between;gap:8px;margin:10px 0 2px;font-size:13px;letter-spacing:1px;color:#d9ccff}
+#walletLine b{color:#ffcc33;font-size:16px}
+#portLine{text-align:center;font-size:13px;letter-spacing:1px;color:#d9ccff;margin:2px 0 8px}
+#portLine b{color:#39ff8a;font-size:18px}
+#chartWrap{position:relative;width:100%;margin:0 auto;border:2px solid #5b2ea6;border-radius:14px;overflow:hidden;background:#0a0714;box-shadow:0 0 24px rgba(123,47,247,.35)}
+#chart{display:block;width:100%;height:140px;touch-action:none;user-select:none;-webkit-user-select:none}
+#selLine{text-align:center;font-size:12px;letter-spacing:2px;color:#b79cff;padding:6px 0 2px}
+#selLine b{color:#fff}
+.mtabs{display:flex;gap:8px;margin:10px 0 2px}
+.mtab{flex:1;min-height:44px;border:1px solid #5b2ea6;border-radius:10px;background:#14141c;color:#b79cff;font:inherit;font-weight:800;font-size:14px;letter-spacing:2px;cursor:pointer}
+.mtab.on{background:linear-gradient(90deg,#ff4040,#a86bff);color:#fff}
+.mtab small{display:block;font-size:10px;font-weight:400;letter-spacing:1px;color:#8f7cc9}
+.mtab.on small{color:#fff}
+.coin{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#14141c;border:1px solid #333;border-radius:10px;color:#fff;padding:8px 10px;margin:6px 0;font-family:inherit;cursor:pointer;touch-action:manipulation}
+.coin.sel{border-color:#ffcc33;box-shadow:0 0 12px rgba(255,204,51,.35)}
+.coin.btc{border-color:#f7931a;box-shadow:0 0 12px rgba(247,147,26,.35)}
+.coin.btc .nm{color:#f7931a}
+.coin .nm{flex:0 0 92px;font-weight:800;font-size:13px;letter-spacing:1px}
+.coin .nm small{display:block;font-weight:400;font-size:10px;color:#8f7cc9;letter-spacing:0}
+.coin .pr{flex:1;font-size:14px}
+.coin .pr small{display:block;font-size:10px;color:#8f7cc9}
+.coin .chg{flex:0 0 64px;text-align:right;font-weight:800;font-size:13px}
+.coin .chg.up{color:#39ff8a}.coin .chg.dn{color:#ff2d55}
+.coin canvas{flex:0 0 64px;width:64px;height:28px}
+#tradeBox{background:#14141c;border:2px solid #5b2ea6;border-radius:12px;padding:12px;margin-top:10px}
+#tradeBox .row{display:flex;gap:8px;margin-top:8px}
+#tradeBox input{flex:1;min-width:0;min-height:48px;background:#0b0b12;color:#fff;border:1px solid #555;border-radius:8px;padding:8px 10px;font-size:16px;font-family:inherit}
+#tradeBox button{min-height:48px;padding:12px 10px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;color:#fff}
+#buyBtn{flex:1;background:linear-gradient(90deg,#0a7a3d,#39ff8a);color:#04140a}
+#sellBtn{flex:1;background:linear-gradient(90deg,#c81e3f,#ff2d55)}
+#tradeBox button:disabled{opacity:.4;cursor:default}
+.quick{display:flex;gap:6px;margin-top:8px}
+.quick button{flex:1;min-height:40px;background:#111;color:#7fd4ff;border:1px solid #3d5a76;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+#tradeMsg{text-align:center;min-height:18px;font-size:12px;font-weight:700;letter-spacing:1px;color:#39ff8a;margin-top:8px}
+#newsLine{background:#0a0714;border:1px solid #5b2ea6;border-radius:10px;padding:10px;font-size:12px;line-height:1.6;color:#d9ccff;margin-top:10px;min-height:38px}
+#newsLine b{color:#ffcc33}
+#logLine{text-align:center;font-size:11px;color:#8f7cc9;line-height:1.6;padding:8px 4px 0}
+#hint{text-align:center;font-size:11px;line-height:1.6;color:#8f7cc9;padding:10px 6px 0}
+#hint b{color:#d9ccff}
+#chainWallet{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;background:#0a0714;border:1px solid #5b2ea6;border-radius:10px;padding:8px 10px;margin:8px 0 4px;font-size:11px;letter-spacing:1px;color:#d9ccff}
+#chainWallet b{color:#ffcc33;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+#chainWallet span{color:#8f7cc9;font-size:10px}
+#chainHead{text-align:center;font-size:11px;letter-spacing:2px;color:#b79cff;margin:8px 0 4px}
+#chainView{display:flex;align-items:center;gap:4px;overflow-x:auto;padding:4px 2px}
+#chainView .blk{flex:0 0 auto;background:#14141c;border:1px solid #a86bff;border-radius:8px;padding:6px 8px;text-align:center;box-shadow:0 0 10px rgba(168,107,255,.25)}
+#chainView .blk b{display:block;font-size:12px;color:#fff}
+#chainView .blk i{display:block;font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#ffcc33}
+#chainView .blk em{display:block;font-style:normal;font-size:9px;letter-spacing:1px;color:#8f7cc9}
+#chainView .lnk{color:#ff2d55;font-size:12px}
+#chainFeed{margin-top:4px;border:1px solid #333;border-radius:10px;background:#0a0714;padding:6px 8px}
+#chainFeed .frow{display:flex;gap:6px;align-items:baseline;font-size:11px;line-height:1.7;color:#d9ccff;border-bottom:1px dashed #2a2a35;padding:2px 0}
+#chainFeed .frow:last-child{border-bottom:0}
+#chainFeed .fhash{font-family:ui-monospace,Menlo,monospace;color:#ffcc33;white-space:nowrap}
+#chainFeed .fkind{color:#ff2d55;font-weight:800;letter-spacing:1px;white-space:nowrap}
+#chainFeed .fdet{color:#b79cff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mineBox{background:#14141c;border:2px solid #5b2ea6;border-radius:12px;padding:12px;margin-top:10px}
+#mineBox .mine-head{font-size:12px;letter-spacing:2px;color:#b79cff}
+#mineBox .mine-head b{color:#ffcc33}
+#mineStats{text-align:center;font-size:13px;letter-spacing:1px;color:#d9ccff;margin:8px 0}
+#mineStats b{color:#ffcc33;font-size:16px}
+#mineRigs .rig{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#0b0b12;border:1px solid #333;border-radius:10px;color:#fff;padding:8px 10px;margin:6px 0;font-family:inherit}
+#mineRigs .rig .nm{flex:1;font-weight:800;font-size:13px;letter-spacing:1px}
+#mineRigs .rig .nm small{display:block;font-weight:400;font-size:10px;color:#8f7cc9;letter-spacing:0}
+#mineRigs .rig .own{flex:0 0 52px;text-align:center;font-size:12px;color:#b79cff}
+#mineRigs .rig button{flex:0 0 86px;min-height:40px;background:linear-gradient(90deg,#8a6d14,#ffcc33);color:#1a1200;border:0;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit}
+#mineRigs .rig button:disabled{opacity:.4;cursor:default}
+#mineConvert{width:100%;min-height:48px;padding:12px 10px;border:0;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;color:#04140a;background:linear-gradient(90deg,#0a7a3d,#39ff8a)}
+#mineConvert:disabled{opacity:.4;cursor:default}
+#mineMsg{text-align:center;min-height:18px;font-size:12px;font-weight:700;letter-spacing:1px;color:#39ff8a;margin-top:8px}
+.mine-note{text-align:center;font-size:11px;line-height:1.6;color:#8f7cc9;padding:8px 4px 0}
+</style><style>
+/*HUD-SHARED 2026-11-05: Fight-HUD language (gold #8a6d14 border, orange #ff8800 title, #ffd94d pill) + read-only molecules pill. See per-file note.*/
+#ckBar{border-bottom:2px solid #8a6d14;background:rgba(7,7,13,.97)}
+#ckBar button{background:#0d0d10;color:#fff;border:1px solid #8a6d14}
+#ckBar button:active{background:#3a2c05}
+.ck-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:1px 2px 5px}
+.ck-title{color:#ff8800;font-weight:800;font-size:13px;letter-spacing:2px;white-space:normal;overflow-wrap:anywhere}
+.ck-mol{margin-left:auto;flex:none;border:1px solid #8a6d14;background:#171106;color:#ffd94d;border-radius:999px;padding:4px 10px;font-size:12px;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+.ck-mol b{color:#fff}
+body{padding-top:102px!important}
+@media (orientation:landscape) and (max-height:500px){.wrap{padding:2px 10px 14px}}
+</style>
+</head>
+<body>
+<style>
+#ckBar{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(7,7,13,.97);border-bottom:2px solid #a86bff;padding:4px 6px 5px;box-sizing:border-box}
+#ckBar .ck-row{display:flex;gap:4px}
+#ckBar button{flex:1;min-width:0;min-height:44px;padding:6px 2px;background:#14141c;color:#fff;border:1px solid #7a2d8f;border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.5px;line-height:1.15;cursor:pointer;touch-action:manipulation;white-space:normal;overflow:hidden}
+#ckBar button:active{background:#2a1a33}
+#ckBar #ckHelp{flex:0 0 44px}
+#ckBest{text-align:center;color:#ffcc33;font-size:11px;letter-spacing:2px;padding-top:3px;font-family:inherit}
+.ck-ov{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.ck-ov.on{display:flex}
+.ck-box{background:#14141c;border:2px solid #a86bff;border-radius:12px;max-width:430px;width:100%;padding:18px;text-align:center;color:#fff;font-family:inherit;max-height:88vh;max-height:88dvh;overflow:auto}
+.ck-t{color:#ffcc33;font-size:20px;font-weight:700;letter-spacing:3px;margin-bottom:10px}
+.ck-b{color:#ddd;font-size:13px;line-height:1.6;margin-bottom:14px;text-align:left}
+.ck-b b{color:#ffcc33}
+.ck-btns{display:flex;flex-direction:column;gap:8px}
+.ck-btns button,.ck-box>button{padding:14px 18px;min-height:48px;background:linear-gradient(90deg,#ff2a2a,#a86bff);color:#fff;border:0;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.ck-btns button.ck-ghost,.ck-box>button.ck-ghost{background:#111;color:#7fd4ff;border:1px solid #3d5a76}
+#ckOffline{display:none;position:fixed;top:0;left:0;right:0;z-index:390;background:#7a2d2d;color:#fff;text-align:center;font-size:12px;letter-spacing:1px;padding:8px;box-sizing:border-box}
+</style>
+<div id="ckBar"><div class="ck-top"><span class="ck-title">WRAITH EXCHANGE</span><span class="ck-mol" id="ckMol">⚛ <b>0</b></span></div><div class="ck-row"><button id="ckPause" type="button">⏸ PAUSE</button><button id="ckRestart" type="button">↻ RESTART</button><button id="ckSound" type="button">🔊 SOUND ON</button><button id="ckFull" type="button">⛶ FULLSCREEN</button><button id="ckArcade" type="button">⌂ ARCADE</button><button id="ckHelp" type="button" aria-label="How to play">?</button></div><div id="ckBest">🏆 BEST: —</div></div>
+<div id="ckLoading" class="ck-ov on"><div class="ck-box"><div class="ck-t">LOADING…</div><div class="ck-b" style="text-align:center">Opening the shop…</div></div></div>
+<div id="ckOffline">⚠ OFFLINE — YOUR PROGRESS SAVES ON THIS DEVICE.</div>
+<div id="ckTut" class="ck-ov" role="dialog" aria-modal="true" aria-label="How to play"><div class="ck-box"><div class="ck-t">WRAITH EXCHANGE</div><div class="ck-b"><b>GOAL</b> — Grow your portfolio. Buy meme coins with <b>atoms</b> when they are cheap, sell when they pump — or buy character <b>stocks</b> with <b>ions</b>. Your <b>BEST</b> portfolio value (in atoms; stocks valued at 2 atoms per ion) is saved on this device.<br><b>TO START</b> — You need at least <b>500 atoms</b> to trade coins. Earn atoms with <b>!daily (+50 atoms a day)</b> in the Tavern, or top up <b>$5 = 500 atoms</b>, or mine ore — rigs from <b>15 atoms</b>, convert up to <b>40 atoms a day</b>. Stocks trade with <b>ions</b> — you need ions in your wallet to buy a share.<br><b>TRADE</b> — Pick a tab — <b>COINS</b> or <b>STOCKS</b> — then tap a product to pick it. Type how many <b>atoms</b> to spend (BUY coins) or how many <b>coins</b> to sell (SELL coins); on STOCKS, type <b>ions</b> to spend (BUY shares) or how many <b>shares</b> to sell (SELL shares). Quick buttons fill the amount for you.<br><b>MARKET</b> — Prices move every few seconds and news moves them more. <b>Coins are play only</b> — no real crypto, winnings stay as atoms. <b>Stocks are real money</b> — ions ($1 = 50 ions), winnings stay as ions in-game, no cash-out beyond your ion balance.<br><b>BITWRAITH (₿)</b> looks Bitcoin-style but is a <b>PLAY coin</b> — not real Bitcoin, worth atoms only, no real money, no cash-out. <b>SPARK</b> is never traded here — it stays the Store's currency.<br><b>PAUSE</b> — Freezes the market. <b>RESTART</b> — Sells everything back at the current prices and opens a fresh market. Your best portfolio is never touched.</div><div class="ck-btns"><button id="ckTutOk" type="button">GOT IT — TRADE!</button></div></div></div>
+<div id="ckPaused" class="ck-ov" role="dialog" aria-modal="true" aria-label="Paused"><div class="ck-box"><div class="ck-t">⏸ PAUSED</div><div class="ck-b" style="text-align:center">The market is frozen — prices are not moving.</div><div class="ck-btns"><button id="ckResume" type="button">▶ RESUME</button><button id="ckQuit" type="button" class="ck-ghost">⌂ QUIT TO ARCADE</button></div></div></div>
+<div id="ckExit" class="ck-ov" role="dialog" aria-modal="true" aria-label="Exit game?"><div class="ck-box"><div class="ck-t">EXIT?</div><div class="ck-b" style="text-align:center">Your coins, stocks and balances are saved on this device.</div><div class="ck-btns"><button id="ckExitGo" type="button">EXIT</button><button id="ckExitStay" type="button" class="ck-ghost">STAY</button></div></div></div>
+<div id="ckError" class="ck-ov" role="dialog" aria-modal="true" aria-label="Something went wrong"><div class="ck-box"><div class="ck-t">SOMETHING WENT WRONG</div><div class="ck-b" style="text-align:center">The shop hit a snag. Your coins, stocks and balances are saved on this device.</div><div class="ck-btns"><button id="ckRetry" type="button">↻ RETRY</button><button id="ckKeepPlaying" type="button" class="ck-ghost">KEEP PLAYING</button></div></div></div>
+<div id="ckLock" class="ck-ov" role="dialog" aria-modal="true" aria-label="Locked"><div class="ck-box"><div class="ck-t">🔒 500 ATOMS TO TRADE</div><div class="ck-b" style="text-align:center">You have <b id="ckLockBal">—</b> atoms.<br><br>Trading opens at <b>500 atoms</b> ($5 worth).<br><br>How to get there:<br><b>!daily</b> in the Tavern — <b>+50 atoms a day</b><br>or top up <b>$5 = 500 atoms</b><br>or mine ore below — rigs from <b>15 atoms</b>, up to <b>40 atoms a day</b>.<br><br>Coins are play-only atoms. Stocks trade in ions (real money) — winnings stay as ions in-game.</div><div class="ck-btns"><button id="ckLockRefresh" type="button">↻ CHECK MY BALANCE</button><button id="ckLockStocks" type="button">📈 TRADE STOCKS (IONS)</button><button id="ckLockMine" type="button">⛏ MINE ORE (RIGS FROM 15 ATOMS)</button><button id="ckLockArcade" type="button" class="ck-ghost">⌂ BACK TO ARCADE</button></div></div></div>
+<script>window.addEventListener('error',function(ev){try{if(window.console&&console.error)console.error(ev&&ev.error||ev&&ev.message||'ck-error');}catch(e){}var o=document.getElementById('ckError');if(o)o.classList.add('on');var l=document.getElementById('ckLoading');if(l)l.classList.remove('on');});</script>
+<div class="wrap">
+<h1>WRAITH <b>EXCHANGE</b></h1>
+<div class="tag">AETHERIS'S SHOP · WRAITH CHAIN · FAKE BLOCKS</div>
+<div class="playnote">Trade meme coins with <b>atoms</b> — or character stocks with <b>ions</b>. Coins are play-only atoms; stocks are real-money ions. No cash-out beyond your ion balance — winnings stay in-game. Blocks below are play-only fakes on a pretend chain — no real wallet, no real chain. <b>BITWRAITH (₿)</b> is a play coin — not real Bitcoin.</div>
+<div id="walletLine"><div>⚛ ATOMS <b id="atomBal">—</b></div><div>◆ IONS <b id="ionBal">—</b></div><div>HELD <b id="heldVal">0</b></div></div>
+<div id="portLine">PORTFOLIO VALUE <b id="portVal">—</b> ATOMS</div>
+<div id="chainWallet">⛓ PLAY WALLET <b id="chainAddr">—</b><span>FAKE ADDRESS · NO REAL WALLET · NO REAL CRYPTO</span></div>
+<div id="chainHead">⛓ WRAITH CHAIN — PLAY ONLY (FAKE BLOCKS)</div>
+<div id="chainView"></div>
+<div id="chainFeed"></div>
+<div id="chartWrap"><canvas id="chart" width="460" height="140"></canvas></div>
+<div id="selLine">CHART: <b id="selName">AETHERIS</b></div>
+<div class="mtabs" role="tablist" aria-label="Market"><button type="button" class="mtab on" id="tabCoins" role="tab" aria-selected="true">🪙 COINS<small>11 products · atoms · play</small></button><button type="button" class="mtab" id="tabStocks" role="tab" aria-selected="false">📈 STOCKS<small>3 characters · ions · real money</small></button></div>
+<div id="coinList"></div>
+<div id="tradeBox">
+<div style="font-size:12px;letter-spacing:2px;color:#b79cff">TRADE <span id="tradeMkt">COINS</span> — <b id="tradeCoin" style="color:#fff">AETHERIS</b></div>
+<div class="row"><input id="amtInput" type="number" inputmode="decimal" min="0" step="any" placeholder="Amount" aria-label="Trade amount"></div>
+<div class="row"><button id="buyBtn" type="button">⬆ BUY (ATOMS)</button><button id="sellBtn" type="button">⬇ SELL (COINS)</button></div>
+<div class="quick"><button type="button" data-q="10">10</button><button type="button" data-q="50">50</button><button type="button" data-q="100">100</button><button type="button" data-q="max">MAX</button></div>
+<div id="tradeMsg"></div>
+</div>
+<div id="mineBox">
+<div class="mine-head">⛏ MINING — ORE → ATOMS · <b>PLAY ONLY</b></div>
+<div id="mineStats">ORE <b id="mineOre">0</b> · RATE <b id="mineRate">0</b>/HR · TODAY <b id="mineDay">0/40</b> ATOMS</div>
+<div id="mineRigs"></div>
+<div class="row"><button id="mineConvert" type="button">⬇ CONVERT ORE → ATOMS</button></div>
+<div id="mineMsg"></div>
+<div class="mine-note">Rigs mine while you're away — up to 8h offline. Convert at most 40 atoms a day. Ore is play-only atoms — no real money, no cash-out.</div>
+</div>
+<div id="newsLine">📰 Market opens… watch the news.</div>
+<div id="logLine"></div>
+<div id="hint"><b>BUY</b> — type atoms to spend &nbsp;·&nbsp; <b>SELL</b> — type coins to sell &nbsp;·&nbsp; <b>B</b> buy · <b>S</b> sell · <b>P</b> pause · <b>Esc</b> resume</div>
+<div class="sqref">💳 <a href="https://squareup.com/refer/SWVPVP0000" target="_blank" rel="noopener">Get Square — Cee's referral link</a><br>Sign up for Square through Cee's referral. It doesn't buy ions — it's just his link.</div>
+</div>
+<script>
+/* WRAITH EXCHANGE — AETHERIS'S SHOP. A stock-market / meme-coin trading
+   game. Coins are our own characters/world only (no real coins, no real
+   tickers) — character coins, our own chemistry coins, and BITWRAITH, a
+   Bitcoin-style PLAY coin (not real Bitcoin). Coins trade in ATOMS (play only); stocks trade in IONS
+   (real money, $1 = 50 ions). No cash-out beyond the ion balance. Aetheris is the shopkeeper in name
+   only — plain UI text, no dialogue lines (those come from Cee). */
+(function(){
+'use strict';
+function $(id){return document.getElementById(id);}
+
+/* ---------- coins (our own only) ---------- */
+var COINS=[
+  {id:'AETHERIS', name:'AETHERIS COIN', base:10, price:10, prev:10, hist:[10], hold:0, blurb:'flagship'},
+  {id:'KAVIO',    name:'KAVIO',         base:8,  price:8,  prev:8,  hist:[8],  hold:0, blurb:'the gunslinger'},
+  {id:'TAKA',     name:'TAKA',          base:5,  price:5,  prev:5,  hist:[5],  hold:0, blurb:'the fox healer'},
+  {id:'GRINNOIR', name:'GRINNOIR',      base:6,  price:6,  prev:6,  hist:[6],  hold:0, blurb:'the grin'},
+  {id:'VANIX',    name:'VANIX',         base:12, price:12, prev:12, hist:[12], hold:0, blurb:'the wraith'},
+  {id:'BITWRAITH', name:'BITWRAITH',    base:50, price:50, prev:50, hist:[50], hold:0, blurb:'\u20BF bitcoin-style \u00B7 play only'},
+  {id:'CATION',   name:'CATION',        base:5.5, price:5.5, prev:5.5, hist:[5.5], hold:0, blurb:'positive ion'},
+  {id:'ANION',    name:'ANION',         base:7.5, price:7.5, prev:7.5, hist:[7.5], hold:0, blurb:'negative ion'},
+  {id:'PLASMA',   name:'PLASMA',        base:9.5, price:9.5, prev:9.5, hist:[9.5], hold:0, blurb:'bottled plasma'},
+  {id:'VOLT',     name:'VOLT',          base:11.5, price:11.5, prev:11.5, hist:[11.5], hold:0, blurb:'live current'},
+  {id:'CHARGE',   name:'CHARGE',        base:6.5, price:6.5, prev:6.5, hist:[6.5], hold:0, blurb:'pure charge'}
+];
+/* ---------- stocks: the characters, traded like crypto, in IONS ----------
+   Same three characters as coins (KAVIO/TAKA/GRINNOIR), same base prices
+   (8/5/6), same blurbs — but a separate market: prices, history and share
+   holdings are tracked separately from the coin entries. Stocks trade in
+   IONS (real money, $1 = 50 ions, 1 ion = $0.02, 1 ion = 2 atoms).
+   Coins stay in ATOMS (play only). No cash-out beyond the ion balance. */
+var STOCKS=[
+  {id:'KAVIO',    name:'KAVIO',    base:8, price:8, prev:8, hist:[8], shares:0, blurb:'the gunslinger'},
+  {id:'TAKA',     name:'TAKA',     base:5, price:5, prev:5, hist:[5], shares:0, blurb:'the fox healer'},
+  {id:'GRINNOIR', name:'GRINNOIR', base:6, price:6, prev:6, hist:[6], shares:0, blurb:'the grin'}
+];
+var ION_TO_ATOMS=2; /* locked rate: $1 = 50 ions = 100 atoms, so 1 ion = 2 atoms */
+var market='coins'; /* 'coins' | 'stocks' */
+var selStock=0;
+function cur(){return market==='coins'?COINS[sel]:STOCKS[selStock];}
+function curList(){return market==='coins'?COINS:STOCKS;}
+function stockById(id){for(var i=0;i<STOCKS.length;i++)if(STOCKS[i].id===id)return STOCKS[i];return null;}
+/* Neutral market headlines only — never Aetheris speaking. */
+var NEWS=[
+  {c:'KAVIO',    up:'KAVIO wins a big duel — traders pile in.', dn:'KAVIO loses a duel — traders pull back.'},
+  {c:'TAKA',     up:'TAKA heals a whole raid party — TAKA demand jumps.', dn:'TAKA takes a day off — TAKA cools down.'},
+  {c:'GRINNOIR', up:'GRINNOIR grins at the moon — the market grins back.', dn:'GRINNOIR goes quiet — the market drifts down.'},
+  {c:'VANIX',    up:'VANIX clears the arena — VANIX surges.', dn:'VANIX takes a hit in the arena — VANIX dips.'},
+  {c:'AETHERIS', up:'Aetheris shop restocks — AETHERIS climbs.', dn:'A glitch flickers through the shop — AETHERIS slips.'},
+  {c:'BITWRAITH', up:'BITWRAITH catches a wave — traders pile in.', dn:'BITWRAITH cools off — traders take profits.'},
+  {c:'CATION', up:'CATION gains charge — the board lights up.', dn:'CATION loses charge — the board dims.'},
+  {c:'ANION', up:'ANION finds its balance — traders buy in.', dn:'ANION drifts negative — traders step back.'},
+  {c:'PLASMA', up:'PLASMA burns bright — the market heats up.', dn:'PLASMA flickers — the market cools.'},
+  {c:'VOLT', up:'VOLT surges — the board buzzes.', dn:'VOLT dips — the board goes quiet.'},
+  {c:'CHARGE', up:'CHARGE builds up — traders plug in.', dn:'CHARGE runs low — traders unplug.'}
+];
+var MIN_ATOMS=500, TICK_MS=2000, STATE_KEY='wraith_exchange_state_v1';
+
+/* ---------- wraith chain (play-only fake blockchain look) ----------
+   Visual only: blocks are generated on this device from a tiny hash of
+   their own text. No real chain, no wallet connect, no real money — the
+   "address" is a fake play address and every hash is fake. */
+var chainBlocks=[], chainN=0;
+function fakeHash(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}var out='';for(var j=0;j<3;j++){h=Math.imul(h^0x9e3779b9,0x85ebca6b)>>>0;out+=('0000000'+h.toString(16)).slice(-8);}return out.slice(0,12);}
+function chainRender(){
+  var v=$('chainView');
+  if(v){var html='',start=Math.max(0,chainBlocks.length-5);for(var i=start;i<chainBlocks.length;i++){var b=chainBlocks[i];html+='<span class="blk"><b>#'+b.n+'</b><i>'+b.hash+'</i><em>'+b.kind+'</em></span>'+(i<chainBlocks.length-1?'<span class="lnk">\u26D3</span>':'');}v.innerHTML=html;}
+  var f=$('chainFeed');
+  if(f){var fh='';for(var k=chainBlocks.length-1;k>=0&&chainBlocks.length-1-k<8;k--){var b2=chainBlocks[k];fh+='<div class="frow"><span class="fhash">#'+b2.n+' \u00B7 '+b2.hash+'</span><span class="fkind">'+b2.kind+'</span><span class="fdet"></span></div>';}f.innerHTML=fh;
+    var rows=f.children;for(var r=0;r<rows.length;r++){var det=rows[r].querySelector('.fdet');if(det)det.textContent=chainBlocks[chainBlocks.length-1-r].detail;}}
+}
+function chainAdd(kind,detail){
+  chainN++;
+  var prev=chainBlocks.length?chainBlocks[chainBlocks.length-1].hash:'000000000000';
+  chainBlocks.push({n:chainN,hash:fakeHash(chainN+kind+detail+prev),prev:prev,kind:kind,detail:detail});
+  if(chainBlocks.length>40)chainBlocks.shift();
+  chainRender();
+}
+function chainInit(){
+  var a=$('chainAddr');if(a)a.textContent='PLAY-0x'+fakeHash('WRAITH-WALLET-AETHERIS').toUpperCase();
+  chainBlocks.push({n:0,hash:fakeHash('GENESIS-WRAITH-CHAIN'),prev:'000000000000',kind:'GENESIS',detail:'Wraith Chain opens — play only, fake blocks.'});
+  chainRender();
+}
+
+/* ---------- atoms: local last-known balance, same shape as the hub wallet ----------
+   Read: JSON {ions:n, ts} under wraith_atom_balance_v1 (index.html awLastKnown).
+   Write: same key, same shape (index.html awSaveLastKnown). NO Firebase in-game,
+   no cloud write. Caveat: the hub re-syncs this key from the cloud wallet when
+   it loads — a cloud re-sync may restore locally-spent atoms (same caveat as
+   Town's local atom spending). */
+var AW_BAL_KEY='wraith_atom_balance_v1';
+function awRead(){try{var v=JSON.parse(window.localStorage.getItem(AW_BAL_KEY)||'null');return (v&&typeof v.ions==='number')?v.ions:null;}catch(e){return null;}}
+function awWrite(n){try{if(n===null||n===undefined)window.localStorage.removeItem(AW_BAL_KEY);else window.localStorage.setItem(AW_BAL_KEY,JSON.stringify({ions:Math.round(n),ts:Date.now()}));}catch(e){}}
+function atomBal(){var n=awRead();return (n===null||isNaN(n))?0:Math.max(0,Math.round(n));}
+/* ---------- ions: the Tavern's own wallet, device-local mirror ----------
+   The Tavern keeps its ion balance in localStorage 'sw_ion_wallet' as
+   JSON {ions, molecules, owned, equipped, lastDaily, ts} and syncs it to
+   Firestore ion_wallets when cloud is available. This page has no Firebase,
+   so it reads/writes the SAME local key (read-modify-write, preserving the
+   other wallet fields) — stocks spend the same device-local ion balance
+   the Tavern shows. LIMITATION: this page does NOT write to Firestore, so
+   a cloud re-sync from the hub may restore locally-spent ions (same
+   caveat as the atom balance above). */
+var ION_WALLET_KEY='sw_ion_wallet';
+function ionRead(){try{var w=JSON.parse(window.localStorage.getItem(ION_WALLET_KEY)||'null');return (w&&typeof w.ions==='number')?Math.max(0,Math.floor(w.ions)):0;}catch(e){return 0;}}
+function ionWrite(n){try{var w=null;try{w=JSON.parse(window.localStorage.getItem(ION_WALLET_KEY)||'null');}catch(e){w=null;}if(!w||typeof w!=='object')w={};w.ions=Math.max(0,Math.round(n));w.ts=Date.now();window.localStorage.setItem(ION_WALLET_KEY,JSON.stringify(w));}catch(e){}}
+function ionBal(){return ionRead();}
+
+/* ---------- state ---------- */
+var cash=0, sel=0, paused=false, locked=false, traded=false, tickN=0;
+var chart=$('chart'), chartCtx=null;
+try{chartCtx=chart?chart.getContext('2d'):null;}catch(e){chartCtx=null;}
+
+function saveState(){
+  try{
+    window.localStorage.setItem(STATE_KEY,JSON.stringify({hold:COINS.map(function(c){return c.hold;}),shares:STOCKS.map(function(s){return s.shares;}),ts:Date.now()}));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    var o=JSON.parse(window.localStorage.getItem(STATE_KEY)||'null');
+    if(o&&Array.isArray(o.hold))for(var i=0;i<COINS.length&&i<o.hold.length;i++){var h=+o.hold[i];if(isFinite(h)&&h>0)COINS[i].hold=h;}
+    if(o&&Array.isArray(o.shares))for(var j=0;j<STOCKS.length&&j<o.shares.length;j++){var sh=+o.shares[j];if(isFinite(sh)&&sh>0)STOCKS[j].shares=sh;}
+  }catch(e){}
+}
+function stockValueAtoms(){
+  var v=0,i;
+  for(i=0;i<STOCKS.length;i++)v+=STOCKS[i].shares*STOCKS[i].price;
+  return v*ION_TO_ATOMS;
+}
+function portfolioValue(){
+  var v=cash,i;
+  for(i=0;i<COINS.length;i++)v+=COINS[i].hold*COINS[i].price;
+  return v+stockValueAtoms();
+}
+function heldValue(){
+  var v=0,i;
+  for(i=0;i<COINS.length;i++)v+=COINS[i].hold*COINS[i].price;
+  return v+stockValueAtoms();
+}
+function fmt(n){
+  if(!isFinite(n))return '0';
+  var a=Math.abs(n);
+  if(a>=1000)return Math.round(n).toLocaleString('en-US');
+  if(a>=100)return String(Math.round(n*10)/10);
+  return String(Math.round(n*100)/100);
+}
+function fmtCoins(n){return String(Math.round(n*10000)/10000);}
+
+/* ---------- audio (WebAudio synth only, like pinball) ---------- */
+var AC=null;
+function ac(){
+  if(ckMuted())return null;
+  try{
+    if(!AC){var Ctor=window.AudioContext||window.webkitAudioContext;if(!Ctor)return null;AC=new Ctor();}
+    if(AC.state==='suspended')AC.resume();
+    return AC;
+  }catch(e){return null;}
+}
+function blip(f,d,type,vol,slideTo){
+  var c=ac();if(!c)return;
+  try{
+    var o=c.createOscillator(),g=c.createGain();
+    o.type=type||'square';o.frequency.setValueAtTime(f,c.currentTime);
+    if(slideTo)o.frequency.exponentialRampToValueAtTime(slideTo,c.currentTime+d);
+    g.gain.setValueAtTime(vol||0.08,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+    o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d);
+  }catch(e){}
+}
+function sBuy(){blip(520,0.09,'triangle',0.1,780);}
+function sSell(){blip(780,0.09,'triangle',0.1,420);}
+function sNews(){blip(660,0.1,'square',0.07);setTimeout(function(){blip(880,0.12,'square',0.07);},100);}
+function sErr(){blip(180,0.15,'sawtooth',0.08,120);}
+
+/* ---------- finish kit (same standard as the other arcade games) ---------- */
+var CK_SLUG='exchange',CK_HS_KEY='wraith_exchange_best_v1',CK_MUTE_KEY='wraith-exchange_muted_v1',CK_TUT_KEY='wraith-exchange_tutorial_seen_v1',CK_PLAYS_KEY='sw_plays_exchange';
+function ckLSGet(k){try{return window.localStorage.getItem(k);}catch(e){return null;}}
+function ckLSSet(k,v){try{window.localStorage.setItem(k,v);}catch(e){}}
+function ckLoadHS(){try{var o=JSON.parse(ckLSGet(CK_HS_KEY)||'null');if(o&&typeof o==='object')return{best:(+o.best)||0,plays:(+o.plays)||0};}catch(e){}return{best:0,plays:0};}
+function ckSaveHS(o){ckLSSet(CK_HS_KEY,JSON.stringify(o));}
+function ckBestLine(){var h=ckLoadHS();return h.best>0?('\u{1F3C6} BEST: '+fmt(h.best)+' ATOMS'):'\u{1F3C6} BEST: \u2014';}
+function ckSyncBest(){var el=$('ckBest');if(el)el.textContent=ckBestLine();}
+function ckNoteBest(v){if(typeof v!=='number'||!isFinite(v))return;var h=ckLoadHS();if(v>h.best)h.best=Math.round(v);ckSaveHS(h);ckSyncBest();}
+function ckRunStart(){try{var p=parseInt(ckLSGet(CK_PLAYS_KEY)||'0',10)||0;ckLSSet(CK_PLAYS_KEY,String(p+1));}catch(e){}var h=ckLoadHS();h.plays=(h.plays||0)+1;ckSaveHS(h);ckSyncBest();}
+function ckMuted(){try{return ckLSGet(CK_MUTE_KEY)==='1';}catch(e){return false;}}
+function ckSetMuted(m){
+  ckLSSet(CK_MUTE_KEY,m?'1':'0');
+  var b=$('ckSound');if(b)b.textContent=m?'\u{1F507} MUTED':'\u{1F50A} SOUND ON';
+  if(m&&AC){try{AC.suspend();}catch(e){}}
+}
+function ckTutSeen(){try{return ckLSGet(CK_TUT_KEY)==='1';}catch(e){return false;}}
+function ckShowTut(){var o=$('ckTut');if(o)o.classList.add('on');}
+function ckHideTut(){var o=$('ckTut');if(o)o.classList.remove('on');}
+function ckDismissTut(){ckLSSet(CK_TUT_KEY,'1');ckHideTut();}
+function ckShowPaused(on){var o=$('ckPaused');if(o)o.classList.toggle('on',!!on);var b=$('ckPause');if(b)b.textContent=on?'\u25B6 RESUME':'\u23F8 PAUSE';}
+var ckExitOpen=false;
+function ckShowExit(on){var o=$('ckExit');if(o)o.classList.toggle('on',!!on);ckExitOpen=!!on;}
+function ckDoExit(){
+  try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}
+  try{window.location.href='index.html';}catch(e){}
+}
+function ckRunActive(){return traded||heldValue()>0;}
+function ckRequestExit(){if(ckRunActive())ckShowExit(true);else ckDoExit();}
+function ckToggleFs(){
+  try{
+    if(document.fullscreenElement){var p=document.exitFullscreen&&document.exitFullscreen();if(p&&p.catch)p.catch(function(){});}
+    else if(document.documentElement.requestFullscreen){var q=document.documentElement.requestFullscreen();if(q&&q.catch)q.catch(function(){});}
+    else if(document.documentElement.webkitRequestFullscreen){document.documentElement.webkitRequestFullscreen();}
+  }catch(e){}
+}
+function ckSyncOffline(){var b=$('ckOffline');if(!b)return;var off=false;try{off=!navigator.onLine;}catch(e){}b.style.display=off?'block':'none';}
+function ckReady(){var o=$('ckLoading');if(o)o.classList.remove('on');ckSyncBest();ckSyncOffline();if(!ckTutSeen())ckShowTut();}
+function pauseGame(){paused=true;ckShowPaused(true);}
+function resumeGame(){paused=false;ckShowPaused(false);}
+function ckOnPauseBtn(){if(paused)resumeGame();else pauseGame();}
+
+/* ---------- gate: 500 atoms to enter trading ---------- */
+function gateCheck(){
+  cash=atomBal();
+  locked=cash<MIN_ATOMS;
+  var lb=$('ckLockBal');if(lb)lb.textContent=String(cash);
+  syncLock();
+  return !locked;
+}
+
+/* ---------- market ---------- */
+function coinById(id){for(var i=0;i<COINS.length;i++)if(COINS[i].id===id)return COINS[i];return null;}
+function applyNews(){
+  var ni=Math.floor(Math.random()*NEWS.length);
+  var nw=NEWS[ni],c=coinById(nw.c);if(!c)return null;
+  var up=Math.random()<0.55;
+  var pct=5+Math.floor(Math.random()*16); /* 5–20% */
+  var mult=up?(1+pct/100):(1-pct/100);
+  c.prev=c.price;c.price=Math.max(0.5,c.price*mult);
+  c.hist.push(c.price);if(c.hist.length>60)c.hist.shift();
+  var st=stockById(nw.c),stockMoved=false;
+  if(st){st.prev=st.price;st.price=Math.max(0.5,st.price*mult);st.hist.push(st.price);if(st.hist.length>60)st.hist.shift();stockMoved=true;}
+  var el=$('newsLine');
+  if(el)el.innerHTML='\u{1F4F0} <b>'+c.id+' '+(up?'+':'−')+pct+'%</b> — '+(up?nw.up:nw.dn)+(stockMoved?' — '+c.id+' stock moves too.':'');
+  sNews();
+  return {coin:c.id,pct:up?pct:-pct,stock:stockMoved};
+}
+function tick(forceNews){
+  if(paused||locked)return null;
+  tickN++;
+  var i,c;
+  for(i=0;i<COINS.length;i++){
+    c=COINS[i];
+    c.prev=c.price;
+    var drift=(Math.random()-0.5)*0.12; /* random walk, ±6% per tick */
+    c.price=Math.max(0.5,c.price*(1+drift));
+    c.hist.push(c.price);if(c.hist.length>60)c.hist.shift();
+  }
+  for(i=0;i<STOCKS.length;i++){
+    var s=STOCKS[i];
+    s.prev=s.price;
+    var drift2=(Math.random()-0.5)*0.12; /* stocks walk like coins, ±6% per tick */
+    s.price=Math.max(0.5,s.price*(1+drift2));
+    s.hist.push(s.price);if(s.hist.length>60)s.hist.shift();
+  }
+  var news=null;
+  if(forceNews||Math.random()<0.18)news=applyNews();
+  ckNoteBest(portfolioValue());
+  render();
+  chainAdd(news?'NEWS':'TICK',news?('NEWS '+news.coin+' '+(news.pct>=0?'+':'')+news.pct+'%'):('market tick #'+tickN+' — prices moved'));
+  return {tick:tickN,news:news};
+}
+var tickTimer=null;
+function armTicks(){
+  if(tickTimer)return;
+  tickTimer=setInterval(function(){tick(false);},TICK_MS);
+}
+function disarmTicks(){if(tickTimer){clearInterval(tickTimer);tickTimer=null;}}
+
+/* ---------- trading ---------- */
+function setMsg(t,ok){
+  var el=$('tradeMsg');if(!el)return;
+  el.textContent=t||'';
+  el.style.color=ok===false?'#ff2d55':'#39ff8a';
+}
+function buyAtoms(amount){
+  if(locked){gateCheck();setMsg('LOCKED — NEED 500 ATOMS TO TRADE.',false);sErr();return false;}
+  amount=+amount;
+  if(!isFinite(amount)||amount<=0){setMsg('TYPE HOW MANY ATOMS TO SPEND.',false);sErr();return false;}
+  cash=atomBal();
+  if(amount>cash){setMsg('NOT ENOUGH ATOMS — YOU HAVE '+cash+'.',false);sErr();return false;}
+  var c=COINS[sel];
+  var qty=amount/c.price;
+  qty=Math.floor(qty*10000)/10000;
+  if(qty<=0){setMsg('AMOUNT TOO SMALL FOR ONE COIN.',false);sErr();return false;}
+  var spent=Math.floor(qty*c.price*100)/100;
+  cash=Math.round((cash-spent)*100)/100;
+  awWrite(cash);
+  c.hold=Math.round((c.hold+qty)*10000)/10000;
+  traded=true;saveState();
+  setMsg('BOUGHT '+fmtCoins(qty)+' '+c.id+' FOR '+fmt(spent)+' ATOMS.',true);
+  chainAdd('BUY','BOUGHT '+fmtCoins(qty)+' '+c.id+' FOR '+fmt(spent)+' ATOMS');
+  sBuy();ckNoteBest(portfolioValue());render();
+  return true;
+}
+function sellCoins(amount){
+  if(locked){gateCheck();setMsg('LOCKED — NEED 500 ATOMS TO TRADE.',false);sErr();return false;}
+  amount=+amount;
+  if(!isFinite(amount)||amount<=0){setMsg('TYPE HOW MANY COINS TO SELL.',false);sErr();return false;}
+  var c=COINS[sel];
+  if(amount>c.hold+1e-9){setMsg('YOU ONLY HOLD '+fmtCoins(c.hold)+' '+c.id+'.',false);sErr();return false;}
+  var proceeds=Math.floor(amount*c.price*100)/100;
+  c.hold=Math.round((c.hold-amount)*10000)/10000;
+  cash=atomBal();
+  cash=Math.round((cash+proceeds)*100)/100;
+  awWrite(cash);
+  traded=true;saveState();
+  setMsg('SOLD '+fmtCoins(amount)+' '+c.id+' FOR '+fmt(proceeds)+' ATOMS.',true);
+  chainAdd('SELL','SOLD '+fmtCoins(amount)+' '+c.id+' FOR '+fmt(proceeds)+' ATOMS');
+  sSell();ckNoteBest(portfolioValue());render();
+  return true;
+}
+/* ---------- stocks: buy/sell shares with IONS (real money) ----------
+   Ions are whole numbers in the Tavern wallet, so stock spends and
+   proceeds are floored to whole ions — no fractional ions are lost. */
+function buyStock(amount){
+  amount=+amount;
+  if(!isFinite(amount)||amount<=0){setMsg('TYPE HOW MANY IONS TO SPEND.',false);sErr();return false;}
+  var ions=ionBal();
+  if(amount>ions){setMsg('NOT ENOUGH IONS — YOU HAVE '+ions+'.',false);sErr();return false;}
+  var s=STOCKS[selStock];
+  var qty=amount/s.price;
+  qty=Math.floor(qty*10000)/10000;
+  if(qty<=0){setMsg('AMOUNT TOO SMALL FOR ONE SHARE.',false);sErr();return false;}
+  var spent=Math.floor(qty*s.price);
+  if(spent<=0){setMsg('AMOUNT TOO SMALL FOR ONE SHARE.',false);sErr();return false;}
+  ionWrite(ions-spent);
+  s.shares=Math.round((s.shares+qty)*10000)/10000;
+  traded=true;saveState();
+  setMsg('BOUGHT '+fmtCoins(qty)+' '+s.id+' SHARES FOR '+fmt(spent)+' IONS.',true);
+  chainAdd('BUY','BOUGHT '+fmtCoins(qty)+' '+s.id+' SHARES FOR '+fmt(spent)+' IONS');
+  sBuy();ckNoteBest(portfolioValue());render();
+  return true;
+}
+function sellStock(amount){
+  amount=+amount;
+  if(!isFinite(amount)||amount<=0){setMsg('TYPE HOW MANY SHARES TO SELL.',false);sErr();return false;}
+  var s=STOCKS[selStock];
+  if(amount>s.shares+1e-9){setMsg('YOU ONLY HOLD '+fmtCoins(s.shares)+' '+s.id+' SHARES.',false);sErr();return false;}
+  var proceeds=Math.floor(amount*s.price);
+  if(proceeds<=0){setMsg('TOO SMALL — SELLS FOR LESS THAN 1 ION.',false);sErr();return false;}
+  s.shares=Math.round((s.shares-amount)*10000)/10000;
+  ionWrite(ionBal()+proceeds);
+  traded=true;saveState();
+  setMsg('SOLD '+fmtCoins(amount)+' '+s.id+' SHARES FOR '+fmt(proceeds)+' IONS.',true);
+  chainAdd('SELL','SOLD '+fmtCoins(amount)+' '+s.id+' SHARES FOR '+fmt(proceeds)+' IONS');
+  sSell();ckNoteBest(portfolioValue());render();
+  return true;
+}
+function restartMarket(){
+  /* Fresh run: sell everything back at current prices (atoms and ions
+     conserved), reset prices to base, clear news. Best portfolio is never touched. */
+  var c=COINS[sel];
+  var i,total=0;
+  for(i=0;i<COINS.length;i++){
+    total+=COINS[i].hold*COINS[i].price;
+    COINS[i].price=COINS[i].base;COINS[i].prev=COINS[i].base;
+    COINS[i].hist=[COINS[i].base];COINS[i].hold=0;
+  }
+  var j,totalIons=0;
+  for(j=0;j<STOCKS.length;j++){
+    totalIons+=STOCKS[j].shares*STOCKS[j].price;
+    STOCKS[j].price=STOCKS[j].base;STOCKS[j].prev=STOCKS[j].base;
+    STOCKS[j].hist=[STOCKS[j].base];STOCKS[j].shares=0;
+  }
+  if(totalIons>0)ionWrite(ionBal()+Math.floor(totalIons));
+  if(total>0){
+    cash=atomBal();
+    cash=Math.round((cash+Math.floor(total*100)/100)*100)/100;
+    awWrite(cash);
+  }
+  traded=false;tickN=0;saveState();
+  var el=$('newsLine');if(el)el.textContent='\u{1F4F0} Fresh market — prices reset to open.';
+  var rmsg='FRESH MARKET — PRICES RESET.';
+  if(total>0||totalIons>0)rmsg='RESTARTED — SOLD EVERYTHING BACK FOR '+fmt(total)+' ATOMS'+(totalIons>0?' + '+Math.floor(totalIons)+' IONS':'')+'.';
+  setMsg(rmsg,true);
+  ckNoteBest(portfolioValue());render();
+}
+
+/* ---------- mining: rigs make ORE, ore converts to ATOMS ----------
+   Cee's Ion Mining tycoon design, adapted to Bloodnet. Rigs cost atoms
+   (15/60/200/500). Each rig makes ore per hour; ore converts 1:1 to
+   atoms, whole ore only. Caps: 40 atoms/day minted from mining, 8h
+   offline production. Mining is an EARN path — it is NOT behind the
+   500-atom trade gate, so a locked player can mine their way up to 500
+   (the lock overlay has a MINE button that steps aside for it; the gate
+   itself is unchanged and coins stay disabled until 500). Mined atoms go
+   into the same atom wallet (wraith_atom_balance_v1) the Exchange trades
+   with, so they show in the balance and spend on coins. Ore accrues on
+   real elapsed time: while the page is open it ticks every second; on
+   load, offline time is credited up to 8h. Ore is kept at full float
+   precision internally (rounded only for display) so slow rigs never
+   lose fractions to rounding. No real money — atoms only, play-only
+   like the coins. */
+var MINE_KEY='wraith_exchange_mining_v1';
+var MINE_DAY_CAP=40, MINE_OFFLINE_H=8;
+var RIGS=[
+  {id:'SCRAP',  name:'SCRAP RIG',  cost:15,  rate:1},
+  {id:'COPPER', name:'COPPER RIG', cost:60,  rate:3},
+  {id:'GOLD',   name:'GOLD RIG',   cost:200, rate:8},
+  {id:'WRAITH', name:'WRAITH RIG', cost:500, rate:20}
+];
+var mine={rigs:[0,0,0,0],ore:0,lastTs:0,day:'',minted:0};
+var mineLockOut=false; /* lock overlay stepped aside so the player can mine */
+function mineDayStr(d){d=d||new Date();var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;}
+function mineSave(){try{window.localStorage.setItem(MINE_KEY,JSON.stringify(mine));}catch(e){}}
+function mineLoad(){
+  try{
+    var o=JSON.parse(window.localStorage.getItem(MINE_KEY)||'null');
+    if(o&&typeof o==='object'){
+      if(Array.isArray(o.rigs))for(var i=0;i<4&&i<o.rigs.length;i++){var n=+o.rigs[i];if(isFinite(n)&&n>0)mine.rigs[i]=Math.floor(n);}
+      if(isFinite(+o.ore)&&+o.ore>0)mine.ore=+o.ore;
+      if(isFinite(+o.lastTs)&&+o.lastTs>0)mine.lastTs=+o.lastTs;
+      if(typeof o.day==='string')mine.day=o.day;
+      if(isFinite(+o.minted)&&+o.minted>0)mine.minted=+o.minted;
+    }
+  }catch(e){}
+  if(!mine.lastTs)mine.lastTs=Date.now();
+  var today=mineDayStr();
+  if(mine.day!==today){mine.day=today;mine.minted=0;}
+}
+function mineRate(){var r=0;for(var i=0;i<RIGS.length;i++)r+=mine.rigs[i]*RIGS[i].rate;return r;}
+function mineAccrue(now){
+  now=now||Date.now();
+  if(!mine.lastTs){mine.lastTs=now;return 0;}
+  var dt=(now-mine.lastTs)/3600000;
+  if(dt<=0){mine.lastTs=now;return 0;}
+  if(dt>MINE_OFFLINE_H)dt=MINE_OFFLINE_H; /* offline cap: 8h max per gap */
+  var gained=mineRate()*dt;
+  if(gained>0)mine.ore+=gained;
+  mine.lastTs=now;
+  mineSave();
+  renderMining();
+  return gained;
+}
+function mineMsg(t,ok){var el=$('mineMsg');if(!el)return;el.textContent=t||'';el.style.color=ok===false?'#ff2d55':'#39ff8a';}
+function buyRig(i){
+  if(i<0||i>=RIGS.length)return false;
+  var rig=RIGS[i];
+  var bal=atomBal();
+  if(bal<rig.cost){mineMsg('NOT ENOUGH ATOMS — '+rig.name+' COSTS '+rig.cost+'.',false);sErr();return false;}
+  awWrite(bal-rig.cost);
+  mine.rigs[i]++;
+  mineSave();
+  mineMsg('BOUGHT '+rig.name+' FOR '+rig.cost+' ATOMS — NOW '+mine.rigs[i]+' OWNED.',true);
+  chainAdd('RIG','BOUGHT '+rig.name+' FOR '+rig.cost+' ATOMS');
+  sBuy();render();renderMining();
+  return true;
+}
+function convertOre(){
+  var today=mineDayStr();
+  if(mine.day!==today){mine.day=today;mine.minted=0;}
+  var remain=MINE_DAY_CAP-mine.minted;
+  if(remain<=0){mineMsg('DAILY CAP REACHED — 40/40 ATOMS MINED TODAY.',false);sErr();return false;}
+  var whole=Math.floor(mine.ore);
+  if(whole<=0){mineMsg('NO WHOLE ORE TO CONVERT YET — RIGS ARE STILL MINING.',false);sErr();return false;}
+  var amount=Math.min(whole,remain);
+  mine.ore=mine.ore-amount;
+  mine.minted+=amount;
+  awWrite(atomBal()+amount);
+  mineSave();
+  mineMsg('CONVERTED '+amount+' ORE → '+amount+' ATOMS ('+mine.minted+'/40 TODAY).',true);
+  chainAdd('MINE','CONVERTED '+amount+' ORE → '+amount+' ATOMS');
+  sBuy();render();renderMining();
+  return true;
+}
+function renderMining(){
+  var o=$('mineOre');if(o)o.textContent=String(Math.floor(mine.ore*10)/10);
+  var r=$('mineRate');if(r)r.textContent=String(mineRate());
+  var d=$('mineDay');if(d)d.textContent=mine.minted+'/'+MINE_DAY_CAP;
+  var rows=$('mineRigs');
+  if(rows){
+    var ch=rows.children;
+    for(var i=0;i<RIGS.length&&i<ch.length;i++){
+      var own=ch[i].querySelector('.own');
+      if(own)own.textContent='OWN '+mine.rigs[i];
+      var btn=ch[i].querySelector('button');
+      if(btn)btn.disabled=atomBal()<RIGS[i].cost;
+    }
+  }
+  var cv=$('mineConvert');if(cv)cv.disabled=(Math.floor(mine.ore)<=0||(MINE_DAY_CAP-mine.minted)<=0);
+}
+function buildMineRigs(){
+  var box=$('mineRigs');if(!box)return;
+  box.innerHTML='';
+  for(var i=0;i<RIGS.length;i++){
+    (function(idx){
+      var rig=RIGS[idx];
+      var row=document.createElement('div');
+      row.className='rig';
+      row.innerHTML='<span class="nm">'+rig.name+'<small>'+rig.cost+' ⚛ · '+rig.rate+' ore/hr</small></span><span class="own">OWN 0</span>';
+      var b=document.createElement('button');
+      b.type='button';b.textContent='BUY '+rig.cost+' ⚛';
+      b.addEventListener('click',function(){buyRig(idx);});
+      row.appendChild(b);
+      box.appendChild(row);
+    })(i);
+  }
+}
+
+/* ---------- render ---------- */
+function drawChart(){
+  if(!chartCtx)return;
+  var c=cur(),W=460,H=140;
+  chartCtx.clearRect(0,0,W,H);
+  chartCtx.fillStyle='#0a0714';chartCtx.fillRect(0,0,W,H);
+  var hist=c.hist,lo=Infinity,hi=-Infinity,i;
+  for(i=0;i<hist.length;i++){if(hist[i]<lo)lo=hist[i];if(hist[i]>hi)hi=hist[i];}
+  if(hi-lo<0.01){hi=lo+0.01;}
+  /* grid */
+  chartCtx.strokeStyle='rgba(91,46,166,.4)';chartCtx.lineWidth=1;
+  for(i=1;i<4;i++){chartCtx.beginPath();chartCtx.moveTo(0,H*i/4);chartCtx.lineTo(W,H*i/4);chartCtx.stroke();}
+  /* line — green core glow only */
+  chartCtx.strokeStyle='#39ff8a';chartCtx.lineWidth=2;
+  chartCtx.shadowColor='rgba(57,255,138,.7)';chartCtx.shadowBlur=8;
+  chartCtx.beginPath();
+  for(i=0;i<hist.length;i++){
+    var x=hist.length===1?W/2:(i/(hist.length-1))*(W-16)+8;
+    var y=H-8-((hist[i]-lo)/(hi-lo))*(H-24);
+    if(i===0)chartCtx.moveTo(x,y);else chartCtx.lineTo(x,y);
+  }
+  chartCtx.stroke();chartCtx.shadowBlur=0;
+  chartCtx.fillStyle='#39ff8a';chartCtx.font='800 12px system-ui,sans-serif';chartCtx.textAlign='left';
+  chartCtx.fillText(c.id+'  '+fmt(c.price)+(market==='coins'?' ⚛ / coin':' ◆ / share'),10,18);
+  chartCtx.fillStyle='#b79cff';
+  chartCtx.fillText('HIGH '+fmt(hi)+'   LOW '+fmt(lo),10,H-8);
+}
+function drawSpark(cv,coin){
+  var ctx=null;
+  try{ctx=cv.getContext('2d');}catch(e){ctx=null;}
+  if(!ctx)return;
+  var hist=coin.hist,W=64,H=28,lo=Infinity,hi=-Infinity,i;
+  for(i=0;i<hist.length;i++){if(hist[i]<lo)lo=hist[i];if(hist[i]>hi)hi=hist[i];}
+  if(hi-lo<0.01)hi=lo+0.01;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle=coin.price>=coin.prev?'#39ff8a':'#ff2d55';ctx.lineWidth=1.5;
+  ctx.beginPath();
+  for(i=0;i<hist.length;i++){
+    var x=hist.length===1?W/2:(i/(hist.length-1))*(W-4)+2;
+    var y=H-3-((hist[i]-lo)/(hi-lo))*(H-6);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+}
+function buildCoinList(){
+  var list=$('coinList');if(!list)return;
+  list.innerHTML='';
+  var items=curList();
+  var selIdx=(market==='coins'?sel:selStock);
+  for(var i=0;i<items.length;i++){
+    (function(idx){
+      var c=items[idx];
+      var b=document.createElement('button');
+      b.type='button';b.className='coin'+(idx===selIdx?' sel':'')+(market==='coins'&&c.id==='BITWRAITH'?' btc':'');b.id='coinBtn'+idx;
+      b.setAttribute('aria-label','Select '+c.id);
+      var chg=c.prev>0?((c.price-c.prev)/c.prev*100):0;
+      var chgTxt=(chg>=0?'+':'')+String(Math.round(chg*10)/10)+'%';
+      var priceHtml,holdHtml;
+      if(market==='coins'){priceHtml=fmt(c.price)+' ⚛';holdHtml='hold '+fmtCoins(c.hold);}
+      else{priceHtml=fmt(c.price)+' ◆';holdHtml='hold '+fmtCoins(c.shares)+' shares';}
+      b.innerHTML='<span class="nm">'+c.id+'<small>'+c.blurb+'</small></span>'+
+        '<span class="pr">'+priceHtml+'<small>'+holdHtml+'</small></span>'+
+        '<canvas width="64" height="28"></canvas>'+
+        '<span class="chg '+(chg>=0?'up':'dn')+'">'+chgTxt+'</span>';
+      b.addEventListener('click',function(){
+        if(market==='coins')sel=idx;else selStock=idx;
+        var sn=$('selName');if(sn)sn.textContent=c.id;var tc=$('tradeCoin');if(tc)tc.textContent=c.id;render();});
+      list.appendChild(b);
+    })(i);
+  }
+}
+function setMarket(m){
+  if(m!=='coins'&&m!=='stocks')return;
+  mineLockOut=false; /* switching tabs re-arms the gate overlay */
+  market=m;
+  var tc=$('tabCoins'),ts=$('tabStocks');
+  if(tc){tc.classList.toggle('on',m==='coins');tc.setAttribute('aria-selected',m==='coins'?'true':'false');}
+  if(ts){ts.classList.toggle('on',m==='stocks');ts.setAttribute('aria-selected',m==='stocks'?'true':'false');}
+  buildCoinList();
+  syncLock();
+  render();
+}
+function syncLock(){
+  /* The 500-atom gate blocks COINS only. On STOCKS the gate is the ion
+     balance, so the lock overlay stays hidden and the trade buttons stay
+     live — buyStock/sellStock validate ions/shares themselves. */
+  var showLock=(market==='coins'&&locked&&!mineLockOut);
+  var o=$('ckLock');
+  if(o)o.classList.toggle('on',showLock);
+  var bb=$('buyBtn');if(bb)bb.disabled=(market==='coins'&&locked);
+  var sb=$('sellBtn');if(sb)sb.disabled=(market==='coins'&&locked);
+}
+function render(){
+  cash=atomBal();
+  var ab=$('atomBal');if(ab)ab.textContent=String(cash);
+  var ib=$('ionBal');if(ib)ib.textContent=String(ionBal());
+  var hv=$('heldVal');if(hv)hv.textContent=fmt(heldValue())+' ⚛';
+  var pv=$('portVal');if(pv)pv.textContent=fmt(portfolioValue());
+  var c0=cur();
+  var sn=$('selName');if(sn)sn.textContent=c0.id;
+  var tc=$('tradeCoin');if(tc)tc.textContent=c0.id;
+  var tm=$('tradeMkt');if(tm)tm.textContent=(market==='coins'?'COINS':'STOCKS');
+  var bb=$('buyBtn');if(bb)bb.textContent=(market==='coins'?'⬆ BUY (ATOMS)':'⬆ BUY (IONS)');
+  var sb=$('sellBtn');if(sb)sb.textContent=(market==='coins'?'⬇ SELL (COINS)':'⬇ SELL (SHARES)');
+  var hn=$('hint');
+  if(hn)hn.innerHTML=(market==='coins'
+    ?'<b>BUY</b> — type atoms to spend &nbsp;·&nbsp; <b>SELL</b> — type coins to sell &nbsp;·&nbsp; <b>B</b> buy · <b>S</b> sell · <b>P</b> pause · <b>Esc</b> resume'
+    :'<b>BUY</b> — type ions to spend &nbsp;·&nbsp; <b>SELL</b> — type shares to sell &nbsp;·&nbsp; <b>B</b> buy · <b>S</b> sell · <b>P</b> pause · <b>Esc</b> resume');
+  var list=$('coinList');
+  var items=curList(), selIdx=(market==='coins'?sel:selStock);
+  if(list){
+    var rows=list.children;
+    for(var i=0;i<items.length&&i<rows.length;i++){
+      var it=items[i],row=rows[i];
+      if(!row)continue;
+      row.className='coin'+(i===selIdx?' sel':'')+(market==='coins'&&items[i].id==='BITWRAITH'?' btc':'');
+      var pr=row.children[1],cv=row.children[2],ch=row.children[3];
+      if(pr){
+        if(market==='coins')pr.innerHTML=fmt(it.price)+' ⚛<small>hold '+fmtCoins(it.hold)+'</small>';
+        else pr.innerHTML=fmt(it.price)+' ◆<small>hold '+fmtCoins(it.shares)+' shares</small>';
+      }
+      if(ch){var d=it.prev>0?((it.price-it.prev)/it.prev*100):0;ch.textContent=(d>=0?'+':'')+String(Math.round(d*10)/10)+'%';ch.className='chg '+(d>=0?'up':'dn');}
+      if(cv)drawSpark(cv,it);
+    }
+  }
+  drawChart();
+  var lg=$('logLine');
+  if(lg)lg.textContent='Portfolio (atoms) = atoms in hand + coins at current prices + stocks (ions, valued at 2 atoms each). Best portfolio saves on this device.';
+}
+
+/* ---------- test/debug handle ---------- */
+window.__exchange={
+  COINS:COINS,
+  state:function(){return{cash:atomBal(),ions:ionBal(),portfolio:portfolioValue(),held:heldValue(),locked:locked,paused:paused,traded:traded,tickN:tickN,market:market,sel:cur().id,coins:COINS.map(function(c){return{id:c.id,price:c.price,prev:c.prev,hold:c.hold,hist:c.hist.slice()};}),stocks:STOCKS.map(function(s){return{id:s.id,price:s.price,prev:s.prev,shares:s.shares,hist:s.hist.slice()};})};},
+  tick:tick,buy:buyAtoms,sell:sellCoins,buyStock:buyStock,sellStock:sellStock,restart:restartMarket,
+  ionBal:ionBal,setIon:function(n){ionWrite(n);render();},
+  market:function(){return market;},setMarket:setMarket,
+  setStockPrice:function(id,p){var s=stockById(id);if(s){s.prev=s.price;s.price=p;s.hist.push(p);render();}},
+  setShares:function(id,h){var s=stockById(id);if(s){s.shares=h;saveState();render();}},
+  selectStock:function(i){selStock=i;if(market!=='stocks')setMarket('stocks');render();},
+  gateCheck:gateCheck,pauseGame:pauseGame,resumeGame:resumeGame,
+  setCash:function(n){awWrite(n);cash=n;render();},
+  setPrice:function(id,p){var c=coinById(id);if(c){c.prev=c.price;c.price=p;c.hist.push(p);render();}},
+  setHold:function(id,h){var c=coinById(id);if(c){c.hold=h;saveState();render();}},
+  select:function(i){if(market==='stocks')selStock=i;else sel=i;render();},
+  applyNews:applyNews,
+  isActive:function(){return ckRunActive();},
+  MIN_ATOMS:MIN_ATOMS,
+  chain:function(){return chainBlocks.slice();},
+  chainHash:fakeHash,
+  mining:function(){return{ore:mine.ore,rate:mineRate(),rigs:mine.rigs.slice(),minted:mine.minted,day:mine.day,cap:MINE_DAY_CAP,offlineH:MINE_OFFLINE_H};},
+  buyRig:buyRig,convertOre:convertOre,mineAccrue:mineAccrue,renderMining:renderMining,
+  mineSetLastTs:function(ts){mine.lastTs=ts;mineSave();},
+  mineSetDay:function(day,minted){mine.day=day;mine.minted=minted;mineSave();},
+  mineReset:function(){mine={rigs:[0,0,0,0],ore:0,lastTs:Date.now(),day:mineDayStr(),minted:0};mineSave();renderMining();}
+};
+
+/* ---------- finish-kit wiring ---------- */
+(function(){
+  ckSetMuted(ckMuted());
+  var b;
+  b=$('ckPause');if(b)b.addEventListener('click',function(){ckOnPauseBtn();});
+  b=$('ckRestart');if(b)b.addEventListener('click',function(){resumeGame();restartMarket();});
+  b=$('ckSound');if(b)b.addEventListener('click',function(){ckSetMuted(!ckMuted());});
+  b=$('ckFull');if(b)b.addEventListener('click',function(){ckToggleFs();});
+  b=$('ckArcade');if(b)b.addEventListener('click',function(){ckRequestExit();});
+  b=$('ckHelp');if(b)b.addEventListener('click',function(){ckShowTut();});
+  b=$('ckResume');if(b)b.addEventListener('click',function(){resumeGame();});
+  b=$('ckQuit');if(b)b.addEventListener('click',function(){resumeGame();ckRequestExit();});
+  b=$('ckTutOk');if(b)b.addEventListener('click',function(){ckDismissTut();});
+  b=$('ckExitGo');if(b)b.addEventListener('click',function(){ckShowExit(false);ckDoExit();});
+  b=$('ckExitStay');if(b)b.addEventListener('click',function(){ckShowExit(false);});
+  b=$('ckRetry');if(b)b.addEventListener('click',function(){try{window.location.reload();}catch(e){}});
+  b=$('ckKeepPlaying');if(b)b.addEventListener('click',function(){var o=$('ckError');if(o)o.classList.remove('on');});
+  b=$('ckLockRefresh');if(b)b.addEventListener('click',function(){if(gateCheck()){setMsg('UNLOCKED — WELCOME TO THE SHOP.',true);render();}});
+  b=$('ckLockArcade');if(b)b.addEventListener('click',function(){ckDoExit();});
+  b=$('tabCoins');if(b)b.addEventListener('click',function(){setMarket('coins');});
+  b=$('tabStocks');if(b)b.addEventListener('click',function(){setMarket('stocks');});
+  b=$('ckLockStocks');if(b)b.addEventListener('click',function(){setMarket('stocks');});
+  b=$('ckLockMine');if(b)b.addEventListener('click',function(){mineLockOut=true;syncLock();var mb=$('mineBox');try{if(mb&&mb.scrollIntoView)mb.scrollIntoView();}catch(e){}});
+  b=$('buyBtn');if(b)b.addEventListener('click',function(){var a=$('amtInput');if(market==='stocks')buyStock(a?a.value:'');else buyAtoms(a?a.value:'');});
+  b=$('sellBtn');if(b)b.addEventListener('click',function(){var a=$('amtInput');if(market==='stocks')sellStock(a?a.value:'');else sellCoins(a?a.value:'');});
+  var qs=document.querySelectorAll('.quick button');
+  for(var qi=0;qi<qs.length;qi++){
+    (function(btn){
+      btn.addEventListener('click',function(){
+        var a=$('amtInput');if(!a)return;
+        var q=btn.getAttribute('data-q');
+        if(q==='max')a.value=String(market==='stocks'?ionBal():atomBal());
+        else a.value=q;
+        a.focus();
+      });
+    })(qs[qi]);
+  }
+  ['ckPause','ckRestart','ckSound','ckFull','ckArcade','ckHelp','ckResume','ckQuit','ckTutOk','ckExitGo','ckExitStay','ckRetry','ckKeepPlaying','ckLockRefresh','ckLockArcade','ckLockMine','buyBtn','sellBtn'].forEach(function(id){var el=$(id);if(el)el.addEventListener('click',function(e){e.stopPropagation();});});
+  document.addEventListener('keydown',function(e){
+    if(!e)return;
+    var k=e.key;
+    if(k==='Escape'){
+      if(ckExitOpen){ckShowExit(false);return;}
+      if(paused)resumeGame();
+      return;
+    }
+    var tag=(e.target&&e.target.tagName)||'';
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+    if(k==='p'||k==='P'){if(paused)resumeGame();else pauseGame();}
+    else if(k==='b'||k==='B'){var a=$('amtInput');if(market==='stocks')buyStock(a?a.value:'');else buyAtoms(a?a.value:'');}
+    else if(k==='s'||k==='S'){var a2=$('amtInput');if(market==='stocks')sellStock(a2?a2.value:'');else sellCoins(a2?a2.value:'');}
+  });
+  document.addEventListener('visibilitychange',function(){if(document.hidden&&!locked)pauseGame();});
+  try{history.pushState({ckExitGuard:1},'');}catch(e){}
+  window.addEventListener('popstate',function(){if(ckRunActive()){try{history.pushState({ckExitGuard:1},'');}catch(e){}ckShowExit(true);}});
+  window.addEventListener('offline',function(){var el=$('ckOffline');if(el)el.style.display='block';});
+  window.addEventListener('online',function(){var el=$('ckOffline');if(el)el.style.display='none';});
+  window.ckRequestExit=ckRequestExit;
+  window.ckRunStart=ckRunStart;
+})();
+
+/* ---------- init ---------- */
+loadState();
+cash=atomBal();
+buildCoinList();
+gateCheck();
+chainInit();
+mineLoad();
+mineAccrue(Date.now()); /* credit offline ore, capped at 8h */
+buildMineRigs();
+renderMining();
+setInterval(function(){mineAccrue(Date.now());renderMining();},1000);
+ckRunStart();
+ckNoteBest(portfolioValue());
+render();
+ckReady();
+armTicks();
+window.__exchangeReady=true;
+})();
+</script>
+<script>/*HUD-MOL 2026-11-05: read-only molecules pill — shared wraith_coins balance, never writes.*/
+(function(){function u(){var e=document.getElementById('ckMol');if(!e)return;var v=0;try{v=parseFloat(localStorage.getItem('wraith_coins'))||0;}catch(_){}var b=e.querySelector('b');if(b)b.textContent=String(Math.floor(v));}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',u);}else{u();}
+window.addEventListener('storage',u);setInterval(u,2000);})();</script>
+</body></html>

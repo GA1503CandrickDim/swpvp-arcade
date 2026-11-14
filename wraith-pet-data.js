@@ -1,15 +1,15 @@
 'use strict';
 var PET_DEFS = [
-{ id: 'buddy', name: 'BUDDY', emoji: '🦖', body: '#1c1c22', belly: '#ffd23f', tail: 'rect', ear: 'spike', track: 'free', cost: 0, dollars: 0, desc: 'Your dino buddy. Dark hide, gold belly.' },
-{ id: 'goldraven', name: 'GOLDRAVEN', emoji: '🦅', body: '#14141c', belly: '#ffd23f', tail: 'wing', ear: 'beak', track: 'coin', cost: 800, dollars: 0, noBreed: true, desc: 'A raven knight who remembers. Morphs between raven and person.' },
-{ id: 'dog', name: 'DOG', emoji: '🐶', body: '#8a6b4f', belly: '#e8dcc8', tail: 'rect', ear: 'flop', track: 'coin', cost: 150, dollars: 0, desc: 'A plain friendly dog. Nothing fancy.' },
-{ id: 'cat', name: 'CAT', emoji: '🐱', body: '#6b6b72', belly: '#f0e8dc', tail: 'rect', ear: 'point', track: 'coin', cost: 300, dollars: 0, desc: 'A plain grey cat. Quiet and calm.' },
-{ id: 'bunny', name: 'BUNNY', emoji: '🐰', body: '#d8d8d8', belly: '#ffffff', tail: 'puff', ear: 'long', track: 'coin', cost: 600, dollars: 0, desc: 'A plain soft bunny. Long ears.' },
-{ id: 'ember', name: 'EMBER', emoji: '🔥', body: '#b3541e', belly: '#ffe9b0', tail: 'flame', ear: 'point', track: 'dollar', cost: 0, dollars: 1, desc: 'A warm little fire pup. Flame tail. Has its own ember field map.' },
-{ id: 'frost', name: 'FROST', emoji: '❄️', body: '#a8c8e0', belly: '#ffffff', tail: 'puff', ear: 'point', track: 'dollar', cost: 0, dollars: 2, desc: 'A chilly ice pup. Snow-soft fur. Has its own snowfield map.' },
-{ id: 'shadow', name: 'SHADOW', emoji: '🌑', body: '#14141c', belly: '#ffd23f', tail: 'rect', ear: 'horn', track: 'dollar', cost: 0, dollars: 3, desc: 'A quiet wraith cat. Gold eyes, tiny horns. Has its own moonlit yard map.' },
-{ id: 'morph', name: 'MORPH', emoji: '🎭', body: '#3f3f56', belly: '#cfd2e0', tail: 'rect', ear: 'horn', track: 'dollar', cost: 0, dollars: 4, desc: 'A shifter — swap his mask, top, chain and hat anytime. Has his own loft map.' },
-{ id: 'apex', name: 'APEX', emoji: '👑', body: '#0d0d12', belly: '#ffd700', tail: 'flame', ear: 'horn', track: 'dollar', cost: 0, dollars: 5, desc: 'The ultimate. Every feature, biggest map, gold everything. Has his own spire map.' }
+{ id: 'buddy', name: 'BUDDY', emoji: '🦖', body: '#1c1c22', belly: '#ffd23f', tail: 'rect', ear: 'spike', track: 'free', cost: 0, dollars: 0, desc: 'A stout dusk-rex with plated back, heavy tail and a bright gold chest.' },
+{ id: 'goldraven', name: 'GOLDRAVEN', emoji: '🦅', body: '#14141c', belly: '#ffd23f', tail: 'wing', ear: 'beak', track: 'coin', cost: 800, dollars: 0, noBreed: true, desc: 'A regal raven sentinel with feather-blade wings, a gold beak and a knight\'s staff. Morphs between raven and person.' },
+{ id: 'dog', name: 'DOG', emoji: '🐶', body: '#8a6b4f', belly: '#e8dcc8', tail: 'rect', ear: 'flop', track: 'coin', cost: 150, dollars: 0, desc: 'A loyal trail hound with floppy ears, a soft muzzle and a wagging curled tail.' },
+{ id: 'cat', name: 'CAT', emoji: '🐱', body: '#6b6b72', belly: '#f0e8dc', tail: 'rect', ear: 'point', track: 'coin', cost: 300, dollars: 0, desc: 'A nimble moon-cat with tall ears, cheek tufts and a long balancing tail.' },
+{ id: 'bunny', name: 'BUNNY', emoji: '🐰', body: '#d8d8d8', belly: '#ffffff', tail: 'puff', ear: 'long', track: 'coin', cost: 600, dollars: 0, desc: 'A round meadow hopper with expressive long ears, pink inner fur and oversized paws.' },
+{ id: 'ember', name: 'EMBER', emoji: '🔥', body: '#b3541e', belly: '#ffe9b0', tail: 'flame', ear: 'point', track: 'dollar', cost: 0, dollars: 1, desc: 'A flame-maned ember fox with a glowing chest and living fire plume. Has its own ember field map.' },
+{ id: 'frost', name: 'FROST', emoji: '❄️', body: '#a8c8e0', belly: '#ffffff', tail: 'puff', ear: 'point', track: 'dollar', cost: 0, dollars: 2, desc: 'An arctic fox with crystal ears, frost-bright eyes and an icy tail plume. Has its own snowfield map.' },
+{ id: 'shadow', name: 'SHADOW', emoji: '🌑', body: '#14141c', belly: '#ffd23f', tail: 'rect', ear: 'horn', track: 'dollar', cost: 0, dollars: 3, desc: 'A spectral shadow-cat with violet spirit eyes, smoke mantle and crescent markings. Has its own moonlit yard map.' },
+{ id: 'morph', name: 'MORPH', emoji: '🎭', body: '#3f3f56', belly: '#cfd2e0', tail: 'rect', ear: 'horn', track: 'dollar', cost: 0, dollars: 4, desc: 'A masked shape-shifter with a segmented porcelain face and floating rune. Swap mask, top, chain and hat anytime. Has its own loft map.' },
+{ id: 'apex', name: 'APEX', emoji: '👑', body: '#0d0d12', belly: '#ffd700', tail: 'flame', ear: 'horn', track: 'dollar', cost: 0, dollars: 5, desc: 'The apex monarch: armored quadruped, radiant crown-horns and violet war-cape. Has its own spire map.' }
 ];
 var MORPH_PARTS = {
 mask: [
@@ -102,66 +102,76 @@ buddy: { name: 'DINO FIELD', w: 640, h: 480, ground: '#1e2a18', sky: '#0d140c', 
 pickups: [ { x: 120, y: 120 }, { x: 520, y: 120 }, { x: 320, y: 360 }, { x: 520, y: 400 } ],
 spots: [
 { x: 520, y: 240, kind: 'bones', label: 'BONE PILE', line: 'A pile of old bones. Buddy guards his treasure.', bonus: 10 },
-{ x: 140, y: 300, kind: 'pool', label: 'MUD POOL', line: 'Buddy loves the mud pool. Do not ask why.', bonus: 10 }
+{ x: 140, y: 300, kind: 'pool', label: 'MUD POOL', line: 'Buddy loves the mud pool. Do not ask why.', bonus: 10 },
+{ x: 320, y: 120, kind: 'game', mode: 'dino', target: 'dino-run.html', label: 'DINO RUN', line: 'A tiny arcade cabinet hums. DINO RUN waits inside!', bonus: 0 }
 ] },
 dog: { name: 'DOG YARD', w: 720, h: 540, ground: '#3a2e1c', sky: '#241c10', coin: 5, dest: { x: 660, y: 70 },
 pickups: [ { x: 130, y: 140 }, { x: 590, y: 130 }, { x: 360, y: 420 } ],
 spots: [
 { x: 560, y: 260, kind: 'kennel', label: 'KENNEL', line: 'A cozy kennel. Dog naps here after every walk.', bonus: 10 },
-{ x: 170, y: 300, kind: 'hydrant', label: 'HYDRANT', line: 'The famous hydrant. Every dog in town knows it.', bonus: 10 }
+{ x: 170, y: 300, kind: 'hydrant', label: 'HYDRANT', line: 'The famous hydrant. Every dog in town knows it.', bonus: 10 },
+{ x: 360, y: 130, kind: 'game', mode: 'flap', target: 'wraith-flap.html', label: 'WRAITH FLAP', line: 'A tiny arcade cabinet flaps its wings. WRAITH FLAP waits inside!', bonus: 0 }
 ] },
 cat: { name: 'CAT GARDEN', w: 800, h: 600, ground: '#22331f', sky: '#101a0e', coin: 5, dest: { x: 740, y: 70 },
 pickups: [ { x: 130, y: 130 }, { x: 670, y: 150 }, { x: 400, y: 450 }, { x: 670, y: 470 } ],
 spots: [
 { x: 600, y: 250, kind: 'tree', label: 'CAT TREE', line: 'A tall cat tree. Cat watches the whole garden from up there.', bonus: 10 },
-{ x: 180, y: 320, kind: 'pool', label: 'FISH POND', line: 'A small fish pond. Cat stares at it for hours.', bonus: 10 }
+{ x: 180, y: 320, kind: 'pool', label: 'FISH POND', line: 'A small fish pond. Cat stares at it for hours.', bonus: 10 },
+{ x: 400, y: 140, kind: 'game', mode: 'serpent', target: 'wraith-serpent.html', label: 'WRAITH SERPENT', line: 'A tiny arcade cabinet hisses. WRAITH SERPENT waits inside!', bonus: 0 }
 ] },
 bunny: { name: 'BUNNY MEADOW', w: 880, h: 640, ground: '#2c3a1e', sky: '#141f0e', coin: 5, dest: { x: 810, y: 80 },
 pickups: [ { x: 130, y: 130 }, { x: 750, y: 140 }, { x: 440, y: 320 }, { x: 150, y: 520 }, { x: 740, y: 520 } ],
 spots: [
 { x: 640, y: 250, kind: 'carrot', label: 'CARROT PATCH', line: 'A fat carrot patch. Bunny could live here forever.', bonus: 10 },
-{ x: 200, y: 330, kind: 'flowers', label: 'FLOWER BED', line: 'A bed of soft flowers. Bunny naps between the blooms.', bonus: 10 }
+{ x: 200, y: 330, kind: 'flowers', label: 'FLOWER BED', line: 'A bed of soft flowers. Bunny naps between the blooms.', bonus: 10 },
+{ x: 440, y: 140, kind: 'game', mode: 'cards', target: 'wraith-cards.html', label: 'WRAITH CARDS', line: 'A tiny arcade cabinet shuffles its deck. WRAITH CARDS waits inside!', bonus: 0 }
 ] },
 ember: { name: 'EMBER FIELD', w: 960, h: 640, ground: '#2a1608', sky: '#1a0d05', coin: 5, dest: { x: 890, y: 80 },
 pickups: [ { x: 150, y: 140 }, { x: 820, y: 180 }, { x: 480, y: 480 }, { x: 830, y: 520 } ],
 spots: [
 { x: 700, y: 300, kind: 'crystal', label: 'WARM CRYSTAL', line: 'The crystal hums warm. Ember naps beside it sometimes.', bonus: 10 },
 { x: 220, y: 330, kind: 'stand', label: 'LAVA STAND', line: 'A stone stand over a slow lava pool. Toasty.', bonus: 10 },
-{ x: 480, y: 150, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 }
+{ x: 480, y: 150, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 },
+{ x: 350, y: 500, kind: 'game', mode: 'slimeball', target: 'slimeball.html', label: 'SLIMEBALL', line: 'A tiny arcade cabinet bounces. SLIMEBALL waits inside!', bonus: 0 }
 ] },
 frost: { name: 'SNOWFIELD', w: 1040, h: 700, ground: '#dfe9f2', sky: '#b8c9dd', coin: 5, dest: { x: 970, y: 80 },
 pickups: [ { x: 180, y: 200 }, { x: 780, y: 160 }, { x: 480, y: 500 } ],
 spots: [
 { x: 480, y: 280, kind: 'crystal', label: 'ICE CRYSTAL', line: 'The ice crystal sings quiet in the cold. Frost loves it.', bonus: 10 },
-{ x: 760, y: 420, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 }
+{ x: 760, y: 420, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 },
+{ x: 200, y: 480, kind: 'game', mode: 'tetris', target: 'tetris.html', label: 'TETRIS', line: 'A tiny arcade cabinet stacks blocks. TETRIS waits inside!', bonus: 0 }
 ] },
 shadow: { name: 'MOONLIT YARD', w: 1120, h: 760, ground: '#0c0c18', sky: '#070712', coin: 5, dest: { x: 1050, y: 90 },
 pickups: [ { x: 120, y: 120 }, { x: 840, y: 140 }, { x: 480, y: 320 }, { x: 160, y: 520 }, { x: 820, y: 520 } ],
 spots: [
 { x: 700, y: 200, kind: 'moon', label: 'MOON GATE', line: 'The moon gate glows. Shadow slips through it like smoke.', bonus: 10 },
 { x: 260, y: 420, kind: 'stand', label: 'OLD WELL', line: 'Something glints at the bottom of the old well.', bonus: 10 },
-{ x: 560, y: 600, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 }
+{ x: 560, y: 600, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 },
+{ x: 900, y: 380, kind: 'game', mode: 'invader', target: 'star-invader.html', label: 'STAR INVADER', line: 'A tiny arcade cabinet blips. STAR INVADER waits inside!', bonus: 0 }
 ] },
 morph: { name: 'MORPH LOFT', w: 1200, h: 800, ground: '#1c1a20', sky: '#121016', coin: 5, dest: { x: 1120, y: 90 },
 pickups: [ { x: 150, y: 150 }, { x: 810, y: 170 }, { x: 480, y: 470 }, { x: 820, y: 500 } ],
 spots: [
 { x: 690, y: 300, kind: 'bench', label: 'WORKBENCH', line: 'Tools everywhere. Morph built half his look right here.', bonus: 10 },
 { x: 230, y: 320, kind: 'sign', label: 'NEON SIGN', line: 'The sign buzzes: MAKE IT YOURS.', bonus: 10 },
-{ x: 600, y: 620, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 }
+{ x: 600, y: 620, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 },
+{ x: 950, y: 480, kind: 'game', mode: 'sav', target: 'sav.html', label: 'SAV', line: 'A tiny arcade cabinet crackles. SAV waits inside!', bonus: 0 }
 ] },
 apex: { name: 'AURA SPIRE', w: 1280, h: 860, ground: '#14141f', sky: '#0a0a14', coin: 5, dest: { x: 1200, y: 90 },
 pickups: [ { x: 160, y: 160 }, { x: 850, y: 180 }, { x: 480, y: 430 }, { x: 240, y: 680 }, { x: 1050, y: 640 } ],
 spots: [
 { x: 760, y: 300, kind: 'crystal', label: 'SPIRE CRYSTAL', line: 'The spire crystal burns gold. Apex stands taller near it.', bonus: 10 },
 { x: 280, y: 340, kind: 'stand', label: 'GOLD STAND', line: 'A stand of solid gold. Nobody knows who left it.', bonus: 10 },
-{ x: 640, y: 620, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 }
+{ x: 640, y: 620, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 },
+{ x: 1000, y: 450, kind: 'game', mode: 'fight', target: 'wraith-survival.html?mode=fight', label: 'VANIX FIGHT', line: 'A tiny arcade cabinet rattles. VANIX FIGHT waits inside!', bonus: 0 }
 ] },
 goldraven: { name: 'RAVEN ROOST', w: 1040, h: 700, ground: '#141826', sky: '#0a0c16', coin: 5, dest: { x: 970, y: 80 },
 pickups: [ { x: 150, y: 150 }, { x: 800, y: 170 }, { x: 480, y: 480 }, { x: 830, y: 540 } ],
 spots: [
 { x: 700, y: 300, kind: 'perch', label: 'HIGH PERCH', line: 'Goldraven watches the whole roost from up here.', bonus: 10 },
 { x: 240, y: 330, kind: 'shrine', label: 'OLD SHRINE', line: 'A shrine to a friend nobody remembers but him.', bonus: 10 },
-{ x: 520, y: 600, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 }
+{ x: 520, y: 600, kind: 'dummy', label: 'TRAINING POST', line: 'A sturdy sparring post.', bonus: 0 },
+{ x: 900, y: 450, kind: 'game', mode: 'defense', target: 'wraith-defense.html', label: 'WRAITH DEFENSE', line: 'A tiny arcade cabinet stands guard. WRAITH DEFENSE waits inside!', bonus: 0 }
 ] }
 };
 MAP_DEFS.apex.decor = mapDecor(71, 46, 1280, 860);
@@ -470,6 +480,18 @@ function sanitizeSaveForCode(raw, now) {
     st.team.wins = Math.max(0, Math.floor(saveCodeNum(raw.team.wins, 0)));
     st.team.played = Math.max(0, Math.floor(saveCodeNum(raw.team.played, 0)));
   }
+  if (raw.packbattle && typeof raw.packbattle === 'object') {
+    var pbsrc = raw.packbattle;
+    if (pbsrc.wins && typeof pbsrc.wins === 'object') {
+      st.packbattle.wins.rookie = Math.max(0, Math.floor(saveCodeNum(pbsrc.wins.rookie, 0)));
+      st.packbattle.wins.veteran = Math.max(0, Math.floor(saveCodeNum(pbsrc.wins.veteran, 0)));
+      st.packbattle.wins.champion = Math.max(0, Math.floor(saveCodeNum(pbsrc.wins.champion, 0)));
+    }
+    if (pbsrc.daily && typeof pbsrc.daily === 'object') {
+      st.packbattle.daily.date = (typeof pbsrc.daily.date === 'string') ? pbsrc.daily.date.slice(0, 10) : '';
+      st.packbattle.daily.wins = Math.max(0, Math.floor(saveCodeNum(pbsrc.daily.wins, 0)));
+    }
+  }
   st.lastSeen = saveCodeNum(raw.lastSeen, now);
   if (!isFinite(st.lastSeen) || st.lastSeen < 0) st.lastSeen = now;
   for (var pli = 0; pli < PET_DEFS.length; pli++) st.pets[PET_DEFS[pli].id].lastSeen = st.lastSeen;
@@ -706,3 +728,191 @@ else { wildHit(); if (!b.over) playerHit(mv); }
 b.log = b.log.concat(lines);
 return b;
 }
+
+/* ===== PACK BATTLE (card battle in the Pet game, Cee 2026-11-03) =====
+   Pure logic, same pattern as teamBattleMove / battleMove: state in,
+   state out. The deck is built from OWNED pets only; APEX is never a
+   card (not in the table) and the unnamed $5 pet is not a card either.
+   Card numbers are the card-battle mapping ONLY — they do not change
+   any pet's battle stats, moves, levels or look. Element is flavour
+   only in v1 (no advantage). No energy/charge mechanic existed before;
+   PACK BATTLE energy is its own thing (start 3, +2/turn, max 10).
+   PIERCE is the part of a card's ATK that ignores the foe's GUARD:
+   damage = PIERCE + max(0, ATK - PIERCE - foe GUARD). */
+var PACK_BATTLE_CARDS = {
+  buddy:     { atk: 6,  guard: 4,  pierce: 0, cost: 1 },
+  dog:       { atk: 7,  guard: 5,  pierce: 0, cost: 1 },
+  cat:       { atk: 8,  guard: 5,  pierce: 0, cost: 2 },
+  bunny:     { atk: 9,  guard: 6,  pierce: 0, cost: 2 },
+  goldraven: { atk: 10, guard: 7,  pierce: 2, cost: 2 },
+  ember:     { atk: 11, guard: 7,  pierce: 4, cost: 2 },
+  frost:     { atk: 12, guard: 8,  pierce: 2, cost: 3 },
+  shadow:    { atk: 13, guard: 9,  pierce: 6, cost: 3 },
+  morph:     { atk: 14, guard: 10, pierce: 4, cost: 3 }
+};
+var PACK_BATTLE_TIERS = {
+  rookie:   { name: 'ROOKIE',   hp: 30, atk: 4, guard: 3, special: 8,  reward: 15, foes: ['fernhop', 'yardbug', 'gardenmouse'] },
+  veteran:  { name: 'VETERAN',  hp: 45, atk: 6, guard: 5, special: 12, reward: 25, foes: ['hoppet', 'cinderpup', 'snowhop'] },
+  champion: { name: 'CHAMPION', hp: 60, atk: 8, guard: 7, special: 16, reward: 40, foes: ['gloombat', 'scrapbot', 'spirebat'] }
+};
+var PACK_BATTLE_START_ENERGY = 3, PACK_BATTLE_ENERGY_PER_TURN = 2,
+    PACK_BATTLE_MAX_ENERGY = 10, PACK_BATTLE_OPEN_DRAW = 3,
+    PACK_BATTLE_HAND_CAP = 5, PACK_BATTLE_XP = 12, PACK_BATTLE_ATOMS = 2,
+    PACK_BATTLE_LOSS_MOLECULES = 2, PACK_BATTLE_DAILY_CAP = 10;
+var PACK_BATTLE_ELEMENT_COLORS = { SHADE: '#8a6fd8', FLAME: '#ff7a3c', FROST: '#7fd4ff', LEAF: '#39d353', FLUX: '#ffd23f', AURA: '#ffd700' };
+function freshPackBattleState() { return { wins: { rookie: 0, veteran: 0, champion: 0 }, daily: { date: '', wins: 0 } }; }
+function packBattleToday() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function packBattleUnlocked(st, tierId) {
+  if (!st.packbattle) st.packbattle = freshPackBattleState();
+  if (tierId === 'rookie') return true;
+  if (tierId === 'veteran') return (st.packbattle.wins.rookie || 0) >= 1;
+  if (tierId === 'champion') return (st.packbattle.wins.veteran || 0) >= 1;
+  return false;
+}
+function packBattleDeckIds(st) {
+  var out = [];
+  PET_DEFS.forEach(function (d) {
+    if (PACK_BATTLE_CARDS[d.id] && st.pets[d.id] && st.pets[d.id].owned) out.push(d.id);
+  });
+  return out;
+}
+function packBattleCard(st, id) {
+  var c = PACK_BATTLE_CARDS[id];
+  if (!c) return null;
+  var d = petDef(id);
+  return { id: id, name: d.name, emoji: d.emoji, element: petElement(st, id),
+    special: PET_SPECIALS[id] || 'BIG HIT', atk: c.atk + gearBonus(st).dmg,
+    guard: c.guard, pierce: c.pierce, cost: c.cost };
+}
+function packBattleShuffle(arr, rand) {
+  var r = rand || Math.random;
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(r() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr;
+}
+function packBattleDraw(pb, rand) {
+  if (pb.hand.length >= PACK_BATTLE_HAND_CAP) return false;
+  if (!pb.deck.length) {
+    if (!pb.discard.length) return false;
+    pb.deck = packBattleShuffle(pb.discard.splice(0), rand);
+  }
+  pb.hand.push(pb.deck.shift());
+  return true;
+}
+function newPackBattle(st, tierId, rand) {
+  if (!st.packbattle) st.packbattle = freshPackBattleState();
+  var tier = PACK_BATTLE_TIERS[tierId];
+  if (!tier || !packBattleUnlocked(st, tierId)) return null;
+  var ids = packBattleDeckIds(st);
+  if (!ids.length) return null;
+  var r = rand || Math.random;
+  var foeId = tier.foes[Math.floor(r() * tier.foes.length)];
+  var foe = wildDefById(foeId);
+  if (!foe) return null;
+  var stats = battleStats(st, st.active);
+  var pb = { tier: tierId, tierName: tier.name, foeId: foeId, foeName: foe.name,
+    foeType: foe.type, foeSpecial: foe.special, foeHp: tier.hp, foeMaxHp: tier.hp,
+    foeGuard: tier.guard, foeGuardMax: tier.guard, foeTurn: 0,
+    playerHp: stats.hp, playerMax: stats.hp, energy: PACK_BATTLE_START_ENERGY,
+    hand: [], deck: packBattleShuffle(ids.slice(), r), discard: [],
+    guard: 0, tossed: false, turn: 1, over: false, won: false, fled: false,
+    capped: false, reward: { molecules: 0, atoms: 0, xp: 0 }, log: [] };
+  for (var i = 0; i < PACK_BATTLE_OPEN_DRAW; i++) packBattleDraw(pb, r);
+  pb.log.push('PACK BATTLE — ' + tier.name + '! A wild ' + foe.name + ' blocks the yard!');
+  return pb;
+}
+function packBattleMove(pb, st, store, kind, arg, creditAtoms, rand) {
+  if (!pb || pb.over) return pb;
+  if (!st.packbattle) st.packbattle = freshPackBattleState();
+  var r = rand || Math.random;
+  var lines = [];
+  var tier = PACK_BATTLE_TIERS[pb.tier];
+  function finishWin() {
+    pb.over = true; pb.won = true;
+    var today = packBattleToday();
+    if (st.packbattle.daily.date !== today) st.packbattle.daily = { date: today, wins: 0 };
+    st.packbattle.wins[pb.tier] = (st.packbattle.wins[pb.tier] || 0) + 1;
+    var capped = st.packbattle.daily.wins >= PACK_BATTLE_DAILY_CAP;
+    pb.capped = capped;
+    if (!capped) {
+      st.packbattle.daily.wins++;
+      setCoins(store, getCoins(store) + tier.reward);
+      pb.reward = { molecules: tier.reward, atoms: PACK_BATTLE_ATOMS, xp: PACK_BATTLE_XP };
+      if (typeof creditAtoms === 'function') { try { creditAtoms(PACK_BATTLE_ATOMS); } catch (e) {} }
+    } else {
+      pb.reward = { molecules: 0, atoms: 0, xp: PACK_BATTLE_XP };
+    }
+    gainBattleXP(st, st.active, PACK_BATTLE_XP);
+    lines.push('WRAITH WINS! Your pack tore through ' + pb.foeName + '!');
+  }
+  function finishLoss() {
+    pb.over = true; pb.won = false;
+    setCoins(store, getCoins(store) + PACK_BATTLE_LOSS_MOLECULES);
+    pb.reward = { molecules: PACK_BATTLE_LOSS_MOLECULES, atoms: 0, xp: 0 };
+    lines.push(pb.foeName + ' got the better of your pack this time.');
+  }
+  if (kind === 'run') {
+    pb.over = true; pb.fled = true;
+    lines.push('Ran off — no reward, nothing lost.');
+  } else if (kind === 'play') {
+    var id = pb.hand[arg];
+    var card = id ? packBattleCard(st, id) : null;
+    if (!card) { lines.push('NO SUCH CARD.'); }
+    else if (pb.energy < card.cost) { lines.push('NOT ENOUGH ENERGY FOR ' + card.name + ' (NEEDS ' + card.cost + ').'); }
+    else {
+      pb.energy -= card.cost;
+      pb.hand.splice(arg, 1);
+      pb.discard.push(id);
+      var dmg = card.pierce + Math.max(0, card.atk - card.pierce - pb.foeGuard);
+      pb.foeHp = Math.max(0, pb.foeHp - dmg);
+      pb.guard += card.guard;
+      lines.push(card.name + ' uses ' + card.special + ' — ' + dmg + ' damage! +' + card.guard + ' GUARD.');
+      if (pb.foeHp <= 0) finishWin();
+    }
+  } else if (kind === 'toss') {
+    var tid = pb.hand[arg];
+    if (pb.tossed) { lines.push('ALREADY TOSSED THIS TURN.'); }
+    else if (!tid) { lines.push('NO CARD TO TOSS.'); }
+    else {
+      pb.hand.splice(arg, 1);
+      pb.discard.push(tid);
+      pb.energy = Math.min(PACK_BATTLE_MAX_ENERGY, pb.energy + 1);
+      pb.tossed = true;
+      lines.push('TOSSED ' + petDef(tid).name + ' — +1 ENERGY.');
+    }
+  } else if (kind === 'end') {
+    pb.foeGuard = pb.foeGuardMax;
+    pb.foeTurn++;
+    var isSpecial = (pb.foeTurn % 3 === 0);
+    var pow = isSpecial ? tier.special : tier.atk;
+    var taken = Math.max(0, pow - pb.guard);
+    pb.playerHp = Math.max(0, pb.playerHp - taken);
+    lines.push(pb.foeName + ' uses ' + (isSpecial ? pb.foeSpecial : 'STRIKE') + ' — ' + taken + ' damage!');
+    pb.guard = 0;
+    if (pb.playerHp <= 0) { finishLoss(); }
+    else {
+      if ((pb.foeTurn + 1) % 3 === 0) lines.push(pb.foeName + ' is winding up…');
+      pb.turn++;
+      pb.energy = Math.min(PACK_BATTLE_MAX_ENERGY, pb.energy + PACK_BATTLE_ENERGY_PER_TURN);
+      packBattleDraw(pb, r);
+      pb.tossed = false;
+    }
+  }
+  pb.log = pb.log.concat(lines);
+  return pb;
+}
+var __PACKBATTLE_API__ = { CARDS: PACK_BATTLE_CARDS, TIERS: PACK_BATTLE_TIERS,
+  ELEMENT_COLORS: PACK_BATTLE_ELEMENT_COLORS,
+  START_ENERGY: PACK_BATTLE_START_ENERGY, ENERGY_PER_TURN: PACK_BATTLE_ENERGY_PER_TURN,
+  MAX_ENERGY: PACK_BATTLE_MAX_ENERGY, OPEN_DRAW: PACK_BATTLE_OPEN_DRAW,
+  HAND_CAP: PACK_BATTLE_HAND_CAP, XP: PACK_BATTLE_XP, ATOMS: PACK_BATTLE_ATOMS,
+  LOSS_MOLECULES: PACK_BATTLE_LOSS_MOLECULES, DAILY_CAP: PACK_BATTLE_DAILY_CAP,
+  freshPackBattleState: freshPackBattleState, packBattleToday: packBattleToday,
+  packBattleUnlocked: packBattleUnlocked, packBattleDeckIds: packBattleDeckIds,
+  packBattleCard: packBattleCard, packBattleShuffle: packBattleShuffle,
+  packBattleDraw: packBattleDraw, newPackBattle: newPackBattle,
+  packBattleMove: packBattleMove };
+if (typeof window !== 'undefined') window.__PACKBATTLE__ = __PACKBATTLE_API__;
+if (typeof global !== 'undefined') global.__PACKBATTLE__ = __PACKBATTLE_API__;

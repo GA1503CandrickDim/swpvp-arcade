@@ -1,0 +1,287 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>WRAITH SLICE — Wraith's Arcade</title><style>
+*{box-sizing:border-box}body{margin:0;background:#07070d;color:#fff;font-family:monospace;overflow:hidden}
+#ckBar{padding:8px 10px 0;max-width:480px;margin:0 auto}
+.ck-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:2px;color:#a86bff}
+.ck-top b{color:#fff}
+.ck-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.ck-row button{flex:1;padding:10px 4px;background:#111;color:#a86bff;border:1px solid #a86bff;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ck-row button:active{background:#241028}
+#ckBest{font-size:11px;color:#ccc;letter-spacing:1px;margin:6px 0 0}
+#hud{display:flex;justify-content:space-between;padding:6px 12px;font-size:12px;color:#a86bff;letter-spacing:1px;max-width:480px;margin:0 auto}
+#hud b{color:#fff}
+#wrap{position:relative;max-width:480px;margin:0 auto}canvas{display:block;width:100%;height:auto;background:#0a0a14;touch-action:none}
+#msg{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:13px;font-weight:700;color:#ffd94d;z-index:3;pointer-events:none;text-shadow:0 2px 6px #000}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.85);text-align:center;z-index:2;padding:10px}
+#ov h1{color:#a86bff;letter-spacing:3px;margin:0 0 8px;font-size:20px}#ov p{margin:4px 0;color:#ccc;font-size:12px;line-height:1.5}
+#ov button{margin:4px;padding:10px 16px;background:#a86bff;color:#000;border:0;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
+#ov button.ghost{background:#111;color:#fff;border:1px solid #fff}
+.ck-ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:10;padding:12px}
+.ck-ov.on{display:flex}
+.ck-box{max-width:430px;width:100%;background:#111;border:1px solid #a86bff;border-radius:12px;padding:18px;text-align:center}
+.ck-t{font-size:18px;letter-spacing:3px;color:#a86bff;margin-bottom:8px}
+.ck-b{font-size:12px;line-height:1.6;color:#ccc;text-align:left}
+.ck-b b{color:#fff}
+.ck-btns{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ck-btns button{padding:10px 16px;background:#a86bff;color:#000;border:0;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
+.ck-btns button.ck-ghost{background:#111;color:#fff;border:1px solid #fff}
+#ckOffline{display:none;background:#3a2a00;color:#ffd94d;text-align:center;font-size:11px;letter-spacing:1px;padding:6px}
+#ckOffline.on{display:block}
+#hubLink{text-align:center;padding:4px 0 10px;max-width:480px;margin:0 auto}
+#hubLink a{color:#a86bff;text-decoration:none;font-size:12px}
+html,body{touch-action:none;overscroll-behavior:none}
+</style></head><body>
+<div id="ckBar"><div class="ck-top"><span class="ck-title">WRAITH SLICE</span><span class="ck-mol" id="ckMol">🪙 <b>0</b></span></div><div class="ck-row"><button id="ckPause" type="button">⏸ PAUSE</button><button id="ckRestart" type="button">↻ RESTART</button><button id="ckSound" type="button">🔊 SOUND ON</button><button id="ckFull" type="button">⛶ FULLSCREEN</button><button id="ckArcade" type="button">⌂ ARCADE</button><button id="ckHelp" type="button" aria-label="How to play">?</button></div><div id="ckBest">🏆 BEST: —</div></div>
+<div id="ckLoading" class="ck-ov on"><div class="ck-box"><div class="ck-t">LOADING…</div><div class="ck-b" style="text-align:center">Sharpening the wraith blade…</div></div></div>
+<div id="ckOffline">⚠ OFFLINE — YOUR PROGRESS SAVES ON THIS DEVICE.</div>
+<div id="ckTut" class="ck-ov" role="dialog" aria-modal="true" aria-label="How to play"><div class="ck-box"><div class="ck-t">WRAITH SLICE</div><div class="ck-b"><b>GOAL</b> — Slice the fruit flying up, dodge the bombs. You have <b>3 lives</b> — slice a bomb and you lose one. Missed fruit costs nothing.<br><b>CONTROLS</b> — <b>Mouse:</b> drag / swipe across the fruit. <b>Touch:</b> swipe with your finger. <b>P</b> pause · <b>R</b> restart · <b>M</b> mute.<br><b>SCORING</b> — Fruit <b>+10</b> · Golden fruit <b>+50</b> · Slice <b>3+ in one swipe</b> for a <b>COMBO +20</b>. Every slice earns molecules: fruit <b>+1</b>, golden <b>+5</b>, combo <b>+2</b>. Your <b>BEST</b> score is saved on this device. Free to play — no atoms or ions to enter.</div><div class="ck-btns"><button id="ckTutOk" type="button">GOT IT — PLAY!</button></div></div></div>
+<div id="ckPaused" class="ck-ov" role="dialog" aria-modal="true" aria-label="Paused"><div class="ck-box"><div class="ck-t">⏸ PAUSED</div><div class="ck-b" style="text-align:center">Take a breather — the fruit is frozen.</div><div class="ck-btns"><button id="ckResume" type="button">▶ RESUME</button><button id="ckQuit" type="button" class="ck-ghost">⌂ QUIT TO ARCADE</button></div></div></div>
+<div id="ckExit" class="ck-ov" role="dialog" aria-modal="true" aria-label="Exit game?"><div class="ck-box"><div class="ck-t">EXIT?</div><div class="ck-b" style="text-align:center">Your progress is saved.</div><div class="ck-btns"><button id="ckExitGo" type="button">EXIT</button><button id="ckExitStay" type="button" class="ck-ghost">STAY</button></div></div></div>
+<div id="ckError" class="ck-ov" role="dialog" aria-modal="true" aria-label="Something went wrong"><div class="ck-box"><div class="ck-t">SOMETHING WENT WRONG</div><div class="ck-b" style="text-align:center">The game hit a snag. Your progress is saved on this device.</div><div class="ck-btns"><button id="ckRetry" type="button">↻ RETRY</button><button id="ckKeepPlaying" type="button" class="ck-ghost">KEEP PLAYING</button></div></div></div>
+<script>window.addEventListener('error',function(ev){try{if(window.console&&console.error)console.error(ev&&ev.error||ev&&ev.message||'ck-error');}catch(e){}var o=document.getElementById('ckError');if(o)o.classList.add('on');var l=document.getElementById('ckLoading');if(l)l.classList.remove('on');});</script>
+<div id="hud"><span>SCORE <b id="hs">0</b></span><span id="hm">❤ 3</span><span>BEST <b id="hb">0</b></span></div>
+<div id="wrap"><canvas id="cv" width="480" height="640"></canvas><div id="msg"></div>
+<div id="ov"><h1 id="ovt">WRAITH SLICE</h1><p id="ovp"></p><div id="ovb"></div></div></div>
+<div id="hubLink"><a href="index.html">← BACK TO ARCADE</a></div>
+<script>
+'use strict';
+/* WRAITH SLICE — original fruit-slicing game. No borrowed names, art, music or characters.
+   Free to play. Molecules only (wraith_coins). No atoms/ions to enter, no ion generation. */
+var W=480,H=640,M=Math;
+var D=typeof document!=='undefined'?document:0,L=typeof localStorage!=='undefined'?localStorage:0;
+var BEST_KEY='wraith_slice_best',PLAYS_KEY='sw_plays_wraith-slice',MOL_KEY='wraith_coins',MUTE_KEY='wraith_slice_muted_v1',TUT_KEY='wraith_slice_tutorial_seen_v1';
+function lb(){try{return parseInt(L.getItem(BEST_KEY))||0;}catch(e){return 0;}}
+function sb(v){try{L.setItem(BEST_KEY,String(v));}catch(e){}}
+function lsGet(k){try{return L.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{L.setItem(k,v);}catch(e){}}
+function bankMol(n){if(!n)return;try{var c=parseFloat(L.getItem(MOL_KEY))||0;L.setItem(MOL_KEY,String(c+n));}catch(e){}}
+function ckMuted(){try{return lsGet(MUTE_KEY)==='1';}catch(e){return false;}}
+function ckTutSeen(){try{return lsGet(TUT_KEY)==='1';}catch(e){return false;}}
+var FRUIT={
+  apple:{c:'#ff3b5c',r:26,pts:10,mol:1},
+  orange:{c:'#ff7a1e',r:24,pts:10,mol:1},
+  plum:{c:'#a86bff',r:22,pts:10,mol:1},
+  golden:{c:'#ffd94d',r:24,pts:50,mol:5}
+};
+function cg(rn){return{rn:rn||M.random,sc:0,be:lb(),lives:3,mol:0,items:[],halves:[],parts:[],trail:[],ph:'menu',ov:false,pz:false,ap:false,spawnT:40,ss:0,msg:'',msgT:0,flash:0,muted:ckMuted(),over:false,stroke:0};}
+function spawn(S){
+  var r=S.rn(),kind;
+  if(r<0.12)kind='bomb';
+  else if(r<0.20)kind='golden';
+  else kind=['apple','orange','plum'][M.floor(S.rn()*3)];
+  var def=kind==='bomb'?{c:'#14141c',r:26,pts:0,mol:0}:FRUIT[kind];
+  var up=11+S.rn()*3+M.min(3,S.sc/300);
+  S.items.push({x:40+S.rn()*(W-80),y:H+30,vx:(S.rn()-0.5)*2.6,vy:-up,r:def.r,kind:kind,c:def.c,pts:def.pts,mol:def.mol,rot:S.rn()*6.28,vr:(S.rn()-0.5)*0.12,sliced:false});
+}
+function spawnBurst(S){spawn(S);var r=S.rn();if(r<0.25)spawn(S);if(r<0.08)spawn(S);}
+function segHit(x1,y1,x2,y2,px,py,r){
+  var dx=x2-x1,dy=y2-y1,len2=dx*dx+dy*dy,t=0;
+  if(len2>0)t=M.max(0,M.min(1,((px-x1)*dx+(py-y1)*dy)/len2));
+  var cx=x1+t*dx,cy=y1+t*dy,ax=px-cx,ay=py-cy;
+  return ax*ax+ay*ay<(r+8)*(r+8);
+}
+var AC=null;
+function ac(){try{if(!AC){var C=(typeof window!=='undefined')&&(window.AudioContext||window.webkitAudioContext);if(C)AC=new C();}if(AC&&AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function blip(S,f,d,type,vol){if(!S||S.muted)return;try{var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.value=f;g.gain.value=vol||0.08;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.stop(c.currentTime+d);}catch(e){}}
+function sliceItem(S,it){
+  it.sliced=true;
+  if(it.kind==='bomb'){
+    S.lives--;S.flash=9;S.msg='BOOM! −1 LIFE';S.msgT=55;S.ss=0;
+    for(var i=0;i<14;i++)S.parts.push({x:it.x,y:it.y,vx:(S.rn()-0.5)*7,vy:(S.rn()-0.5)*7-1,life:26+((S.rn()*10)|0),c:i%2?'#ff3b5c':'#a86bff'});
+    blip(S,110,0.25,'sawtooth',0.20);
+    if(S.lives<=0)gameOver(S);
+    return;
+  }
+  S.sc+=it.pts;S.mol+=it.mol;bankMol(it.mol);
+  S.halves.push({x:it.x,y:it.y,vx:-1.6-S.rn(),vy:it.vy*0.4-1,rot:it.rot,vr:-0.12,side:0,kind:it.kind,c:it.c,r:it.r,life:45});
+  S.halves.push({x:it.x,y:it.y,vx:1.6+S.rn(),vy:it.vy*0.4-1,rot:it.rot,vr:0.12,side:1,kind:it.kind,c:it.c,r:it.r,life:45});
+  S.ss++;
+  blip(S,it.kind==='golden'?990:660,0.06,'square',0.10);
+  if(it.kind==='golden'){S.msg='GOLDEN! +'+it.pts;S.msgT=45;}
+  if(S.ss===3){S.sc+=20;S.mol+=2;bankMol(2);S.msg='COMBO x3! +20';S.msgT=50;blip(S,880,0.09,'square',0.12);}
+}
+function gameOver(S){
+  S.ov=true;S.ph='over';S.over=true;
+  if(S.sc>S.be){S.be=S.sc;sb(S.be);}
+  S.msg='GAME OVER';
+  try{if(typeof window!=='undefined'&&window.parent&&window.parent!==window)window.parent.postMessage({type:'vanix-win-molecules',amt:S.mol,game:'slice'},'*');}catch(e){}
+}
+function st(S,inp){
+  if(!S||S.ov||S.pz)return;
+  inp=inp||{};
+  if(S.msgT>0)S.msgT--;
+  if(S.flash>0)S.flash--;
+  if(S.ph!=='play')return;
+  if(--S.spawnT<=0){spawnBurst(S);S.spawnT=M.max(26,55-M.floor(S.sc/150)-((S.rn()*14)|0));}
+  var segs=inp.segs||[],s,i;
+  for(s=0;s<segs.length;s++){
+    var g=segs[s];
+    for(i=S.items.length-1;i>=0;i--){
+      var it=S.items[i];
+      if(it.sliced)continue;
+      if(segHit(g[0],g[1],g[2],g[3],it.x,it.y,it.r)){
+        sliceItem(S,it);
+        S.items.splice(i,1);
+        if(S.ov)return;
+      }
+    }
+  }
+  for(i=S.items.length-1;i>=0;i--){
+    var f=S.items[i];
+    f.vy+=0.32;f.x+=f.vx;f.y+=f.vy;f.rot+=f.vr;
+    if(f.x<20){f.x=20;f.vx=M.abs(f.vx);}
+    if(f.x>W-20){f.x=W-20;f.vx=-M.abs(f.vx);}
+    if(f.y>H+50)S.items.splice(i,1); /* missed fruit: no penalty, the run goes on */
+  }
+  for(i=S.halves.length-1;i>=0;i--){
+    var h=S.halves[i];
+    h.vy+=0.32;h.x+=h.vx;h.y+=h.vy;h.rot+=h.vr;h.life--;
+    if(h.life<=0||h.y>H+50)S.halves.splice(i,1);
+  }
+  for(i=S.parts.length-1;i>=0;i--){
+    var p=S.parts[i];
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;p.life--;
+    if(p.life<=0)S.parts.splice(i,1);
+  }
+  for(i=S.trail.length-1;i>=0;i--){S.trail[i].life-=2;if(S.trail[i].life<=0)S.trail.splice(i,1);}
+}
+function startRun(S){
+  var be=S?S.be:lb();
+  var N=cg(S?S.rn:null);N.be=be;N.ph='play';
+  try{var p=parseInt(L.getItem(PLAYS_KEY))||0;L.setItem(PLAYS_KEY,String(p+1));}catch(e){}
+  return N;
+}
+function pg(S,a){if(!S)return;S.pz=true;S.ap=!!a;}
+function rg(S){if(!S)return;S.pz=false;S.ap=false;}
+var ROOT=typeof window!=='undefined'?window:globalThis;
+ROOT.__SLICE__={W:W,H:H,createGame:cg,stepGame:st,startRun:startRun,spawnItem:spawn,sliceItem:sliceItem,gameOver:gameOver,pauseGame:pg,resumeGame:rg,BEST_KEY:BEST_KEY,PLAYS_KEY:PLAYS_KEY,MOL_KEY:MOL_KEY};
+var cv=(typeof document!=='undefined')?D.getElementById('cv'):null;
+if(cv){
+var ctx=cv.getContext('2d');
+function $(id){return D.getElementById(id);}
+function on(el,t,f,o){if(el)el.addEventListener(t,f,o);}
+function F(c){ctx.fillStyle=c;}
+function syncMol(){var e=$('ckMol');if(!e)return;var v=0;try{v=parseFloat(L.getItem(MOL_KEY))||0;}catch(_){}var b=e.querySelector('b');if(b)b.textContent=String(Math.floor(v));}
+function syncBest(){var e=$('ckBest');if(e)e.textContent=S?('🏆 BEST: '+(S.be||0)+' PTS'):'🏆 BEST: —';}
+function syncSound(){var b=$('ckSound');if(b)b.textContent=(S&&S.muted)?'🔇 MUTED':'🔊 SOUND ON';}
+function ckShow(id,on){var e=$(id);if(e)e.classList.toggle('on',!!on);}
+function showTut(){ckShow('ckTut',true);}
+function hideTut(){ckShow('ckTut',false);}
+function so(t,p,h){var a=$('ovt'),b=$('ovp'),c=$('ovb');if(a)a.innerHTML=t;if(b)b.innerHTML=p;if(c)c.innerHTML=h;var o=$('ov');if(o)o.style.display='flex';}
+function ho(){var o=$('ov');if(o)o.style.display='none';}
+var S=null,pausedOv=false,lastTs=0,acc=0,pendSegs=[],lastPt=null;
+function sg(){S=startRun(S);ho();hideTut();syncBest();syncMol();}
+function ru(){if(S){rg(S);ckShow('ckPaused',false);ho();}}
+function ps(){if(!S||S.ov)return;pg(S,false);ckShow('ckPaused',true);}
+function tg(){if(!S||S.ov)return;if(S.pz)ru();else ps();}
+function eo(){so('GAME OVER','SCORE '+S.sc+' • BEST '+S.be+'<br>+'+S.mol+' MOLECULES BANKED','<button onclick="sg()">↻ PLAY AGAIN</button><button class="ghost" onclick="goHub()">⌂ ARCADE</button>');}
+function mn(){so('WRAITH SLICE','SWIPE TO SLICE THE FRUIT — DODGE THE BOMBS<br>3 LIVES • GOLDEN FRUIT +50 • COMBO x3 +20 • MISSED FRUIT COSTS NOTHING','<button onclick="sg()">▶ START</button>');}
+function goHub(){try{if(window.parent&&window.parent!==window&&typeof window.parent.backToMenu==='function'){window.parent.backToMenu();return;}}catch(e){}try{window.location.href='index.html';}catch(e){}}
+function showTop(){if(!ckTutSeen()){showTut();return;}if(!S||S.ph!=='play')mn();}
+window.sg=sg;window.ru=ru;window.goHub=goHub;window.showTop=showTop;
+function cp(e){var r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
+on(cv,'pointerdown',function(e){e.preventDefault();try{if(e.pointerId!==undefined&&cv.setPointerCapture)cv.setPointerCapture(e.pointerId);}catch(_){}if(!S)return;if(S.pz){ru();return;}if(S.ph!=='play')return;var p=cp(e);S.stroke=1;S.ss=0;lastPt=p;S.trail.push({x:p.x,y:p.y,life:30});});
+on(cv,'pointermove',function(e){e.preventDefault();if(!S||!S.stroke||S.ph!=='play')return;var p=cp(e);if(lastPt)pendSegs.push([lastPt.x,lastPt.y,p.x,p.y]);lastPt=p;S.trail.push({x:p.x,y:p.y,life:30});if(S.trail.length>24)S.trail.shift();});
+on(cv,'contextmenu',function(e){e.preventDefault();});
+function endStroke(){if(!S)return;S.stroke=0;lastPt=null;}
+on(cv,'pointerup',function(e){e.preventDefault();endStroke();});
+on(cv,'pointercancel',function(){endStroke();});
+function bindBtn(id,fn){var el=$(id);if(el)el.addEventListener('click',function(e){e.stopPropagation();fn();});}
+bindBtn('ckPause',function(){tg();});
+bindBtn('ckRestart',function(){if(S){sg();}});
+bindBtn('ckSound',function(){if(!S)return;S.muted=!S.muted;lsSet(MUTE_KEY,S.muted?'1':'0');syncSound();});
+bindBtn('ckFull',function(){try{if(document.fullscreenElement){var p=document.exitFullscreen&&document.exitFullscreen();if(p&&p.catch)p.catch(function(){});}else if(document.documentElement.requestFullscreen){var q=document.documentElement.requestFullscreen();if(q&&q.catch)q.catch(function(){});}}catch(e){}});
+bindBtn('ckArcade',function(){ckShow('ckExit',true);});
+bindBtn('ckHelp',function(){if(S&&S.ph==='play'&&!S.pz)ps();showTut();});
+bindBtn('ckTutOk',function(){hideTut();lsSet(TUT_KEY,'1');if(!S||S.ph!=='play')mn();});
+bindBtn('ckResume',function(){ru();});
+bindBtn('ckQuit',function(){ckShow('ckPaused',false);goHub();});
+bindBtn('ckExitGo',function(){ckShow('ckExit',false);goHub();});
+bindBtn('ckExitStay',function(){ckShow('ckExit',false);});
+bindBtn('ckRetry',function(){try{window.location.reload();}catch(e){ckShow('ckError',false);}});
+bindBtn('ckKeepPlaying',function(){ckShow('ckError',false);});
+on(D,'keydown',function(e){
+  if(e.code==='KeyM'){if(S){S.muted=!S.muted;lsSet(MUTE_KEY,S.muted?'1':'0');syncSound();}return;}
+  if(e.code==='KeyP'){tg();return;}
+  if(e.code==='KeyR'){if(S&&!S.ov)sg();return;}
+  if(e.code==='Space'||e.code==='Enter'){e.preventDefault();if(!S)return;if(S.pz){ru();return;}if(S.ph==='menu'||S.ov)sg();}
+});
+on(D,'visibilitychange',function(){if(!S||S.ov)return;if(D.hidden){if(!S.pz){pg(S,true);ckShow('ckPaused',true);}}else if(S.ap)ru();});
+function syncOffline(){var e=$('ckOffline');if(!e)return;try{e.classList.toggle('on',!navigator.onLine);}catch(_){}}
+try{window.addEventListener('online',syncOffline);window.addEventListener('offline',syncOffline);}catch(e){}
+function drawFruit(it){
+  ctx.save();ctx.translate(it.x,it.y);ctx.rotate(it.rot);
+  if(it.kind==='bomb'){
+    F('#14141c');ctx.beginPath();ctx.arc(0,0,it.r,0,7);ctx.fill();
+    ctx.strokeStyle='#a86bff';ctx.lineWidth=2;ctx.stroke();
+    ctx.strokeStyle='#ff3b5c';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-it.r);ctx.quadraticCurveTo(8,-it.r-10,14,-it.r-6);ctx.stroke();
+    F('#ffd94d');ctx.beginPath();ctx.arc(14,-it.r-6,3,0,7);ctx.fill();
+    F('#fff');ctx.font='bold 14px monospace';ctx.textAlign='center';ctx.fillText('!',0,5);
+  }else{
+    var g=ctx.createRadialGradient(-6,-8,2,0,0,it.r);
+    g.addColorStop(0,'rgba(255,255,255,.55)');g.addColorStop(0.3,it.c);g.addColorStop(1,'rgba(0,0,0,.45)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,it.r,0,7);ctx.fill();
+    if(it.kind==='golden'){
+      var gg=ctx.createRadialGradient(0,0,1,0,0,10);
+      gg.addColorStop(0,'rgba(57,211,83,.85)');gg.addColorStop(1,'rgba(57,211,83,0)');
+      ctx.fillStyle=gg;ctx.beginPath();ctx.arc(0,0,10,0,7);ctx.fill();
+    }
+    ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-it.r);ctx.lineTo(0,-it.r-8);ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawHalf(h){
+  ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.rot);
+  ctx.globalAlpha=M.max(0,M.min(1,h.life/25));
+  ctx.beginPath();ctx.arc(0,0,h.r,h.side? -M.PI/2:M.PI/2,h.side? M.PI/2:3*M.PI/2);ctx.closePath();
+  F(h.c);ctx.fill();
+  ctx.beginPath();ctx.arc(0,0,h.r-5,h.side? -M.PI/2:M.PI/2,h.side? M.PI/2:3*M.PI/2);ctx.closePath();
+  F('rgba(255,255,255,.85)');ctx.fill();
+  ctx.restore();ctx.globalAlpha=1;
+}
+function draw(){
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#14102a');g.addColorStop(1,'#0a0a14');
+  F(g);ctx.fillRect(0,0,W,H);
+  F('#fff');var s;for(s=0;s<24;s++)ctx.fillRect((s*173)%W,(s*89)%120,2,2);
+  if(!S)return;var i;
+  for(i=0;i<S.halves.length;i++)drawHalf(S.halves[i]);
+  for(i=0;i<S.items.length;i++)drawFruit(S.items[i]);
+  for(i=0;i<S.parts.length;i++){var p=S.parts[i];F(p.c);ctx.beginPath();ctx.arc(p.x,p.y,3,0,7);ctx.fill();}
+  if(S.trail.length>1){
+    ctx.save();ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=5;ctx.lineCap='round';ctx.shadowColor='#a86bff';ctx.shadowBlur=12;
+    ctx.beginPath();ctx.moveTo(S.trail[0].x,S.trail[0].y);
+    for(i=1;i<S.trail.length;i++)ctx.lineTo(S.trail[i].x,S.trail[i].y);
+    ctx.stroke();ctx.restore();
+  }
+  if(S.flash>0){F('rgba(255,59,92,'+(S.flash/9*0.3)+')');ctx.fillRect(0,0,W,H);}
+  var me=$('msg');if(me)me.textContent=S.pz?'PAUSED — TAP TO RESUME':(S.msgT>0?S.msg:(S.ph==='play'?'SWIPE TO SLICE — DODGE THE BOMBS':(S.ph==='menu'?'TAP ▶ START':'')));
+  var a=$('hs');if(a)a.textContent=S.sc;
+  var b=$('hb');if(b)b.textContent=S.be;
+  var c=$('hm');if(c)c.textContent='❤ '+S.lives;
+  syncMol();
+}
+function lp(ts){requestAnimationFrame(lp);if(!S)return;
+  if(S.pz){draw();return;}
+  var dt=ts-lastTs;lastTs=ts;acc+=M.min(dt,100);var q=0;
+  while(acc>=16.67&&q<4){var inp={segs:pendSegs.splice(0,pendSegs.length)};st(S,inp);acc-=16.67;q++;}
+  if(q===4)acc=0;
+  if(S.ov&&!S.sh){S.sh=true;syncBest();eo();}
+  draw();}
+function ckReady(){
+  var l=$('ckLoading');if(l)l.classList.remove('on');
+  syncOffline();syncBest();syncMol();syncSound();
+  try{if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanix-game-ready',game:'slice',h:700},'*');}catch(e){}
+  if(!ckTutSeen())showTut();else mn();
+}
+try{
+  if(!ctx)throw new Error('no 2d context');
+  S=cg();
+  ckReady();
+  requestAnimationFrame(function(ts){lastTs=ts;requestAnimationFrame(lp);});
+}catch(err){
+  try{if(window.console&&console.error)console.error(err);}catch(e){}
+  var er=$('ckError');if(er)er.classList.add('on');
+  var ld=$('ckLoading');if(ld)ld.classList.remove('on');
+}
+}
+</script>
+</body></html>

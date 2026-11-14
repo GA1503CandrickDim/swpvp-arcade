@@ -1,0 +1,2495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SWPVP TAVERN</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<style>
+/* ===== THE WRAITH TAVERN — arcade-home look (tavernlook 2026-11-04) =====
+   Same tokens as the arcade home (index.html): system-ui font stack, #050505
+   + wraith-bg.jpg, red #ff4040 / violet #a86bff, black, white. Green ONLY as
+   the core glow (--core) and the Wraith Green ware's own product color.
+   No gold anywhere — Blood Gold renders blood-red, Gold Ring renders violet. */
+:root{
+  color-scheme:dark;
+  --bg:#050505; --bg-2:#0e0e0e; --panel:#0e0e0e; --panel-2:#171717; --panel-3:#1c1c1c;
+  --line:rgba(255,64,64,.45); --line-soft:rgba(168,107,255,.22);
+  --red:#ff4040; --red-hot:#ff4040;
+  --violet:#a86bff; --violet-bright:#c9a6ff; --violet-pale:#efe6ff;
+  --ink:#fff; --body:#d8d8d8; --muted:#b5b5b5;
+  --core:#3dff9e;
+  --radius:16px;
+  --display:system-ui,-apple-system,"Segoe UI",Arial,Helvetica,sans-serif;
+  --text:system-ui,-apple-system,"Segoe UI",Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#050505 url("/wraith-bg.jpg") center 22%/cover no-repeat fixed;color:var(--body);font-family:var(--text);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,5,.8),rgba(5,5,5,.84)),radial-gradient(640px 240px at 50% -70px,rgba(255,64,64,.14),rgba(255,64,64,0) 70%),radial-gradient(500px 200px at 50% 110%,rgba(255,64,64,.06),rgba(255,64,64,0) 70%)}
+a{color:var(--violet-bright)}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:34px 16px 52px}
+h1,h2,h3{font-family:var(--display);color:var(--ink);margin:0}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid #ff4040;outline-offset:3px}
+.muted{color:var(--muted);font-size:14.5px;font-weight:600;line-height:1.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,button{font-family:inherit;font-size:15px}
+input[type=text],select{background:#050505;color:var(--ink);border:1px solid rgba(255,64,64,.6);border-radius:10px;padding:9px 10px}
+input[type=text]::placeholder{color:#777}
+/* primary action button — arcade-home .hero-play: red→violet pill */
+button{background:linear-gradient(90deg,#ff4040,#a86bff);border:0;color:#fff;font-family:var(--display);font-weight:800;letter-spacing:1px;font-size:14px;border-radius:999px;padding:12px 20px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:9px;box-shadow:none;transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}
+button:hover{box-shadow:none}
+button:active{transform:translateY(1px)}
+button.ghost,.btn{background:transparent;border:1px solid #444;color:#b5b5b5;box-shadow:none}
+button.ghost:hover,.btn:hover{border-color:rgba(255,255,255,.4);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+.btn.primary{background:linear-gradient(90deg,#ff4040,#a86bff);border-color:transparent;color:#fff;box-shadow:none}
+.btn.primary:hover{box-shadow:none}
+.btn.play{width:100%;justify-content:center;margin-top:4px}
+
+/* ===== hero — the Keeper ===== */
+.hero{margin-top:18px;position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(168,107,255,.45);background:linear-gradient(160deg,#1a0b1e,#0b0b12 60%,#12060a);box-shadow:none}
+.hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,4,10,.25) 0%,rgba(5,4,10,.55) 60%,rgba(5,4,10,.88) 100%)}
+.hero .inner{position:relative;padding:20px 18px;max-width:640px;min-height:340px;display:flex;flex-direction:column;justify-content:flex-end}
+@media (min-width:760px){.hero .inner{padding:26px 24px}}
+.badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-size:11px;font-weight:800;letter-spacing:2px;color:#fff;border:1px solid transparent;border-radius:999px;padding:5px 10px;background:#ff4040;align-self:flex-start}
+.badge.red{color:#ffb3c0;border-color:rgba(255,64,64,.45);background:rgba(255,64,64,.12)}
+.kicker{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--violet-bright);text-transform:uppercase;margin:16px 0 6px}
+.kicker.red{color:var(--red-hot)}
+.hero h1.big,.big{font-size:30px;letter-spacing:2px;line-height:1.05;font-weight:800}
+@media (min-width:760px){.hero h1.big,.big{font-size:36px}}
+.big .thin{color:#a86bff}
+.lede{margin:12px 0 0;color:#d8d8d8;font-weight:400;font-size:14px;line-height:1.55;max-width:52ch}
+.meta-line{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:18px;color:var(--muted);font-weight:600;font-size:13px}
+.meta-line span{display:inline-flex;align-items:center;gap:7px}
+.meta-line .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--core);box-shadow:0 0 8px 2px rgba(61,255,158,.75)}
+/* top tab nav — arcade-home .arctabs: separate pills, active = red→violet */
+.nav{display:flex;gap:8px;justify-content:center;margin:0 0 16px;flex-wrap:wrap;background:transparent;border:0;border-radius:0;padding:0}
+.nav a{border:1px solid rgba(255,255,255,.25);background:#141414;color:#fff;font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:3px;padding:10px 22px;border-radius:999px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center;transition:color .15s ease,background .15s ease,box-shadow .15s ease}
+.nav a:hover{color:#fff}
+.nav a.hot{color:#fff;background:linear-gradient(90deg,#ff4040,#a86bff);border-color:transparent;box-shadow:0 0 18px rgba(255,64,64,.45),0 0 18px rgba(168,107,255,.25)}
+/* brightness wheel */
+.bright-row{display:flex;gap:6px;justify-content:center;align-items:center;margin:14px 0 2px;flex-wrap:wrap}
+.bright-wheel{position:relative;width:120px;height:120px;margin:14px 6px;flex:none;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+.bright-wheel:active{cursor:grabbing}
+.bw-dial{position:absolute;left:12px;top:12px;width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 50% 30%,#2a0f2e,#0b0b12 72%);border:2px solid rgba(168,107,255,.45);box-shadow:0 4px 0 #050505,0 8px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(201,166,255,.25);transition:transform .25s ease}
+.bright-wheel.dragging .bw-dial{transition:none}
+.bw-pointer{position:absolute;left:50%;top:5px;width:6px;height:22px;margin-left:-3px;border-radius:3px;background:var(--violet-bright);box-shadow:0 0 10px rgba(201,166,255,.8)}
+.bright-row .bw-stop{position:absolute;width:36px;height:36px;border-radius:50%;padding:0;font-size:9px;font-weight:700;letter-spacing:.5px;background:#141414;border:1px solid rgba(255,255,255,.25);color:var(--body);z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.5);min-height:0}
+.bright-row .bw-stop.bw-high{left:42px;top:-10px}
+.bright-row .bw-stop.bw-med{left:87px;top:68px}
+.bright-row .bw-stop.bw-low{left:-3px;top:68px}
+
+#ion-status{font-size:13px;font-weight:600;letter-spacing:1px;padding:8px 16px;border-radius:999px;margin-top:16px;background:rgba(255,64,64,.08);border:1px solid rgba(255,64,64,.45);color:#efe6ff}
+#ion-status.on{border-color:rgba(61,255,158,.55);color:var(--core)}
+#ion-status.off{border-color:rgba(255,64,64,.55);color:var(--red-hot)}
+
+/* ===== panels & section heads — arcade-home .awcard / .grp ===== */
+.panel{background:linear-gradient(180deg,#171717,#0e0e0e);border:1px solid #ff4040;border-top-width:3px;border-radius:var(--radius);padding:14px 16px;margin-top:14px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.panel>h2,.panel h2{font-size:15px;letter-spacing:2px;color:#ff4040;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.panel>h2 .n,.panel h2 .n{color:#ff4040}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:22px 0 12px;flex-wrap:wrap}
+.section-head h2{font-size:12px;letter-spacing:4px;color:#ff4040;font-weight:700}
+.section-head .count{color:var(--muted);font-weight:600;letter-spacing:.08em;font-size:14px}
+.section-head .kicker{margin:0 0 6px}
+
+/* ===== coin purse — wallet strip (mockup .wallet) ===== */
+.wallet{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.wallet .coin{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#171717,#0e0e0e);border:1px solid rgba(255,64,64,.45);border-radius:999px;padding:9px 16px 9px 10px;min-height:52px}
+.coin .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:rgba(168,107,255,.16);border:1px solid rgba(168,107,255,.45);color:var(--violet-bright);flex:none;font-size:18px}
+.coin .ic.core-ic{color:var(--core);background:rgba(61,255,158,.08);border-color:rgba(61,255,158,.35);box-shadow:0 0 12px rgba(61,255,158,.25)}
+.coin .lab{font-size:12px;letter-spacing:.22em;color:var(--muted);font-weight:700;line-height:1.1;display:block}
+.coin .val{font-family:var(--display);font-size:19px;font-weight:700;color:var(--ink);line-height:1.1}
+.coin .val small{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.wallet .spacer{flex:1}
+.wallet .spacer{flex:1}
+.code-row{margin-top:14px}
+.avatar-note{color:var(--muted);font-weight:600;font-size:14.5px;margin:12px 0 0}
+.redeem{margin-top:14px;border-top:1px dashed var(--line-soft);padding-top:14px}
+.redeem .redeem-title{font-weight:700;letter-spacing:.14em;font-family:var(--display);font-size:13px;color:var(--ink)}
+
+/* ===== Keeper's Wares — card grid (mockup .card) ===== */
+.grid{display:grid;gap:14px;grid-template-columns:1fr}
+.grid.wares{grid-template-columns:1fr}
+@media (min-width:560px){.grid.wares{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1020px){.grid.wares{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1160px){.wrap{max-width:1280px}}
+/* ===== Keeper's Wares — arcade-home .game card ===== */
+.card{background:linear-gradient(180deg,#171717,#0e0e0e);border:1px solid #ff4040;border-top-width:3px;border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}
+.card:hover{border-color:#ff4040;box-shadow:0 10px 26px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-2px)}
+.card h2{font-size:16px;letter-spacing:1px;font-weight:800;margin:0 0 4px}
+.card h2 .n{color:var(--violet-bright)}
+.card .head{display:flex;align-items:flex-start;gap:12px}
+.tile{width:52px;height:52px;flex:none;border-radius:13px;display:grid;place-items:center;color:var(--violet-bright);background:#141414;border:1px solid rgba(168,107,255,.45);box-shadow:inset 0 0 14px rgba(168,107,255,.18);font-size:24px}
+.tile.red{color:var(--red-hot)}
+.tile.core{color:var(--core);box-shadow:inset 0 0 14px rgba(61,255,158,.16),0 0 10px rgba(61,255,158,.18)}
+.card h3{font-size:16px;font-weight:800;letter-spacing:1px;line-height:1.15;padding-top:2px}
+.card .tag{margin-left:auto;flex:none;font-family:var(--display);font-size:10px;font-weight:800;letter-spacing:2px;color:#c9a6ff;border:0;border-radius:0;padding:0;background:transparent}
+.card p.desc{margin:0;color:#b5b5b5;font-weight:400;font-size:12px;line-height:1.45}
+.card .foot{margin-top:auto;border-top:1px dashed var(--line-soft);padding-top:11px;display:grid;gap:6px}
+/* name-style preview — the ware's own look on "CEE · WRAITH" */
+.swatch{height:40px;border-radius:10px;border:1px solid var(--line-soft);background:#050505;display:flex;align-items:center;padding:0 14px;font-family:var(--display);font-weight:700;letter-spacing:.1em;font-size:15px}
+.sw-wraith-green{color:var(--core);text-shadow:0 0 10px rgba(61,255,158,.8)}
+.sw-blood-gold{color:#ff4040;text-shadow:0 0 10px rgba(255,64,64,.55)}
+.sw-first-blood{color:var(--red-hot);text-shadow:0 0 10px rgba(255,64,64,.8)}
+.sw-ion-born{color:var(--violet-bright);text-shadow:0 0 10px rgba(168,107,255,.85)}
+.sw-gold-ring{color:#c9a6ff}
+.sw-wraith-flame{color:#ff4040;text-shadow:0 0 12px rgba(255,64,64,.9)}
+.price-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.price{font-family:var(--display);font-size:24px;font-weight:800;color:var(--ink);display:inline-flex;align-items:center;gap:8px}
+.price small{font-size:13px;letter-spacing:.16em;color:var(--muted);font-weight:700}
+.sats{color:var(--muted);font-weight:700;font-size:14px;letter-spacing:.04em}
+.shop-item.owned{border-color:rgba(61,255,158,.55)}
+.shop-item.owned::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--core),transparent 55%,var(--violet))}
+
+/* ===== two-col: buy atoms + avatar | chat ===== */
+.two-col{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:860px){.two-col{grid-template-columns:1fr 1fr}}
+.two-col .panel{margin-top:0}
+.col-stack{display:grid;gap:14px;align-content:start}
+.pack{display:flex;align-items:center;gap:14px;border:1px solid #ff4040;border-top-width:3px;border-radius:16px;padding:14px 16px;background:linear-gradient(180deg,#171717,#0e0e0e);margin-bottom:10px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.pack .amt{font-family:var(--display);font-size:22px;font-weight:800;color:var(--ink);line-height:1.1}
+.pack .amt small{display:block;font-family:var(--text);font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em}
+.pack .btn{margin-left:auto;flex:none;min-height:46px}
+.pack .sats{flex:1;text-align:right}
+/* avatar picker — 10 tiles (mockup .avatars) */
+.av-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:8px}
+.av-row button{aspect-ratio:1;border-radius:14px;border:1px solid rgba(168,107,255,.45);background:linear-gradient(180deg,#171717,#0e0e0e);color:var(--violet-pale);display:grid;place-items:center;padding:0;min-height:52px;min-width:0;font-size:22px;box-shadow:none;position:relative;transition:border-color .15s ease,box-shadow .15s ease}
+.av-row button:hover{border-color:#ff4040}
+.av-row button.sel{border-color:#ff4040;box-shadow:0 0 0 2px rgba(255,64,64,.45),0 0 16px rgba(255,64,64,.4);color:#fff}
+.av-row button.sel::after{content:"ON";position:absolute;top:5px;right:6px;font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.14em;color:#ff4040}
+.av-row button.ghost{grid-column:1/-1;aspect-ratio:auto;min-height:44px;font-size:13px;font-weight:800;letter-spacing:1px;font-family:var(--display);background:transparent;border-color:#444;color:#b5b5b5}
+
+/* ===== chat ===== */
+#chat-log{max-height:260px;overflow-y:auto;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.cmsg{background:rgba(168,107,255,.08);border:1px solid var(--line-soft);border-radius:4px 13px 13px 13px;padding:9px 13px;font-size:14px;font-weight:400;color:var(--body);animation:msgIn .25s ease;white-space:pre-wrap}
+.cmsg b{margin-right:6px;font-family:var(--display);font-size:12px;letter-spacing:.14em;color:var(--violet-bright)}
+.cmsg .t{color:#777;font-size:11px;margin-left:6px}
+.cmsg.bot{border-color:rgba(255,64,64,.45);background:rgba(255,64,64,.10)}
+.cmsg.bot b{color:var(--red-hot)}
+.cmd-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.cmd{font-family:var(--display);font-size:13px;font-weight:800;letter-spacing:1px;color:#ff4040;background:rgba(255,64,64,.16);border:1px solid rgba(255,64,64,.6);border-radius:999px;padding:8px 15px;min-height:40px;box-shadow:none}
+.cmd:hover{border-color:#ff4040;box-shadow:0 0 12px rgba(255,64,64,.35)}
+.chat-input-row{margin-top:10px}
+.bus-panel{margin-top:10px;border:1px solid var(--red);border-radius:14px;padding:12px;background:rgba(255,64,64,.08)}
+.bus-panel .bus-head{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.bus-panel .bus-head b{color:var(--violet-bright)}
+.bus-panel .bus-card{font-size:36px;font-weight:800;text-align:center;margin:10px 0 2px;font-family:var(--display);color:var(--ink)}
+.bus-panel .bus-q{text-align:center;color:var(--muted);font-size:14px;margin-bottom:10px}
+.bus-panel .bus-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.bus-panel .bus-btns button{flex:1;min-width:96px}
+button.bus-cash{background:linear-gradient(90deg,#ff4040,#a86bff);border:0;box-shadow:none}
+button.bus-cash:hover{box-shadow:none}
+
+/* ===== lobby ===== */
+#lobby{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px}
+.pcard{background:linear-gradient(180deg,#171717,#0e0e0e);border:1px solid rgba(168,107,255,.45);border-radius:14px;padding:10px;text-align:center;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.pcard:hover{transform:translateY(-3px);border-color:#ff4040;box-shadow:0 10px 26px rgba(0,0,0,.6)}
+.pcard:active{transform:translateY(0) scale(.98)}
+.pcard.me{border-color:var(--red);box-shadow:0 0 14px rgba(255,64,64,.25)}
+.pav{width:52px;height:52px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;background:#141414;border:2px solid rgba(168,107,255,.45);box-shadow:0 0 10px rgba(168,107,255,.25);color:var(--ink);overflow:hidden}.pav img{width:100%;height:100%;object-fit:cover;display:block}
+.av-row button img{width:100%;height:100%;object-fit:cover;border-radius:12px;display:block}
+.pav.frame-gold{border-color:#c9a6ff;box-shadow:0 0 14px rgba(168,107,255,.7)}
+.pname{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--display);font-size:15px}
+.pbadge{font-size:12px;color:#c9a6ff}
+.pplay{font-size:12px;color:var(--muted);margin-top:2px}
+.pcard button{margin-top:8px;padding:6px 10px;font-size:13px;min-height:40px}
+
+/* ===== duels ===== */
+.duel-box{border:1px solid #ff4040;border-radius:14px;padding:10px;margin-top:8px;background:linear-gradient(180deg,#171717,#0e0e0e);animation:msgIn .3s ease}
+.duel-box button{margin-right:6px;margin-top:6px}
+
+/* ===== movies / split view ===== */
+.split{display:flex;gap:12px;align-items:stretch}
+.split>.game{flex:1 1 58%;min-width:0}
+.split>.side{flex:1 1 42%;min-width:280px}
+.split .card{margin-top:0}
+.game-frame{width:100%;height:620px;border:1px solid var(--line);border-radius:12px;background:#000}
+@media (max-width:700px){.split{flex-direction:column}.game-frame{height:460px}}
+#movies-card .card{margin-top:0}
+#tv-yt-results button{box-shadow:none}
+#tv-sp-open-link{color:var(--core) !important}
+
+/* ===== GUESS THE DRAWING + MOVIE NIGHT (2026-11-05, Tavern activities) ===== */
+#draw-canvas{width:100%;height:auto;max-height:360px;background:#fff;border:1px solid var(--line);border-radius:12px;touch-action:none;display:block;cursor:crosshair}
+.draw-word{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:1px;color:var(--ink);margin:8px 0 2px}
+.draw-tools{margin-top:10px}
+.draw-tools .sw{width:34px;height:34px;min-height:34px;border-radius:50%;padding:0;border:2px solid #444;box-shadow:none}
+.draw-tools .sw.sel{border-color:#fff;box-shadow:0 0 0 2px #ff4040}
+#draw-scores{margin-top:10px;font-size:14px;color:var(--body)}
+#draw-scores b{color:var(--violet-bright);letter-spacing:1px}
+
+/* ===== TALK + DRAW — ONE SCREEN (2026-11-05, Cee: chat and drawing are one screen) ===== */
+.talk-draw-grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:860px){.talk-draw-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
+.talk-draw-grid>.panel{margin-top:0;background:transparent;border:0;padding:0;box-shadow:none}
+.talk-draw-grid>.panel h2{margin-top:0}
+#talk-draw-panel #chat-log{max-height:320px}
+.mn-count{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:1px;color:var(--core);text-align:center;margin:12px 0}
+#mn-results button,#mn-results .mn-result{box-shadow:none}
+
+/* ===== !bg themes (kept — SAV BOT !bg sets data-bg) ===== */
+body[data-bg="galaxies"]{background:radial-gradient(circle at 30% 18%,#3a1a4a,#07060c 72%)}
+body[data-bg="hellfire"]{background:radial-gradient(circle at 50% 0%,#7a2a08,#07060c 75%)}
+body[data-bg="ocean"]{background:radial-gradient(circle at 30% 18%,#0a2a3a,#07060c 72%)}
+body[data-bg="emerald"]{background:radial-gradient(circle at 30% 18%,#0f3d24,#07060c 72%)}
+
+footer{text-align:center;color:#777;font-size:12px;margin-top:26px;font-weight:400}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+body.paused *{animation-play-state:paused !important}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+@media (max-width:560px){
+  .hero .inner{min-height:280px}
+  .wallet .coin{flex:1 1 40%}
+  .nav a{padding:11px 14px;font-size:13px}
+  .pack .sats{display:none}
+  .av-row{gap:8px}
+}
+</style>
+</head>
+<body>
+<body>
+<div class="wrap">
+<article class="hero">
+<div class="shade" aria-hidden="true"></div>
+<div class="inner">
+<span class="badge">🍺 THE KEEPER'S COUNTER</span>
+<p class="kicker">Spend atoms · Dress your name</p>
+<h1 class="big">THE <span class="thin">TAVERN</span></h1>
+<p class="lede">Sit down. The Keeper sells the looks — name colors, rings and flames — and SAV BOT keeps the chat warm. Mind the ghost at the bar.</p>
+<div class="meta-line">
+<span><span class="dot"></span>Coin purse: atoms in the tavern pot</span>
+<span>💬 SAV BOT is in the chat</span>
+</div>
+</div>
+</article>
+
+<div class="nav">
+<a href="https://swpvp-dsu8.vercel.app/">← MAIN SITE (single-player)</a>
+<a href="/">ARCADE →</a>
+
+</div>
+<div class="bright-row">
+<span class="muted">☀️ BRIGHTNESS</span>
+<div class="bright-wheel" id="bright-wheel" role="slider" tabindex="0" aria-label="Brightness wheel" aria-valuemin="0" aria-valuemax="2" aria-valuenow="0" aria-valuetext="HIGH">
+<div class="bw-dial" id="bright-dial"><div class="bw-pointer"></div></div>
+<button id="bright-high" type="button" class="bw-stop bw-high" aria-label="High brightness">HIGH</button>
+<button id="bright-med" type="button" class="bw-stop bw-med" aria-label="Medium brightness">MED</button>
+<button id="bright-low" type="button" class="bw-stop bw-low" aria-label="Low brightness">LOW</button>
+</div>
+<span class="muted" id="bright-note">HIGH</span>
+</div>
+
+<div id="ion-status">Connecting…</div>
+
+<div class="panel" id="purse-card">
+<h2><span class="n">👛</span> YOUR COIN PURSE — ATOMS</h2>
+<div class="wallet">
+<div class="coin"><span class="ic">⚛</span><span><span class="lab">ATOMS IN PURSE</span><br><span class="val" id="ion-balance">…</span></span></div>
+<div class="coin"><span class="ic core-ic">🧬</span><span><span class="lab">MOLECULES</span><br><span class="val" id="mol-balance">…</span></span></div>
+<span class="spacer"></span>
+<div class="muted" id="ion-btc">…</div>
+</div>
+<p class="muted purse-note">New here? The keeper spots you 50 atoms to start. Win brawls and hang out to earn more. These atoms are the tavern pot — the main site and the arcade keep their own single-player purses.</p>
+<div class="row code-row">
+<label class="muted" for="ion-code">Purse code — paste it on the arcade to spend these atoms in Wraith Pet + Tetris</label>
+<input type="text" id="ion-code" readonly style="flex:1;min-width:0">
+<button id="copy-ion-code" type="button" class="ghost">COPY CODE</button>
+</div>
+<p class="muted" id="ion-code-note">1 atom = 13 sats — your balance and every shop price show their BTC value. Buy atoms with real money below — you get an ATOM code for the main site. The BTC number is the price tag. Only you can spend this purse — never share the code.</p>
+<div class="row">
+<label class="muted" for="my-name">Your name</label>
+<input type="text" id="my-name" maxlength="16" placeholder="guest-xxxxx" style="width:140px">
+<label class="muted" for="my-playing">Playing</label>
+<select id="my-playing"></select>
+<button id="save-me" type="button">SAVE</button>
+</div>
+<p class="muted" id="my-id-line"></p>
+<div class="redeem">
+<div class="redeem-title">📜 REDEEM ATOM CODE</div>
+<div class="row" style="margin-top:8px">
+<input type="text" id="atom-redeem-input" placeholder="ATOM-…" style="flex:1;min-width:0">
+<button id="atom-redeem-btn" type="button">REDEEM</button>
+</div>
+<p class="muted" id="atom-redeem-line" style="margin:6px 0 0">Got an ATOM code? Paste it here — it credits this wallet.</p>
+</div>
+</div>
+
+<div class="section-head">
+<div>
+<p class="kicker red">Keeper's Wares</p>
+<h2>NAME STYLES &amp; FLAIR</h2>
+</div>
+<span class="count">6 WARES · PRICES IN ATOMS</span>
+</div>
+<div class="grid wares" id="shop-grid"><span class="muted">Loading shop…</span></div>
+<p class="muted" style="margin-top:10px">The keeper's wares — spend atoms on tavern gear. Buying is forever (saved to your guest id). Duel wagers + tournaments come later — shop first.</p>
+
+<div class="section-head">
+<div>
+<p class="kicker">Restock &amp; settle in</p>
+<h2>ATOMS &amp; FACES</h2>
+</div>
+</div>
+<div class="col-stack">
+<div class="panel" id="sale-card">
+<h2><span class="n">🪙</span> BUY ATOMS — REAL MONEY</h2>
+<p class="muted">Pay real money (PayPal, sandbox test) for atoms. $1 = 100 atoms. $5 = 500 atoms. You get an ATOM code — redeem it on the main site. Your coin purse here is NOT credited — the atoms go to the main site, not this purse.</p>
+<div class="pack">
+<span class="amt">$1<small>100 ATOMS</small></span>
+<span class="sats">≈ 1,300 sats</span>
+<button id="sale-pack-ion1" type="button">BUY</button>
+</div>
+<div class="pack">
+<span class="amt">$5<small>500 ATOMS</small></span>
+<span class="sats">≈ 6,500 sats</span>
+<button id="sale-pack-ion5" type="button">BUY</button>
+</div>
+<div id="sale-paypal" style="margin-top:10px"></div>
+<p class="muted" id="sale-status"></p>
+<div id="sale-code-box" style="display:none;margin-top:10px">
+<label class="muted" for="sale-code">Your ATOM code — redeem it on the main site</label>
+<div class="row"><input type="text" id="sale-code" readonly style="flex:1;min-width:0">
+<button id="copy-sale-code" type="button" class="ghost">COPY CODE</button></div>
+</div>
+</div>
+
+<div class="panel" id="avatar-card">
+<h2><span class="n">🎭</span> PICK YOUR FACE</h2>
+<div class="av-row" id="avatar-picker"></div>
+<input type="file" id="avatar-upload" accept="image/*" style="display:none">
+<button type="button" id="avatar-upload-btn" class="ghost" style="width:100%;margin-top:10px;min-height:44px;border-radius:14px;border:1px solid rgba(168,107,255,.45);background:transparent;color:#b5b5b5;font-weight:800;letter-spacing:1px;font-size:13px;cursor:pointer">📷 UPLOAD YOUR OWN PHOTO</button>
+<p class="avatar-note">Your face shows next to your name in the chat and on the fight cards. Tap one to wear it — or upload your own photo.</p>
+</div>
+</div>
+
+<div class="panel">
+<h2><span class="n">🍺</span> THE COMMON ROOM — WHO'S AT THE TAVERN</h2>
+<p class="muted">Patrons at the tavern right now. Tap DUEL to call someone out for a brawl.</p>
+<div id="lobby"><span class="muted">Loading lobby…</span></div>
+</div>
+
+<div class="panel" id="talk-draw-panel">
+<div class="talk-draw-grid">
+<div class="panel" id="draw-card">
+<h2><span class="n">🎨</span> GUESS THE DRAWING</h2>
+<p class="muted">SAV BOT draws, you guess the word in the chat — first right guess wins the round. Or take the pencil yourself and SAV BOT guesses your drawing. The word never shows in the chat while a round is running.</p>
+<div class="row" style="margin-bottom:4px">
+<button type="button" id="draw-bot-btn">🤖 BOT DRAWS</button>
+<button type="button" class="ghost" id="draw-you-btn">✏️ YOU DRAW</button>
+<button type="button" class="ghost" id="draw-new-btn">↻ NEW ROUND</button>
+</div>
+<div id="draw-word-line" class="draw-word">🤖 SAV BOT is drawing…</div>
+<div id="draw-hint-line" class="muted"></div>
+<canvas id="draw-canvas" width="640" height="360"></canvas>
+<div class="row draw-tools">
+<button type="button" class="sw sel" data-draw-color="#222222" style="background:#222" aria-label="Black ink"></button>
+<button type="button" class="sw" data-draw-color="#ff4040" style="background:#ff4040" aria-label="Red ink"></button>
+<button type="button" class="sw" data-draw-color="#a86bff" style="background:#a86bff" aria-label="Violet ink"></button>
+<button type="button" class="sw" data-draw-color="#3dff9e" style="background:#3dff9e" aria-label="Green ink"></button>
+<button type="button" class="sw" data-draw-color="#3a86ff" style="background:#3a86ff" aria-label="Blue ink"></button>
+<select id="draw-brush" aria-label="Brush size"><option value="2">Thin</option><option value="4" selected>Medium</option><option value="6">Thick</option><option value="10">Chunky</option></select>
+<button type="button" class="ghost" id="draw-clear-btn">CLEAR</button>
+<button type="button" id="draw-done-btn">DONE DRAWING</button>
+</div>
+<p class="muted" id="draw-status" style="margin:8px 0 0"></p>
+<div id="draw-scores" style="margin-top:10px"><span class="muted">No scores yet — guess a drawing to get on the board.</span></div>
+</div>
+<div class="panel" id="chat-card">
+<h2><span class="n">💬</span> TAVERN TALK + SAV BOT</h2>
+<p class="muted">The common room — talk here, call out a brawl, find a match. SAV BOT tends the bar too — type <b>!help</b> in the chat.</p>
+<div id="chat-log"><span class="muted">Connecting to chat…</span></div>
+<div id="bus-panel"></div>
+<div class="cmd-row" aria-label="Chat commands">
+<button type="button" class="cmd" data-cmd="!daily">!daily</button>
+<button type="button" class="cmd" data-cmd="!bal">!bal</button>
+<button type="button" class="cmd" data-cmd="!help">!help</button>
+<button type="button" class="cmd" data-cmd="!flip 10">!flip</button>
+<button type="button" class="cmd" data-cmd="!bus 10">!bus</button>
+<button type="button" class="cmd" data-cmd="!slots 10">!slots</button>
+<button type="button" class="cmd" data-cmd="!dice 10 higher">!dice</button>
+<button type="button" class="cmd" data-cmd="!scratch 10">!scratch</button>
+<button type="button" class="cmd" data-cmd="!messenger">!messenger</button>
+<button type="button" class="cmd" data-cmd="!instagram">!instagram</button>
+<button type="button" class="cmd" data-cmd="!discord">!discord</button>
+<button type="button" class="cmd" data-cmd="!tiktok">!tiktok</button>
+<button type="button" class="cmd" data-cmd="!snapchat">!snapchat</button>
+<button type="button" class="cmd" data-cmd="!twitch">!twitch</button>
+</div>
+<div class="row chat-input-row">
+<input type="text" id="chat-input" maxlength="200" placeholder="Say something…" style="flex:1;min-width:0">
+<button id="chat-send" type="button">SEND</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="panel" id="movies-card">
+<h2><span class="n">🎬</span> FREE MOVIES</h2>
+<p class="muted">Free movies — find where to watch it, no ticket needed. Tap below to open the movies.</p>
+<div class="row"><a href="/movies.html"><button type="button">▶ WATCH FREE MOVIES</button></a></div>
+<div class="split" style="margin-top:12px">
+<div class="card" id="tv-yt-card" style="flex:1 1 50%;min-width:0">
+<h2><span class="n">▶</span> YOUTUBE — WATCH HERE</h2>
+<p class="muted">Search YouTube and watch right here — no new tab.</p>
+<div class="row"><input type="text" id="tv-yt-q" maxlength="200" placeholder="Search YouTube…" style="flex:1;min-width:0"><button id="tv-yt-go" type="button">SEARCH</button></div>
+<div id="tv-yt-player" style="display:none;margin-top:10px"><div style="position:relative;padding-top:56.25%"><iframe id="tv-yt-frame" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p class="muted" id="tv-yt-now" style="margin:8px 0 0"></p><div class="row" style="margin-top:8px"><button id="tv-yt-cast" type="button" style="display:none;flex:1">📺 CAST TO TV</button></div><p class="muted" id="tv-yt-cast-hint" style="display:none;margin:8px 0 0"></p></div>
+<div id="tv-yt-results" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+<p class="muted" id="tv-yt-status" style="margin:8px 0 0"></p>
+</div>
+<div class="card" id="tv-sp-card" style="flex:1 1 50%;min-width:0">
+<h2><span class="n">🎵</span> SPOTIFY — LISTEN HERE</h2>
+<p class="muted" id="tv-sp-status">Checking Spotify setup…</p>
+<div id="tv-sp-snapshot"><p style="margin:6px 0 0"><span id="tv-sp-snap-label">WAS LISTENING</span> — <b id="tv-sp-snap-song">8</b> — <span id="tv-sp-snap-artist">Billie Eilish</span></p><p class="muted" style="margin:4px 0 0"><a id="tv-sp-snap-open" href="https://open.spotify.com/search/8%20Billie%20Eilish" target="_blank" rel="noopener">Open on Spotify ↗</a></p></div>
+<div id="tv-sp-connect" style="display:none"><p class="muted">Connect your own Spotify and play your music right here in the Tavern.</p><p class="muted">Full songs need Spotify Premium — free accounts get 30-second previews.</p><button id="tv-sp-connect-btn" type="button">CONNECT YOUR SPOTIFY</button><p class="muted">Your Spotify login stays on your device — we never see your password, and your tokens never leave this browser.</p></div>
+<div id="tv-sp-setup-missing" style="display:none"><p class="muted">🎵 Spotify player coming soon — the Spotify app isn't set up yet.</p></div>
+<div id="tv-sp-player" style="display:none"><p id="tv-sp-now"><b>Nothing playing</b></p><p class="muted" id="tv-sp-now-time"></p><div id="tv-sp-embed-wrap" style="display:none"><iframe id="tv-sp-embed" style="border-radius:12px" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe><p><a id="tv-sp-open-link" href="#" target="_blank" rel="noopener" style="color:var(--core)">Open in Spotify ↗</a></p></div><div style="display:flex;gap:6px"><button class="ghost" id="tv-sp-prev" type="button" style="flex:1">⏮ PREV</button><button id="tv-sp-playpause" type="button" style="flex:1">▶ PLAY</button><button class="ghost" id="tv-sp-next" type="button" style="flex:1">NEXT ⏭</button></div><p class="muted" id="tv-sp-who"></p><button class="ghost" id="tv-sp-disconnect" type="button">DISCONNECT SPOTIFY</button></div>
+</div>
+</div>
+</div>
+
+
+
+<div class="panel" id="movie-night-card">
+<h2><span class="n">🎬</span> MOVIE NIGHT — WATCH TOGETHER</h2>
+<p class="muted">Pick a video and everyone in the Tavern counts down together, then it plays on the shared screen. Chat stays open below — keep talking while it plays. When it ends, the host picks the next one.</p>
+<div class="row"><input type="text" id="mn-q" maxlength="200" placeholder="Search YouTube for movie night…" style="flex:1;min-width:0"><button id="mn-go" type="button">SEARCH</button></div>
+<div id="mn-results" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+<p class="muted" id="mn-status" style="margin:8px 0 0"></p>
+<div id="mn-countdown" class="mn-count" style="display:none"></div>
+<div id="mn-player" style="display:none;margin-top:10px"><div style="position:relative;padding-top:56.25%"><iframe id="mn-frame" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p class="muted" id="mn-now" style="margin:8px 0 0"></p><div class="row" style="margin-top:8px"><button id="mn-stop" type="button" class="ghost" style="flex:1">■ STOP MOVIE NIGHT</button></div></div>
+</div>
+
+<div class="nav" id="site-nav">
+<a href="https://swpvp-dsu8.vercel.app/">← MAIN SITE (single-player)</a>
+<a href="https://swpvp-arcadio.vercel.app/">ARCADE →</a>
+
+</div>
+
+<footer>🍺 THE WRAITH TAVERN — SWPVP ATOM multiplayer home. Single-player lives on the main site. Buy atoms with real money (PayPal, sandbox test) — you get an ATOM code for the main site.</footer>
+</div>
+<script>
+/* ================= ATOM — MULTIPLAYER HOME =================
+   Single-player stays on the main site (atoms) and the arcade
+   (molecules). This site is MULTIPLAYER and its money is ATOMS —
+   the multiplayer pot. Real money enters only through the atom
+   sale (PayPal, sandbox test): a buyer pays real $ and gets an ATOM
+   code for the main site — atoms here are never cashed out.
+   ---------------------------------------------------------- */
+
+/* ===== ATOM SHOP — CEE: CHANGE PRICES HERE (atoms) ===== */
+const SHOP = [
+  {id:'color-green', kind:'color', name:'Wraith Green', desc:'Your name glows wraith-green in the lobby + chat.', price:10, color:'#00ff88'},
+  {id:'color-gold',  kind:'color', name:'Blood Gold',   desc:'Your name glows blood-red in the lobby + chat.',    price:20, color:'#ff4040'},
+  {id:'badge-blood', kind:'badge', name:'First Blood',  desc:'🩸 badge on your lobby card.',                     price:10, icon:'🩸'},
+  {id:'badge-ion',   kind:'badge', name:'Ion Born',     desc:'⚡ badge on your lobby card.',                     price:20, icon:'⚡'},
+  {id:'frame-gold',  kind:'frame', name:'Gold Ring',    desc:'Violet ring frame around your avatar in the lobby.', price:30},
+  {id:'skin-flame',  kind:'skin',  name:'Wraith Flame', desc:'Duel skin — flames on your fighter when duel skins land in Fight. Shows in the duel room for now.', price:50},
+  {id:'skin-hashbone-daredevil', kind:'skin', name:'Clumsy Bon3z', desc:'Hashbone\'s daredevil look — a proper daredevil guy who jumps off buildings casually.', price:50},
+   {id:'skin-sigilos-sigilized-devil', kind:'skin', name:'Sigilized Devil', desc:'Sigilos — Sigilized Devil. Clean standing art.', price:250},
+];
+const STARTER_IONS = 50;
+/* Molecules start at 0 — they are earned in the games (delve, quests,
+   town), not a starter grant. Atoms keep their 50 starter. One wallet,
+   one code: the same ion_wallets doc holds both balances. */
+const STARTER_MOLECULES = 0;
+/* ===== ATOM ↔ BTC — CEE: CHANGE RATE HERE (locked $1 = 100 atoms) =====
+   $1 = 100 atoms, so 1 atom = $0.01. At BTC ~$78,000 (2026-11-01) that is
+   1 atom ≈ 13 sats. Display only — atoms are never bought with BTC and
+   never cashed out to BTC; the sats/BTC number is the price tag. */
+const ION_SATS_PER_ION = 13;
+function ionsToSats(n){ var v = Math.floor(Number(n) || 0); return v * ION_SATS_PER_ION; }
+function ionsToBtc(n){ return (ionsToSats(n) / 100000000).toFixed(8); }
+function ionBtcLine(n){ return '≈ ' + ionsToSats(n).toLocaleString('en-US') + ' sats (' + ionsToBtc(n) + ' BTC)'; }
+const FIGHT_URL = '/wraith-survival.html';
+const PLAYING_CHOICES = ['Just hanging','Stand + Brawl','Wraith Pet','Wraith Delve','Tetris','Slimeball'];
+const PRESENCE_TTL_MS = 90000, HEARTBEAT_MS = 20000;
+
+/* ===== Firebase — SAME project as the main site (swvp-721a0) ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyB1ERnGB2hAGclij5GN8H184U6jN_tVrKA",
+  authDomain: "swvp-721a0.firebaseapp.com",
+  projectId: "swvp-721a0",
+  messagingSenderId: "1068856275039",
+  appId: "1:1068856275039:web:77f79ebc6aefedb6252bea",
+  measurementId: "G-ECZN9Y71TT"
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ===== Wallet code — the bridge to the arcade (Wraith Pet + Tetris) =====
+   Same pattern as the pet save code (djb2 checksum + base64url, no padding):
+   the code carries the wallet uid, so the arcade can read/write THIS wallet
+   even though it signs in anonymously on a different origin (different uid).
+   The code IS the link — treat it like a save code. The raw uid is never
+   printed in the UI; only the code is shown. Format: ATOM1-<b64(uid)>-<hash8> (older ION1- codes still decode) */
+var ION_CODE_B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+function ionCodeHash(s){ var h = 5381; for (var i = 0; i < s.length; i++){ h = (((h << 5) + h) + s.charCodeAt(i)) >>> 0; } var hex = h.toString(16); while (hex.length < 8) hex = '0' + hex; return hex; }
+function ionCodeUtf8(s){ var out = []; for (var i = 0; i < s.length; i++){ var c = s.charCodeAt(i); if (c < 128) out.push(c); else if (c < 2048) out.push(192 | (c >> 6), 128 | (c & 63)); else out.push(224 | (c >> 12), 128 | ((c >> 6) & 63), 128 | (c & 63)); } return out; }
+function ionCodeB64e(bytes){ var out = ''; for (var i = 0; i < bytes.length; i += 3){ var b0 = bytes[i], b1 = (i + 1 < bytes.length) ? bytes[i + 1] : 0, b2 = (i + 2 < bytes.length) ? bytes[i + 2] : 0; out += ION_CODE_B64.charAt(b0 >> 2); out += ION_CODE_B64.charAt(((b0 & 3) << 4) | (b1 >> 4)); if (i + 1 < bytes.length) out += ION_CODE_B64.charAt(((b1 & 15) << 2) | (b2 >> 6)); if (i + 2 < bytes.length) out += ION_CODE_B64.charAt(b2 & 63); } return out; }
+function ionCodeB64d(s){ var vals = {}, i; for (i = 0; i < ION_CODE_B64.length; i++) vals[ION_CODE_B64.charAt(i)] = i; var out = []; var acc = 0, nbits = 0; for (i = 0; i < s.length; i++){ var v = vals[s.charAt(i)]; if (v === undefined) return null; acc = (acc << 6) | v; nbits += 6; if (nbits >= 8){ nbits -= 8; out.push((acc >> nbits) & 255); } } return out; }
+function ionCodeFromUtf8(bytes){ var out = '', i = 0; while (i < bytes.length){ var b = bytes[i++]; if (b < 128) out += String.fromCharCode(b); else if (b >= 192 && b < 224 && i < bytes.length) out += String.fromCharCode(((b & 31) << 6) | (bytes[i++] & 63)); else if (b >= 224 && b < 240 && i + 1 < bytes.length){ out += String.fromCharCode(((b & 15) << 12) | ((bytes[i] & 63) << 6) | (bytes[i + 1] & 63)); i += 2; } else out += '?'; } return out; }
+function ionCodeFor(uid){ if (!uid) return ''; var b = ionCodeB64e(ionCodeUtf8(String(uid))); return 'ATOM1-' + b + '-' + ionCodeHash(b); }
+function ionUidFromCode(code){
+  if (!code) return null;
+  var c = String(code).trim().replace(/\s+/g, '');
+  var parts = c.split('-');
+  if (parts.length !== 3 || (parts[0] !== 'ATOM1' && parts[0] !== 'ION1')) return null; /* ION1- = legacy, still decodes (no data migration) */
+  if (ionCodeHash(parts[1]) !== parts[2].toLowerCase()) return null;
+  var bytes = ionCodeB64d(parts[1]);
+  if (!bytes) return null;
+  var uid = ionCodeFromUtf8(bytes);
+  if (!uid || /[^A-Za-z0-9_-]/.test(uid)) return null;
+  return uid;
+}
+function canAfford(balance, item){ return balance >= item.price; }
+function applyBuy(balance, owned, item){
+  if ((owned || []).indexOf(item.id) >= 0) return {ok:false, reason:'owned'};
+  if (balance < item.price) return {ok:false, reason:'poor'};
+  return {ok:true, balance: balance - item.price, owned: (owned || []).concat([item.id])};
+}
+function isOnline(lastSeen, now){ return (now - lastSeen) < PRESENCE_TTL_MS; }
+function shopById(id){ return SHOP.find(function(i){ return i.id === id; }) || null; }
+function duelFor(room, me){ return room && (room.from === me || room.to === me) ? room : null; }
+
+/* ===== State ===== */
+let db = null, myUid = null, myName = 'guest';
+let useCloud = false;             /* false = Firestore refused us; local-only mode */
+let wallet = {ions: STARTER_IONS, molecules: STARTER_MOLECULES, owned: [], equipped: {}, lastDaily: 0, ts: 0};
+let myPlaying = 'Just hanging';
+let presenceTimer = null;
+try { myPlaying = localStorage.getItem('sw_ion_playing') || myPlaying; } catch (e) {}
+try { myName = localStorage.getItem('sw_ion_name') || myName; } catch (e) {}
+
+function setStatus(text, on){
+  const el = $('ion-status'); if (!el) return;
+  el.textContent = text; el.className = on === true ? 'on' : (on === false ? 'off' : '');
+}
+
+/* ===== Adaptive brightness — Cee 2026-11-02: the display adapts to the
+   user's screen / environment, same as the main site + arcade. The Ambient
+   Light Sensor (if the device has one and allows it) sets the level
+   automatically; the brightness wheel (drag the dial or tap a stop) overrides
+   for THIS SESSION only. NOT persisted — resets to HIGH on every load, because the
+   environment changes (bright room vs dark room). Applies to the whole
+   page (lobby, chat, shop, wallet, duel area); the game inside the duel
+   frame adapts on its own. ===== */
+var BRIGHT_LEVELS = {high: 1, med: 0.75, low: 0.55};
+var BRIGHT_LABELS = {high: 'HIGH', med: 'MEDIUM', low: 'LOW'};
+/* Brightness wheel — Cee 2026-11-02: the dial turns clockwise from the top.
+   Stops sit 120° apart: HIGH at the top (0°), MEDIUM bottom-right (120°),
+   LOW bottom-left (240°). Drag the dial and it snaps to the nearest stop. */
+var BRIGHT_WHEEL_ANGLES = {high: 0, med: 120, low: 240};
+var BRIGHT_WHEEL_ORDER = ['high', 'med', 'low'];
+function brightWheelAngleForStop(mode){ return BRIGHT_WHEEL_ANGLES[mode] || 0; }
+function brightWheelStopForAngle(deg){
+  deg = ((deg % 360) + 360) % 360;
+  var best = 'high', bestD = 360;
+  BRIGHT_WHEEL_ORDER.forEach(function(k){
+    var d = Math.abs(deg - BRIGHT_WHEEL_ANGLES[k]);
+    if (d > 180) d = 360 - d;
+    if (d < bestD){ bestD = d; best = k; }
+  });
+  return best;
+}
+var brightMode = 'high', brightAuto = false, brightSensor = null;
+function brightApply(){
+  var v = BRIGHT_LEVELS[brightMode] || 1;
+  document.body.style.filter = (v === 1) ? '' : 'brightness(' + v + ')';
+  var note = $('bright-note');
+  if (note) note.textContent = brightAuto ? ('auto · ' + (BRIGHT_LABELS[brightMode] || 'HIGH')) : (BRIGHT_LABELS[brightMode] || 'HIGH');
+  ['high', 'med', 'low'].forEach(function(k){
+    var b = $('bright-' + k);
+    if (b){ var on = (brightMode === k); b.style.borderColor = on ? '#c9a6ff' : ''; b.style.color = on ? '#c9a6ff' : ''; b.style.boxShadow = on ? '0 0 10px rgba(201,166,255,.45)' : ''; }
+  });
+  var dial = $('bright-dial');
+  if (dial) dial.style.transform = 'rotate(' + (BRIGHT_WHEEL_ANGLES[brightMode] || 0) + 'deg)';
+  var wheel = $('bright-wheel');
+  if (wheel && wheel.setAttribute){
+    wheel.setAttribute('aria-valuenow', String(BRIGHT_WHEEL_ORDER.indexOf(brightMode)));
+    wheel.setAttribute('aria-valuetext', BRIGHT_LABELS[brightMode] || 'HIGH');
+  }
+}
+function brightSet(mode, auto){
+  if (!BRIGHT_LEVELS[mode]) mode = 'high';
+  brightMode = mode; brightAuto = !!auto;
+  if (!auto && brightSensor){ try { brightSensor.stop(); } catch (e) {} brightSensor = null; }
+  brightApply();
+}
+function brightFromLux(lux){
+  if (lux == null || isNaN(lux)) return 'high';
+  if (lux >= 500) return 'high';   /* bright room / daylight */
+  if (lux >= 50) return 'med';     /* normal indoor light */
+  return 'low';                     /* dim room */
+}
+function brightInit(){
+  var hb = $('bright-high'); if (hb) hb.onclick = function(){ brightSet('high', false); };
+  var mb = $('bright-med'); if (mb) mb.onclick = function(){ brightSet('med', false); };
+  var lb = $('bright-low'); if (lb) lb.onclick = function(){ brightSet('low', false); };
+  /* Brightness wheel: drag the dial around, it snaps to the nearest stop on
+     release (manual override — stops the light sensor, same as the stop
+     buttons). Tap a stop to jump straight to it. Arrow keys cycle stops. */
+  var wheel = $('bright-wheel');
+  if (wheel && wheel.addEventListener){
+    var dragging = false;
+    var wheelAngle = function(ev){
+      if (!wheel.getBoundingClientRect || !ev || ev.clientX == null || ev.clientY == null) return null;
+      var r = wheel.getBoundingClientRect();
+      var dx = ev.clientX - (r.left + r.width / 2);
+      var dy = ev.clientY - (r.top + r.height / 2);
+      if (dx === 0 && dy === 0) return null;
+      return (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360; /* 0° = top, clockwise */
+    };
+    var wheelDial = function(deg){ var d = $('bright-dial'); if (d) d.style.transform = 'rotate(' + deg + 'deg)'; };
+    wheel.addEventListener('pointerdown', function(ev){
+      var deg = wheelAngle(ev); if (deg == null) return;
+      dragging = true;
+      if (wheel.classList) { try { wheel.classList.add('dragging'); } catch (e) {} }
+      try { if (wheel.setPointerCapture && ev.pointerId != null) wheel.setPointerCapture(ev.pointerId); } catch (e) {}
+      wheelDial(deg);
+      if (ev.preventDefault) ev.preventDefault();
+    });
+    wheel.addEventListener('pointermove', function(ev){
+      if (!dragging) return;
+      var deg = wheelAngle(ev); if (deg == null) return;
+      wheelDial(deg);
+    });
+    var wheelFinish = function(ev){
+      if (!dragging) return;
+      dragging = false;
+      if (wheel.classList) { try { wheel.classList.remove('dragging'); } catch (e) {} }
+      var deg = wheelAngle(ev);
+      if (deg == null){ brightApply(); return; }
+      brightSet(brightWheelStopForAngle(deg), false);
+    };
+    wheel.addEventListener('pointerup', wheelFinish);
+    wheel.addEventListener('pointercancel', function(){ dragging = false; brightApply(); });
+    wheel.addEventListener('keydown', function(ev){
+      if (!ev) return;
+      var i = BRIGHT_WHEEL_ORDER.indexOf(brightMode);
+      if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown'){ brightSet(BRIGHT_WHEEL_ORDER[(i + 1) % 3], false); if (ev.preventDefault) ev.preventDefault(); }
+      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp'){ brightSet(BRIGHT_WHEEL_ORDER[(i + 2) % 3], false); if (ev.preventDefault) ev.preventDefault(); }
+    });
+  }
+  brightApply(); /* default HIGH, fresh each load — never persisted */
+  try {
+    if ('AmbientLightSensor' in window){
+      var s = new AmbientLightSensor({frequency: 1});
+      s.addEventListener('reading', function(){ brightSet(brightFromLux(s.illuminance), true); });
+      s.addEventListener('error', function(){ /* sensor denied / unavailable — manual buttons stay */ });
+      s.start();
+      brightSensor = s;
+    }
+  } catch (e) { /* no sensor — manual buttons stay */ }
+}
+function renderWallet(){
+  const el = $('ion-balance'); if (el) el.innerHTML = esc(String(wallet.ions)) + ' <small>ATOMS</small>';
+  const btc = $('ion-btc'); if (btc) btc.textContent = ionBtcLine(wallet.ions) + ' — 1 atom = ' + ION_SATS_PER_ION + ' sats ($1 = 100 atoms).';
+  const mb = $('mol-balance'); if (mb) mb.innerHTML = esc(String(wallet.molecules || 0)) + ' <small>MOLECULES</small>';
+  const code = $('ion-code'); if (code) code.value = myUid ? ionCodeFor(myUid) : '';
+  const idl = $('my-id-line');
+  if (idl) idl.textContent = myUid ? ('You are ' + myName + ' (' + myUid.slice(0, 8) + '…) — ' + (useCloud ? 'cloud wallet' : 'offline wallet, saved on this device only')) : '';
+  renderAvatarPicker();
+}
+function equippedColor(){ const c = wallet.equipped && wallet.equipped.color; const it = c && shopById(c); return it ? it.color : ''; }
+function equippedBadge(){ const b = wallet.equipped && wallet.equipped.badge; const it = b && shopById(b); return it ? it.icon : ''; }
+function equippedFrame(){ return wallet.equipped && wallet.equipped.frame === 'frame-gold' ? 'frame-gold' : ''; }
+/* ===== Avatar icon picker (f5) — free default set, Cee to confirm the
+   icons. Persists like any other equipped item: cloud ion_wallets
+   equipped.icon + localStorage. The lobby .pav shows the icon instead of
+   the name initial. ===== */
+const AVATAR_ICONS = ['\uD83D\uDC79','\uD83E\uDD96','\uD83D\uDC3A','\uD83E\uDD87','\uD83D\uDC51','\uD83D\uDC80','\uD83D\uDD25','\u2694\uFE0F','\uD83D\uDEE1\uFE0F','\uD83C\uDF19'];
+function equippedIcon(){ return (wallet.equipped && wallet.equipped.icon) || ''; }
+function renderAvatarPicker(){
+  const el = $('avatar-picker'); if (!el) return;
+  const cur = equippedIcon();
+  const isPhoto = cur && cur.indexOf('data:image') === 0;
+  el.innerHTML = AVATAR_ICONS.map(function(ic){
+    return '<button type="button" data-av="' + ic + '"' + (ic === cur ? ' class="sel"' : '') + ' aria-label="Avatar ' + ic + '">' + ic + '</button>';
+  }).join('') + (isPhoto ? '<button type="button" data-av="' + cur.replace(/"/g, '&quot;') + '" class="sel" aria-label="Your uploaded photo"><img src="' + cur.replace(/"/g, '&quot;') + '" alt="Your photo"></button>' : '') + (cur ? '<button type="button" class="ghost" data-av="">\u2715 clear</button>' : '');
+  el.querySelectorAll('[data-av]').forEach(function(b){ b.onclick = function(){ setAvatarIcon(b.getAttribute('data-av')); }; });
+  const up = $('avatar-upload-btn'), inp = $('avatar-upload');
+  if (up && inp && !up._bound){ up._bound = true; up.onclick = function(){ inp.click(); }; inp.onchange = function(){ handleAvatarUpload(inp); }; }
+}
+function handleAvatarUpload(inp){
+  if (!inp || !inp.files || !inp.files[0]) return;
+  const file = inp.files[0];
+  if (!file.type || file.type.indexOf('image/') !== 0) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    const img = new Image();
+    img.onload = function(){
+      const size = 128, cv = document.createElement('canvas');
+      cv.width = size; cv.height = size;
+      const ctx = cv.getContext('2d');
+      const s = Math.min(img.width, img.height), sx = (img.width - s) / 2, sy = (img.height - s) / 2;
+      ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+      setAvatarIcon(cv.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+  inp.value = '';
+}
+async function setAvatarIcon(ic){
+  if (!wallet.equipped) wallet.equipped = {};
+  wallet.equipped.icon = ic || null;
+  stampWallet(); saveWalletLocal();
+  if (useCloud && db){ try { await db.collection('ion_wallets').doc(myUid).set({equipped: wallet.equipped, ts: wallet.ts}, {merge: true}); } catch (e) {} }
+  renderAvatarPicker(); renderWallet(); renderShop(); heartbeat();
+  if (renderLobby._last) renderLobby(renderLobby._last);
+}
+
+/* ===== Keeper's Wares — name-style preview (mockup card look) =====
+   Each card shows the ware the way it will look on you: the swatch renders
+   "CEE · WRAITH" in the ware's own style (name color, badge icon, violet
+   ring, flame). Swatch classes are the mockup's sw-* names, keyed by ware
+   id; the colors are the wares' own product colors. */
+var SHOP_SWATCH = {'color-green':'sw-wraith-green','color-gold':'sw-blood-gold','badge-blood':'sw-first-blood','badge-ion':'sw-ion-born','frame-gold':'sw-gold-ring','skin-flame':'sw-wraith-flame'};
+var SHOP_TILE_TONE = {'color-green':'core','badge-blood':'red','skin-flame':'red'};
+var SHOP_TAG = {color:'NAME COLOR', badge:'BADGE', frame:'FRAME', skin:'DUEL SKIN'};
+function shopSwatchHtml(it){
+  var cls = SHOP_SWATCH[it.id] || '';
+  var inner = 'CEE · WRAITH';
+  if (it.kind === 'badge' && it.icon) inner = esc(it.icon) + ' ' + inner;
+  if (it.kind === 'skin') inner = '🔥 ' + inner + ' 🔥';
+  if (it.kind === 'frame') inner = '💍 ' + inner;
+  return '<div class="swatch ' + cls + '">' + inner + '</div>';
+}
+function shopTileHtml(it){
+  var tone = SHOP_TILE_TONE[it.id] || '';
+  var glyph = '✦';
+  if (it.kind === 'badge' && it.icon) glyph = esc(it.icon);
+  else if (it.kind === 'frame') glyph = '💍';
+  else if (it.kind === 'skin') glyph = '🔥';
+  else if (it.kind === 'color' && it.color) return '<span class="tile ' + tone + '" style="color:' + esc(it.color) + '">●</span>';
+  return '<span class="tile ' + tone + '">' + glyph + '</span>';
+}
+/* ===== Shop render + buy/equip ===== */
+function renderShop(){
+  const grid = $('shop-grid'); if (!grid) return;
+  grid.innerHTML = SHOP.map(function(it){
+    const owned = (wallet.owned || []).indexOf(it.id) >= 0;
+    const isEq = wallet.equipped && wallet.equipped[it.kind] === it.id;
+    const btn = owned
+      ? (isEq ? '<button type="button" class="btn ghost play" data-equip="' + it.id + '">EQUIPPED ✓ — tap to unequip</button>'
+              : '<button type="button" class="btn ghost play" data-equip="' + it.id + '">EQUIP</button>')
+      : '<button type="button" class="btn primary play" data-buy="' + it.id + '"' + (canAfford(wallet.ions, it) ? '' : ' disabled') + '>BUY — ' + it.price + ' ATOMS</button>';
+    return '<article class="card shop-item' + (owned ? ' owned' : '') + '"><div class="head">' + shopTileHtml(it)
+      + '<h3>' + esc(it.name) + '</h3><span class="tag">' + (SHOP_TAG[it.kind] || 'WARE') + '</span></div>'
+      + '<p class="desc">' + esc(it.desc) + '</p>'
+      + shopSwatchHtml(it)
+      + '<div class="foot"><div class="price-row">'
+      + '<span class="price">' + (owned ? 'OWNED' : it.price + ' <small>ATOMS</small>') + '</span>'
+      + '<span class="sats">' + ionBtcLine(it.price) + '</span></div>' + btn + '</div></article>';
+  }).join('');
+  grid.querySelectorAll('[data-buy]').forEach(function(b){ b.onclick = function(){ buyItem(b.getAttribute('data-buy')); }; });
+  grid.querySelectorAll('[data-equip]').forEach(function(b){ b.onclick = function(){ toggleEquip(b.getAttribute('data-equip')); }; });
+}
+function saveWalletLocal(){
+  try { localStorage.setItem('sw_ion_wallet', JSON.stringify(wallet)); } catch (e) {}
+}
+function loadWalletLocal(){
+  try { const w = JSON.parse(localStorage.getItem('sw_ion_wallet') || 'null'); if (w && typeof w.ions === 'number'){ wallet = w; if (typeof wallet.molecules !== 'number') wallet.molecules = 0; if (typeof wallet.ts !== 'number') wallet.ts = 0; } } catch (e) {}
+}
+/* ===== Wallet freshness (f2) — the cloud doc carries a ts and the local
+   wallet carries one too (stamped on every local mutation, saved with the
+   wallet). A cloud doc OLDER than the local state must never clobber it:
+   that was the Gold Ring bug — buy 30 atoms from 50, the cloud write still
+   in flight (or rejected), the snapshot re-applied the stale 50 and the
+   purchase vanished on refresh. A stale snapshot is ignored and the local
+   state is pushed up once so the cloud heals. ===== */
+function walletTs(){ return (typeof wallet.ts === 'number') ? wallet.ts : 0; }
+function stampWallet(){ wallet.ts = Date.now(); }
+async function buyItem(id){
+  const it = shopById(id); if (!it) return;
+  const res = applyBuy(wallet.ions, wallet.owned, it);
+  if (!res.ok){ setStatus(res.reason === 'owned' ? 'You already own ' + it.name + '.' : 'Not enough atoms for ' + it.name + ' — you have ' + wallet.ions + '.', false); return; }
+  wallet.ions = res.balance; wallet.owned = res.owned;
+  if (!wallet.equipped) wallet.equipped = {};
+  wallet.equipped[it.kind] = it.id; /* auto-equip on buy */
+  stampWallet();
+  saveWalletLocal(); /* the post-buy state is saved even if the cloud write fails */
+  if (useCloud && db){
+    try {
+      await db.collection('ion_wallets').doc(myUid).set({uid: myUid, code: ionCodeFor(myUid), ions: wallet.ions, molecules: wallet.molecules || 0, owned: wallet.owned, equipped: wallet.equipped, lastDaily: wallet.lastDaily || 0, ts: wallet.ts}, {merge: true});
+      await db.collection('ion_purchases').add({uid: myUid, item: it.id, price: it.price, ts: Date.now()});
+      /* confirm the cloud actually holds the new balance — a write the
+         rules reject (or one still in flight) leaves the cloud doc stale,
+         and the snapshot below would otherwise clobber the buy. Push once
+         more if the re-read disagrees. */
+      try {
+        const chk = await db.collection('ion_wallets').doc(myUid).get();
+        const cd = chk && chk.exists ? chk.data() : null;
+        if (!cd || cd.ions !== wallet.ions){
+          await db.collection('ion_wallets').doc(myUid).set({uid: myUid, code: ionCodeFor(myUid), ions: wallet.ions, molecules: wallet.molecules || 0, owned: wallet.owned, equipped: wallet.equipped, lastDaily: wallet.lastDaily || 0, ts: wallet.ts}, {merge: true});
+        }
+      } catch (e2) { /* confirm failed — local state is saved; the snapshot heals the cloud */ }
+    } catch (e) {
+      /* NOTE (f1): a failed buy write must NOT flip useCloud off — that
+         killed chat sends after a Keeper's Wares purchase. The wallet
+         snapshot's own error handler is the authority on cloud health. */
+      setStatus('Cloud hiccup — saved on this device instead.', false);
+    }
+  }
+  setStatus('Bought ' + it.name + ' for ' + it.price + ' atoms. ' + wallet.ions + ' left.', true);
+  renderWallet(); renderShop(); heartbeat();
+}
+async function toggleEquip(id){
+  const it = shopById(id); if (!it) return;
+  if (!wallet.equipped) wallet.equipped = {};
+  if (wallet.equipped[it.kind] === id) wallet.equipped[it.kind] = null;
+  else wallet.equipped[it.kind] = id;
+  stampWallet(); saveWalletLocal();
+  if (useCloud && db){ try { await db.collection('ion_wallets').doc(myUid).set({equipped: wallet.equipped, ts: wallet.ts}, {merge: true}); } catch (e) {} }
+  renderWallet(); renderShop(); heartbeat();
+}
+
+/* ===== REDEEM ATOM CODE — credits THIS cloud wallet =====
+   Same contract as the main-site redeem (Cee 2026-11-01 20:54 EST: the
+   atom wallet moves to the third site, so the redeem moves here too).
+   ATOM codes are issued by the server (api/capture-order.js) into
+   Firestore atom_codes/<code> = {atoms, paid:true, redeemed:false, ts}.
+   A redeem is a client-side Firestore TRANSACTION: it re-reads the code
+   doc, refuses it when missing / already redeemed / unpaid, and then
+   atomically marks the code redeemed AND credits the cloud wallet.
+   The code-doc write is ONLY {redeemed:true} (the live atom_codes rules
+   allow redeemed-only updates; create is server-only). The wallet write
+   re-sends the stored code + uid (the ion_wallets update rule requires
+   code == stored code and uid == doc id, and only wallet fields).
+   There is no local purse on this site — a redeem always credits the
+   cloud wallet, so it needs the cloud (useCloud + db + myUid). */
+function redeemAtomCodeNorm(code){ return String(code || '').trim().toUpperCase(); }
+function redeemAtomCodeMsg(reason){
+  if (reason === 'redeemed') return 'That code was already redeemed.';
+  if (reason === 'unpaid') return 'That code was never paid for — it cannot be redeemed.';
+  return 'No such code — check it and try again.';
+}
+/* Pure decision core (no DOM, no Firebase) — the harness tests this. */
+function redeemAtomCodeCheck(codeData, walletBalance){
+  if (!codeData) return {ok: false, reason: 'invalid'};
+  if (codeData.redeemed) return {ok: false, reason: 'redeemed'};
+  if (!codeData.paid) return {ok: false, reason: 'unpaid'};
+  const atoms = Math.floor(Number(codeData.atoms) || 0);
+  if (atoms <= 0) return {ok: false, reason: 'invalid'};
+  const bal = (typeof walletBalance === 'number' && walletBalance >= 0) ? Math.floor(walletBalance) : 0;
+  return {ok: true, atoms: atoms, balance: bal + atoms};
+}
+function redeemAtomCodeLine(t){ const el = $('atom-redeem-line'); if (el) el.textContent = t || ''; }
+async function redeemAtomCode(){
+  const inp = $('atom-redeem-input');
+  const code = redeemAtomCodeNorm(inp ? inp.value : '');
+  if (!code){ redeemAtomCodeLine('Enter a code first.'); return; }
+  if (!ionSaleAtomCodeValid(code)){ redeemAtomCodeLine('That does not look like an ATOM code — it starts ATOM- and has 12 characters after it.'); return; }
+  if (!useCloud || !db || !myUid){ redeemAtomCodeLine('Not connected to the cloud wallet yet — try again in a moment.'); return; }
+  try {
+    /* fast pre-read (same contract as the main-site redeem) */
+    const pre = await db.collection('atom_codes').doc(code).get();
+    const chk = redeemAtomCodeCheck(pre && pre.exists ? pre.data() : null, wallet.ions);
+    if (!chk.ok){ redeemAtomCodeLine(redeemAtomCodeMsg(chk.reason)); return; }
+    const res = await db.runTransaction(function(tx){
+      const ref = db.collection('atom_codes').doc(code);
+      const wref = db.collection('ion_wallets').doc(myUid);
+      return tx.get(ref).then(function(doc){
+        const c2 = redeemAtomCodeCheck(doc && doc.exists ? doc.data() : null, wallet.ions);
+        if (!c2.ok) throw new Error(c2.reason);
+        return tx.get(wref).then(function(wdoc){
+          if (!wdoc || !wdoc.exists) throw new Error('no-wallet');
+          const wd = wdoc.data() || {};
+          const wbal = (typeof wd.ions === 'number') ? wd.ions : wallet.ions;
+          const wcode = (typeof wd.code === 'string' && wd.code) ? wd.code : ionCodeFor(myUid);
+          const wupd = {code: wcode, uid: myUid, ions: wbal + c2.atoms, ts: Date.now()};
+          tx.update(ref, {redeemed: true});
+          tx.update(wref, wupd);
+          return {atoms: c2.atoms, balance: wbal + c2.atoms};
+        });
+      });
+    });
+    wallet.ions = res.balance; stampWallet(); saveWalletLocal(); renderWallet(); renderShop(); heartbeat();
+    redeemAtomCodeLine('Redeemed +' + res.atoms + ' atoms — new balance ' + res.balance + '.');
+    setStatus('Redeemed +' + res.atoms + ' atoms — new balance ' + res.balance + '.', true);
+    if (inp) inp.value = '';
+  } catch (e){
+    const m = String((e && e.message) || '');
+    if (m === 'redeemed' || m.indexOf('redeemed') >= 0){ redeemAtomCodeLine('That code was already redeemed.'); return; }
+    if (m === 'unpaid' || m.indexOf('unpaid') >= 0){ redeemAtomCodeLine('That code was never paid for — it cannot be redeemed.'); return; }
+    if (m === 'invalid' || m.indexOf('invalid') >= 0){ redeemAtomCodeLine('No such code — check it and try again.'); return; }
+    if (m === 'no-wallet' || m.indexOf('no-wallet') >= 0){ redeemAtomCodeLine('Cloud wallet not found — reload the page and try again.'); return; }
+    if ((e && e.code === 'permission-denied') || m.indexOf('permission') >= 0){ redeemAtomCodeLine('Redeem refused — try again in a moment.'); return; }
+    redeemAtomCodeLine('Redeem failed — try again.');
+  }
+}
+
+/* ===== BUY ATOMS — real money (PayPal sandbox) =====
+   Locked rate (Cee 2026-11-01 19:37 EST): $1 = 100 atoms,
+   $5 = 500 atoms. The buyer pays real $
+   (PayPal), Cee gets paid, and the buyer gets an ATOM code to redeem on
+   the main site. The atom wallet here is NOT credited by a sale.
+   PayPal is SANDBOX only until the keys flip to live.
+   Flow mirrors the arcade $ pets checkout: /api/paypal-config tells
+   the page whether checkout is set up (PayPal keys AND the server's
+   Firestore service account — without it the server cannot issue a
+   code, so checkout never starts); the PayPal JS SDK renders the
+   button; createOrder calls /api/create-order (server price table);
+   onApprove calls /api/capture-order, which captures and verifies
+   the payment server-side (COMPLETED + USD + exact amount) and then
+   writes the ATOM code to Firestore atom_codes/<code> =
+   {atoms, paid:true, redeemed:false, ts} ITSELF, then returns the code
+   to the client. The client NEVER writes atom_codes — a client that
+   could write it could mint codes without paying. A failed or declined
+   payment writes nothing. */
+const ION_SALE_PACKS = [
+  {id:'ion1', usd:1, ions:50, atoms:100},
+  {id:'ion5', usd:5, ions:250, atoms:500},
+];
+function ionSalePack(id){ return ION_SALE_PACKS.find(function(p){ return p.id === id; }) || null; }
+function ionSaleAtomCodeValid(code){ return /^ATOM-[A-Za-z0-9]{12}$/.test(String(code || '')); }
+let ionSaleCfg = null;        /* {ionConfigured, clientId, mode} from /api/paypal-config */
+let ionSaleSdkLoading = null;
+function ionSaleStatus(t){ const el = $('sale-status'); if (el) el.textContent = t || ''; }
+function ionSaleSetButtons(disabled){
+  ['sale-pack-ion1', 'sale-pack-ion5'].forEach(function(id){ const b = $(id); if (b) b.disabled = !!disabled; });
+}
+function ionSaleShowCode(code){
+  const box = $('sale-code-box'); if (box) box.style.display = '';
+  const inp = $('sale-code'); if (inp) inp.value = code;
+}
+function ionSaleLoadSdk(clientId){
+  if (ionSaleSdkLoading) return ionSaleSdkLoading;
+  ionSaleSdkLoading = new Promise(function(resolve, reject){
+    if (typeof window !== 'undefined' && window.paypal){ resolve(); return; }
+    if (typeof document === 'undefined' || !document.createElement){ reject(new Error('no-dom')); return; }
+    var s = document.createElement('script');
+    s.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId) + '&currency=USD&enable-funding=venmo&disable-funding=paylater,credit';
+    s.async = true;
+    s.onload = function(){ resolve(); };
+    s.onerror = function(){ reject(new Error('sdk-load')); };
+    (document.head || document.body || document).appendChild(s);
+  });
+  return ionSaleSdkLoading;
+}
+async function ionSaleFetchCfg(){
+  if (ionSaleCfg && ionSaleCfg.ionConfigured) return ionSaleCfg;
+  if (typeof fetch !== 'function') return null;
+  try {
+    const r = await fetch('/api/paypal-config');
+    const j = await r.json();
+    if (j && j.ionConfigured) ionSaleCfg = j;
+    return j;
+  } catch (e) { return null; }
+}
+async function ionSaleCheckSetup(){
+  const cfg = await ionSaleFetchCfg();
+  if (!cfg || !cfg.ionConfigured || !cfg.clientId){
+    ionSaleStatus('Payments are not set up yet — check back soon.');
+    ionSaleSetButtons(true);
+    return null;
+  }
+  ionSaleSetButtons(false);
+  return cfg;
+}
+async function ionSaleStart(packId){
+  const pack = ionSalePack(packId); if (!pack) return;
+  const box = $('sale-paypal'); if (box) box.innerHTML = '';
+  const codeBox = $('sale-code-box'); if (codeBox) codeBox.style.display = 'none';
+  const cfg = await ionSaleCheckSetup();
+  if (!cfg) return;
+  ionSaleStatus('Loading PayPal…');
+  try { await ionSaleLoadSdk(cfg.clientId); } catch (e) { ionSaleStatus('Could not load PayPal. Check your connection and try again.'); return; }
+  const pp = (typeof window !== 'undefined' && window.paypal) ? window.paypal : (typeof paypal !== 'undefined' ? paypal : null);
+  if (!pp || !pp.Buttons){ ionSaleStatus('Could not load PayPal. Check your connection and try again.'); return; }
+  ionSaleStatus('');
+  ionSaleRenderPaypal(pack, pp);
+}
+function ionSaleRenderPaypal(pack, pp){
+  const box = $('sale-paypal'); if (!box) return;
+  box.innerHTML = '';
+  try {
+    pp.Buttons({
+      style: {layout: 'vertical', color: 'black', shape: 'rect', label: 'paypal'},
+      createOrder: function(){
+        return fetch('/api/create-order', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({pack: pack.id})})
+          .then(function(r){ return r.json(); })
+          .then(function(j){ if (!j || !j.orderID) throw new Error('order-failed'); return j.orderID; });
+      },
+      onApprove: function(data){
+        ionSaleStatus('Confirming your payment…');
+        return fetch('/api/capture-order', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({orderID: data.orderID, pack: pack.id})})
+          .then(function(r){ return r.json(); })
+          .then(function(j){ return ionSaleFinish(pack, j); })
+          .catch(function(){ ionSaleStatus('Payment could not be confirmed. You were not charged — check PayPal and try again.'); });
+      },
+      onError: function(){ ionSaleStatus('Checkout hit a snag. Try again — you were not charged.'); },
+    }).render(box);
+  } catch (e) { ionSaleStatus('Could not start PayPal checkout. Try again.'); }
+}
+/* Server confirmed the payment AND wrote the atom code — the client only
+   shows it. The client NEVER writes atom_codes. Returns true when the
+   code was saved and shown. A failed or declined payment never reaches
+   here. If the server could not save the code after a confirmed payment
+   (saved:false), the buyer WAS charged — show the code (if any) with the
+   keep-it warning, and never say "you were not charged". */
+async function ionSaleFinish(pack, j){
+  if (!j || !j.ok || j.atoms !== pack.atoms){
+    ionSaleStatus('Payment could not be confirmed. You were not charged — check PayPal and try again.');
+    return false;
+  }
+  if (j.saved === false){
+    if (j.code && ionSaleAtomCodeValid(j.code)){
+      ionSaleShowCode(j.code);
+      ionSaleStatus('Payment confirmed — but the code could not be saved. Keep this code: redeem it on the main site, and tell Cee if it does not work.');
+    } else {
+      ionSaleStatus('Payment confirmed — but the code could not be saved. Tell Cee (your payment went through) and he will send your code.');
+    }
+    return false;
+  }
+  if (!j.code || !ionSaleAtomCodeValid(j.code)){
+    ionSaleStatus('Payment could not be confirmed. You were not charged — check PayPal and try again.');
+    return false;
+  }
+  ionSaleShowCode(j.code);
+  ionSaleStatus('Paid! ' + j.atoms + ' atoms — redeem the code on the main site. Your atom wallet here was not credited.');
+  return true;
+}
+
+/* ===== Presence (lobby) ===== */
+function heartbeat(){
+  if (!useCloud || !db || !myUid) return;
+  db.collection('ion_presence').doc(myUid).set({
+    uid: myUid, name: myName, playing: myPlaying,
+    color: (wallet.equipped && wallet.equipped.color) || null,
+    badge: (wallet.equipped && wallet.equipped.badge) || null,
+    frame: (wallet.equipped && wallet.equipped.frame) || null,
+    icon: (wallet.equipped && wallet.equipped.icon) || null,
+    lastSeen: Date.now()
+  }, {merge: true}).catch(function(){});
+}
+function renderLobby(players){
+  const el = $('lobby'); if (!el) return;
+  const now = Date.now();
+  const list = (players || []).filter(function(p){ return p.uid !== myUid && isOnline(p.lastSeen || 0, now); });
+  const me = {uid: myUid, name: myName, playing: myPlaying, color: (wallet.equipped && wallet.equipped.color) || null, badge: (wallet.equipped && wallet.equipped.badge) || null, frame: (wallet.equipped && wallet.equipped.frame) || null, icon: (wallet.equipped && wallet.equipped.icon) || null, lastSeen: now};
+  const all = [me].concat(list);
+  if (!list.length && !myUid) { el.innerHTML = '<span class="muted">Loading lobby…</span>'; return; }
+  el.innerHTML = all.map(function(p){
+    const it = p.color && shopById(p.color);
+    const bit = p.badge && shopById(p.badge);
+    const col = it ? it.color : '';
+    const badge = bit ? bit.icon : '';
+    const frame = p.frame === 'frame-gold' ? 'frame-gold' : '';
+    const isMe = p.uid === myUid;
+    const avIcon = p.icon || '';
+    const avHtml = avIcon.indexOf('data:image') === 0 ? '<img src="' + avIcon.replace(/"/g, '&quot;') + '" alt="">' : esc(avIcon || (p.name || 'guest').charAt(0).toUpperCase());
+    return '<div class="pcard' + (isMe ? ' me' : '') + '">'
+      + '<div class="pav ' + frame + '">' + avHtml + '</div>'
+      + '<div class="pname"' + (col ? ' style="color:' + col + '"' : '') + '>' + esc(p.name || 'guest') + '</div>'
+      + (badge ? '<div class="pbadge">' + esc(badge) + '</div>' : '')
+      + '<div class="pplay">🎮 ' + esc(p.playing || 'Just hanging') + '</div>'
+      + (isMe ? '<div class="pplay">— your seat at the bar —</div>'
+              : '<button type="button" data-duel="' + esc(p.uid) + '" data-duel-name="' + esc(p.name || 'guest') + '">⚔️ DUEL</button>')
+      + '</div>';
+  }).join('') + (list.length ? '' : '<p class="muted">No other patrons yet — you’re the first at the bar. Share the link and the tavern fills up.</p>');
+  el.querySelectorAll('[data-duel]').forEach(function(b){ b.onclick = function(){ sendDuel(b.getAttribute('data-duel'), b.getAttribute('data-duel-name')); }; });
+}
+
+/* ===== Live chat (same pattern as the main site's DMs) ===== */
+var localBotMsgs = []; /* bot replies shown locally when the cloud is down */
+function renderChat(msgs){
+  const el = $('chat-log'); if (!el) return;
+  const list = ((msgs || []).slice(-50)).concat(localBotMsgs);
+  renderChat._last = (msgs || []).slice(-50);
+  if (!list.length){ el.innerHTML = '<span class="muted">No talk yet — pull up a chair and say hi.</span>'; return; }
+  el.innerHTML = list.map(function(m){
+    const t = m.ts ? new Date(m.ts).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+    if (m.bot) return '<div class="cmsg bot"><b style="color:var(--ion)">🤖 SAV BOT</b>'
+      + esc(m.text || '') + '<span class="t">' + esc(t) + '</span></div>';
+    const it = m.color && shopById(m.color);
+    const col = it ? it.color : '';
+    return '<div class="cmsg"><b' + (col ? ' style="color:' + col + '"' : '') + '>' + esc(m.name || 'guest') + '</b>'
+      + esc(m.text || '') + '<span class="t">' + esc(t) + '</span></div>';
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+  if (typeof drawScanChat === 'function') drawScanChat(list);
+}
+function renderBotLocal(reply){
+  localBotMsgs.push({name: 'SAV BOT', bot: true, text: reply, ts: Date.now()});
+  if (localBotMsgs.length > 20) localBotMsgs = localBotMsgs.slice(-20);
+  renderChat(renderChat._last || []);
+}
+async function sendChat(){
+  const inp = $('chat-input'); if (!inp) return;
+  const text = (inp.value || '').trim(); if (!text) return;
+  if (typeof drawChatGuard === 'function' && drawChatGuard(text)) return; /* drawing game: drawer typing the word is blocked; guesses are scored here too */
+  inp.value = '';
+  const isCmd = text.charAt(0) === '!';
+  if (!useCloud || !db){
+    if (isCmd){ const r = handleBotCommand(text); if (r) renderBotLocal(r); }
+    else setStatus('Chat needs the cloud — offline for now.', false);
+    return;
+  }
+  try {
+    await db.collection('ion_chat').add({from: myUid, name: myName, color: (wallet.equipped && wallet.equipped.color) || null, text: text, ts: Date.now()});
+  } catch (e) { setStatus('Could not send — chat is offline.', false); return; }
+  if (isCmd) handleBotCommand(text);
+}
+
+/* ===== SAV BOT — merged into the live chat (Cee 2026-11-01 18:36 EST) =====
+   Same commands as the main site's SAV BOT, but the money commands
+   (!daily, !flip, !bus, !atoms) run on the ATOM wallet (this site's atoms).
+   Two ports, honestly different from the main site (no video player /
+   JustWatch pop-out here): !play opens the song on YouTube in a new tab,
+   !watch opens the JustWatch search in a new tab.
+   Pure core: savBot(text, state, rand) -> {reply, ions, lastDaily, open, bg}
+   or null when the text is not a command. No DOM, no Firebase, no
+   localStorage inside — the wrapper applies the result. */
+var BOT_DAILY = 50, BOT_BROKE = 100;
+var BOT_THEMES = ['void', 'galaxies', 'hellfire', 'ocean', 'emerald'];
+/* ===== BOT MINI-GAMES — Cee 2026-11-05: !slots, !dice, !scratch.
+   Play atoms only, same wallet + broke-refill as !flip/!bus. Payouts are
+   TOTAL return (bet included); replies show the NET gain:
+   !slots (7 symbols): 3 of a kind 10x (net +9x), 2 of a kind 2x (net +1x).
+     P(3)=7/343, P(2)=126/343 — EV ~0.94 per bet.
+   !dice (two dice, total 2-12): higher wins on >7, lower wins on <7, pays
+     2x total; total exactly 7 is a TIE and ties LOSE (same as !bus).
+     Exact-number guesses pay FAIR odds by rarity: 2/12 36x, 3/11 18x,
+     4/10 12x, 5/9 9x, 6/8 7x, 7 6x (EV ~1.0 for every number).
+   !scratch (6 symbols): 3 of a kind 5x (net +4x), 2 of a kind 2x (net +1x).
+     P(3)=6/216, P(2)=90/216 — EV ~0.97 per bet. */
+var SLOT_SYMS = ['7️⃣', '💎', '🍒', '⭐', '🔔', '🍀', '👑'];
+var SCRATCH_SYMS = ['💎', '⭐', '🍀', '👑', '🍒', '🔔'];
+var DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+function fmtIon(n){ var v = Number(n); if (isNaN(v)) v = 0; return String(Math.floor(v)); }
+/* ===== HIGHLOW (!bus) — Cee 2026-11-03: replaces Ride the Bus.
+   !bus <bet> starts a run; !bus higher/lower/same guesses the next card;
+   !bus cashout banks the cash-out and ends the run. Fair odds like !flip
+   (no house edge): payout = round(bet × remaining / favorable), counted
+   from the cards still in the deck; Same is capped at 10× bet (the
+   screenshot's 15-bet Same paid +150). Aces are HIGH (14), same as the old
+   Ride the Bus. Cash-out starts at 0 and grows by each correct guess's
+   payout; a wrong guess ends the run and the bet is gone. Deck is 52 cards,
+   no replacement; ties on Higher/Lower lose (only Same wins on an equal
+   card). The run rides in state.bus so savBot stays pure; handleBotCommand
+   holds it in busRun — one run per session. A new !bus while a run is going
+   warns and keeps the old run, so atoms can never be double-deducted. */
+var BUS_SAME_CAP = 10;
+function busNewDeck(rand){
+  var suits = [['hearts', '♥'], ['diamonds', '♦'], ['clubs', '♣'], ['spades', '♠']];
+  var ranks = [['A', 14], ['2', 2], ['3', 3], ['4', 4], ['5', 5], ['6', 6], ['7', 7], ['8', 8], ['9', 9], ['10', 10], ['J', 11], ['Q', 12], ['K', 13]];
+  var deck = [];
+  for (var s = 0; s < 4; s++) for (var r = 0; r < 13; r++) deck.push({n: ranks[r][0], v: ranks[r][1], s: suits[s][0], sym: suits[s][1], red: (s < 2)});
+  for (var i = deck.length - 1; i > 0; i--){ var j = Math.floor(rand() * (i + 1)); var tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp; }
+  return deck;
+}
+function busCardStr(cd){ return cd.n + cd.sym; }
+function busCounts(deck, cur){
+  var h = 0, l = 0, s = 0;
+  for (var i = 0; i < deck.length; i++){ if (deck[i].v > cur.v) h++; else if (deck[i].v < cur.v) l++; else s++; }
+  return {higher: h, lower: l, same: s, remaining: deck.length};
+}
+function busPayouts(bet, cur, deck){
+  var c = busCounts(deck, cur);
+  function pay(fav, cap){
+    if (!fav || !c.remaining) return 0;
+    var p = Math.round(bet * c.remaining / fav);
+    if (cap && p > cap) p = cap;
+    return p;
+  }
+  return {higher: pay(c.higher, 0), lower: pay(c.lower, 0), same: pay(c.same, bet * BUS_SAME_CAP), counts: c};
+}
+function busMult(run){ return (run.cashOut / run.bet).toFixed(2) + 'x'; }
+function busStatus(run){
+  var p = busPayouts(run.bet, run.current, run.deck);
+  function pl(v){ return v > 0 ? '+' + fmtIon(v) : '—'; }
+  return 'Bet: ' + fmtIon(run.bet) + ' · Streak: ' + run.streak + ' · Cash Out: ' + fmtIon(run.cashOut) + ' (' + busMult(run) + ')'
+    + '\nCurrent card: ' + busCardStr(run.current)
+    + '\nIs the next card higher, lower, or the same value?'
+    + '\n▲ Higher ' + pl(p.higher) + ' · ▼ Lower ' + pl(p.lower) + ' · ＝ Same ' + pl(p.same)
+    + '\nReply !bus higher / !bus lower / !bus same — or !bus cashout to bank it.';
+}
+function savBot(q, state, rand){
+  if (!q || q.charAt(0) !== '!') return null;
+  rand = rand || Math.random;
+  var st = state || {ions: 0, lastDaily: 0};
+  var ions = (typeof st.ions === 'number' && st.ions >= 0) ? Math.floor(st.ions) : 0;
+  var lastDaily = st.lastDaily || 0;
+  var parts = q.slice(1).split(/\s+/);
+  var c = (parts[0] || '').toLowerCase();
+  function balLine(){ return 'Balance: ' + fmtIon(ions) + ' atoms.'; }
+  function out(reply, extra){ var r = {reply: reply, ions: ions, lastDaily: lastDaily}; if (extra) for (var k in extra) r[k] = extra[k]; return r; }
+  if (c === 'help') return out('SAV BOT — commands:'
+    + '\n\uD83D\uDCAC Chat: !help \u00B7 !bg <theme> \u00B7 !socials \u00B7 !tip \u00B7 !messenger \u00B7 !instagram \u00B7 !discord \u00B7 !tiktok \u00B7 !snapchat \u00B7 !twitch'
+    + '\n\uD83C\uDFAE Games: !pets \u00B7 !games \u00B7 !fight'
+    + '\n\uD83C\uDFB5 Music & video: !music \u00B7 !play <song> \u00B7 !watch <title> \u00B7 !youtube <query> \u00B7 !spotify <query>'
+    + '\n\u269B Atoms: !atoms \u00B7 !bal \u00B7 !daily \u00B7 !flip <bet> [heads|tails] \u00B7 !bus <bet> \u00B7 !slots <bet> \u00B7 !dice <bet> <higher|lower|number> \u00B7 !scratch <bet>'
+    + '\n\uD83D\uDE8C HighLow: !bus higher / lower / same \u00B7 !bus cashout');
+  if (c === 'atoms' || c === 'ions' || c === 'coins') return out('Your atom purse: ' + fmtIon(ions) + ' atoms. (Multiplayer money — the main site and arcade keep their own single-player purses.)');
+  if (c === 'bal') return out(balLine());
+  if (c === 'daily'){
+    var now = Date.now();
+    if (lastDaily && now - lastDaily < 86400000){
+      var left = Math.ceil((86400000 - (now - lastDaily)) / 3600000);
+      return out('Already claimed — come back in about ' + left + ' hour' + (left === 1 ? '' : 's') + ' for ' + fmtIon(BOT_DAILY) + ' more atoms.');
+    }
+    lastDaily = now; ions += BOT_DAILY;
+    return out('Daily: +' + fmtIon(BOT_DAILY) + ' atoms! ' + balLine());
+  }
+  if (c === 'bg'){
+    var theme = (parts[1] || '').toLowerCase();
+    if (!theme) return out('Backgrounds: ' + BOT_THEMES.join(', ') + ' — try !bg galaxies.');
+    if (BOT_THEMES.indexOf(theme) < 0) return out('No such background — try: ' + BOT_THEMES.join(', ') + '.');
+    return out('Background set to ' + theme + '.', {bg: theme});
+  }
+  if (c === 'pets') return out('Wraith Pet — raise, feed and battle your pet. Play: /wraith-pet.html');
+  if (c === 'games') return out('Arcade — every game in one place: /');
+  if (c === 'fight') return out('Stand + Brawl — pick your fighter: /wraith-survival.html');
+  if (c === 'music') return out('Now playing lives on the main site — THE VAULT, NOW PLAYING card: https://swpvp-dsu8.vercel.app/');
+  if (c === 'socials') return out('Instagram @persistentbeat — main site: https://swpvp-dsu8.vercel.app/');
+  if (c === 'messenger') return out('Opening Messenger — Sav on Facebook.', {open: 'https://m.me/100192355951078'});
+  if (c === 'instagram') return out('Opening Instagram — @persistentbeat.', {open: 'https://www.instagram.com/persistentbeat'});
+  if (c === 'discord') return out('Opening Discord — add Cee.', {open: 'https://discordapp.com/users/650311717594726431'});
+  if (c === 'tiktok') return out('Opening TikTok.', {open: 'https://www.tiktok.com'});
+  if (c === 'snapchat') return out('Opening Snapchat.', {open: 'https://www.snapchat.com'});
+  if (c === 'twitch') return out('Opening Twitch.', {open: 'https://www.twitch.tv'});
+  if (c === 'tip') return out('Support: Cash App $CeeWraith.');
+  if (c === 'flip'){
+    var bet = parseInt(parts[1], 10);
+    var guess = (parts[2] || 'heads').toLowerCase();
+    if (isNaN(bet) || bet <= 0) return out('Bet a real number — !flip <bet> [heads|tails].');
+    if (guess !== 'heads' && guess !== 'tails') return out('Heads or tails only — !flip <bet> [heads|tails].');
+    var note = '';
+    if (ions === 0){ ions = BOT_BROKE; note = 'SAV spots you ' + fmtIon(BOT_BROKE) + ' atoms — do not blow it. '; }
+    if (bet > ions) return out(note + 'Too big — you only got ' + fmtIon(ions) + ' atoms.');
+    var res = rand() < 0.5 ? 'heads' : 'tails';
+    if (res === guess){ ions += bet; return out(note + '🪙 FLIP: ' + res.toUpperCase() + ' — you called ' + guess + '. +' + fmtIon(bet) + ' atoms! ' + balLine()); }
+    ions -= bet; return out(note + '🪙 FLIP: ' + res.toUpperCase() + ' — you called ' + guess + '. -' + fmtIon(bet) + ' atoms. ' + balLine());
+  }
+  if (c === 'bus'){
+    var usage = 'HighLow: !bus <bet> to start — then guess !bus higher / !bus lower / !bus same, or !bus cashout to bank your cash-out. Fair odds from the cards left in the deck; ties on Higher/Lower lose.';
+    var arg = (parts[1] || '').toLowerCase();
+    var run = (st && st.bus) || null;
+    if (arg === 'higher' || arg === 'lower' || arg === 'same'){
+      if (!run) return out('No HighLow run going — start one with !bus <bet>.');
+      if (!run.deck.length){
+        var banked0 = run.cashOut; ions += banked0;
+        return out('🚌 HIGHLOW: deck is empty — run over, cashed out ' + fmtIon(banked0) + ' atoms. ' + balLine(), {bus: null});
+      }
+      var p = busPayouts(run.bet, run.current, run.deck);
+      var next = run.deck.shift();
+      var win = arg === 'higher' ? next.v > run.current.v : arg === 'lower' ? next.v < run.current.v : next.v === run.current.v;
+      if (!win) return out('🚌 HIGHLOW: drew ' + busCardStr(next) + ' — ' + arg + ' was wrong. Run over — the ' + fmtIon(run.bet) + '-atom bet is gone. ' + balLine(), {bus: null});
+      var gain = p[arg];
+      run.streak += 1; run.cashOut += gain; run.current = next;
+      return out('🚌 HIGHLOW: drew ' + busCardStr(next) + ' — ' + arg.toUpperCase() + '! +' + fmtIon(gain) + ' atoms.\n' + busStatus(run), {bus: run});
+    }
+    if (arg === 'cashout'){
+      if (!run) return out('No HighLow run going — start one with !bus <bet>.');
+      var banked = run.cashOut; ions += banked;
+      return out('🚌 HIGHLOW: cashed out ' + fmtIon(banked) + ' atoms after a streak of ' + run.streak + '! ' + balLine(), {bus: null});
+    }
+    if (parts.length > 2) return out(usage, run ? {bus: run} : null);
+    if (run) return out('You already have a HighLow run going — finish it first (!bus higher / lower / same, or !bus cashout).\n' + busStatus(run), {bus: run});
+    var bet = parseInt(parts[1], 10);
+    if (isNaN(bet) || bet <= 0) return out(usage, run ? {bus: run} : null);
+    var note = '';
+    if (ions === 0){ ions = BOT_BROKE; note = 'SAV spots you ' + fmtIon(BOT_BROKE) + ' atoms — do not blow it. '; }
+    if (bet > ions) return out(note + 'Too big — you only got ' + fmtIon(ions) + ' atoms.');
+    ions -= bet;
+    var deck = busNewDeck(rand);
+    var first = deck.shift();
+    var run2 = {bet: bet, streak: 0, cashOut: 0, current: first, deck: deck};
+    return out(note + '🚌 HIGHLOW — a HighLow game has started!\n' + busStatus(run2), {bus: run2});
+  }
+  if (c === 'slots'){
+    var bet = parseInt(parts[1], 10);
+    if (isNaN(bet) || bet <= 0) return out('Bet a real number — !slots <bet>.');
+    var note = '';
+    if (ions === 0){ ions = BOT_BROKE; note = 'SAV spots you ' + fmtIon(BOT_BROKE) + ' atoms — do not blow it. '; }
+    if (bet > ions) return out(note + 'Too big — you only got ' + fmtIon(ions) + ' atoms.');
+    var r1 = SLOT_SYMS[Math.floor(rand() * SLOT_SYMS.length)];
+    var r2 = SLOT_SYMS[Math.floor(rand() * SLOT_SYMS.length)];
+    var r3 = SLOT_SYMS[Math.floor(rand() * SLOT_SYMS.length)];
+    var reels = '[' + r1 + ' ' + r2 + ' ' + r3 + ']';
+    if (r1 === r2 && r2 === r3){ ions += bet * 9; return out(note + '🎰 SLOTS: ' + reels + ' — JACKPOT! Three of a kind — 10x! +' + fmtIon(bet * 9) + ' atoms! ' + balLine()); }
+    if (r1 === r2 || r2 === r3 || r1 === r3){ ions += bet; return out(note + '🎰 SLOTS: ' + reels + ' — two of a kind — 2x! +' + fmtIon(bet) + ' atoms! ' + balLine()); }
+    ions -= bet; return out(note + '🎰 SLOTS: ' + reels + ' — no match. -' + fmtIon(bet) + ' atoms. ' + balLine());
+  }
+  if (c === 'dice'){
+    var bet = parseInt(parts[1], 10);
+    if (isNaN(bet) || bet <= 0) return out('Bet a real number — !dice <bet> <higher|lower|number>.');
+    var pick = (parts[2] || '').toLowerCase();
+    var num = -1, mult = 0;
+    if (pick === 'higher' || pick === 'lower'){ mult = 2; }
+    else {
+      num = parseInt(pick, 10);
+      if (isNaN(num) || num < 2 || num > 12) return out('Pick higher, lower, or a total from 2 to 12 — !dice <bet> <higher|lower|number>.');
+      mult = Math.round(36 / (6 - Math.abs(7 - num)));
+    }
+    var note = '';
+    if (ions === 0){ ions = BOT_BROKE; note = 'SAV spots you ' + fmtIon(BOT_BROKE) + ' atoms — do not blow it. '; }
+    if (bet > ions) return out(note + 'Too big — you only got ' + fmtIon(ions) + ' atoms.');
+    var d1 = 1 + Math.floor(rand() * 6), d2 = 1 + Math.floor(rand() * 6);
+    var tot = d1 + d2;
+    var roll = DICE_FACES[d1 - 1] + DICE_FACES[d2 - 1] + ' = ' + tot;
+    var won = pick === 'higher' ? tot > 7 : pick === 'lower' ? tot < 7 : tot === num;
+    var called = num >= 0 ? 'called ' + num : (pick === 'higher' ? 'called HIGHER' : 'called LOWER');
+    if (won){ var gain = bet * (mult - 1); ions += gain; return out(note + '🎲 DICE: ' + roll + ' — ' + called + ' — ' + mult + 'x! +' + fmtIon(gain) + ' atoms! ' + balLine()); }
+    var tieNote = (tot === 7 && num < 0) ? ' 7 is a tie — ties lose.' : '';
+    ions -= bet; return out(note + '🎲 DICE: ' + roll + ' — ' + called + '.' + tieNote + ' -' + fmtIon(bet) + ' atoms. ' + balLine());
+  }
+  if (c === 'scratch'){
+    var bet = parseInt(parts[1], 10);
+    if (isNaN(bet) || bet <= 0) return out('Bet a real number — !scratch <bet>.');
+    var note = '';
+    if (ions === 0){ ions = BOT_BROKE; note = 'SAV spots you ' + fmtIon(BOT_BROKE) + ' atoms — do not blow it. '; }
+    if (bet > ions) return out(note + 'Too big — you only got ' + fmtIon(ions) + ' atoms.');
+    var s1 = SCRATCH_SYMS[Math.floor(rand() * SCRATCH_SYMS.length)];
+    var s2 = SCRATCH_SYMS[Math.floor(rand() * SCRATCH_SYMS.length)];
+    var s3 = SCRATCH_SYMS[Math.floor(rand() * SCRATCH_SYMS.length)];
+    var card = '[' + s1 + ' ' + s2 + ' ' + s3 + ']';
+    if (s1 === s2 && s2 === s3){ ions += bet * 4; return out(note + '🎫 SCRATCH: ' + card + ' — three of a kind — 5x! +' + fmtIon(bet * 4) + ' atoms! ' + balLine()); }
+    if (s1 === s2 || s2 === s3 || s1 === s3){ ions += bet; return out(note + '🎫 SCRATCH: ' + card + ' — two of a kind — 2x! +' + fmtIon(bet) + ' atoms! ' + balLine()); }
+    ions -= bet; return out(note + '🎫 SCRATCH: ' + card + ' — no match. -' + fmtIon(bet) + ' atoms. ' + balLine());
+  }
+  if (c === 'play'){
+    var query = parts.slice(1).join(' ');
+    if (!query) return out('Play what? — !play <song>.');
+    return out('Opening "' + query + '" on YouTube in a new tab.', {open: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query)});
+  }
+  if (c === 'watch'){
+    var title = parts.slice(1).join(' ');
+    if (!title) return out('Watch what? — !watch <title>.');
+    return out('Looking up "' + title + '" on JustWatch — opening it in a new tab.', {open: 'https://www.justwatch.com/us/search?q=' + encodeURIComponent(title)});
+  }
+  if (c === 'youtube'){
+    var q2 = parts.slice(1).join(' ');
+    if (!q2) return out('Opening YouTube in a new tab.', {open: 'https://www.youtube.com'});
+    return out('Opening YouTube search for "' + q2 + '" in a new tab.', {open: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q2)});
+  }
+  if (c === 'spotify'){
+    var q3 = parts.slice(1).join(' ');
+    if (!q3) return out('Opening Spotify in a new tab.', {open: 'https://open.spotify.com'});
+    return out('Opening Spotify search for "' + q3 + '" in a new tab.', {open: 'https://open.spotify.com/search/' + encodeURIComponent(q3)});
+  }
+  return out('Unknown command — type !help.');
+}
+async function saveWallet(){
+  stampWallet(); saveWalletLocal();
+  if (useCloud && db){
+    try { await db.collection('ion_wallets').doc(myUid).set({uid: myUid, code: ionCodeFor(myUid), ions: wallet.ions, molecules: wallet.molecules || 0, owned: wallet.owned, equipped: wallet.equipped, lastDaily: wallet.lastDaily || 0, ts: wallet.ts}, {merge: true}); }
+    catch (e) { /* local copy is saved; do NOT flip useCloud off here (f1) */ }
+  }
+}
+function applyBotBg(theme){
+  try { document.body.setAttribute('data-bg', theme); localStorage.setItem('sw_ion_bg', theme); } catch (e) {}
+}
+/* Runs a chat command through the bot. Only the sender's own client runs
+   it (so one message gets exactly one bot reply); everyone else just
+   renders the reply from the chat. Applies atom changes to the wallet
+   and posts the reply as a SAV BOT message. Returns the reply or null. */
+/* One HighLow run per session — held here, threaded through savBot's state
+   so the bot core stays pure. The panel under the chat log is the local
+   player's buttons (same plain <button> + data-* pattern as duels/shop);
+   everyone else just sees the text replies in chat. */
+var busRun = null;
+function renderBusPanel(){
+  const el = $('bus-panel'); if (!el) return;
+  if (!busRun){ el.innerHTML = ''; return; }
+  const p = busPayouts(busRun.bet, busRun.current, busRun.deck);
+  function gBtn(action, arrow, name, pay){
+    return '<button type="button" data-bus="' + action + '"' + (pay > 0 ? '' : ' disabled') + '>' + arrow + ' ' + name + ' ' + (pay > 0 ? '+' + fmtIon(pay) : '—') + '</button>';
+  }
+  el.innerHTML = '<div class="bus-panel"><div class="bus-head"><span>Bet: <b>' + fmtIon(busRun.bet) + '</b></span><span>Streak: <b>' + busRun.streak + '</b></span><span>Cash Out: <b>' + fmtIon(busRun.cashOut) + ' (' + busMult(busRun) + ')</b></span></div>'
+    + '<div class="bus-card">' + esc(busCardStr(busRun.current)) + '</div>'
+    + '<div class="bus-q">Is the next card higher, lower, or the same value?</div>'
+    + '<div class="bus-btns">'
+    + gBtn('higher', '▲', 'Higher', p.higher)
+    + gBtn('lower', '▼', 'Lower', p.lower)
+    + gBtn('same', '＝', 'Same', p.same)
+    + '<button type="button" class="bus-cash" data-bus="cashout">💰 Cash Out ' + fmtIon(busRun.cashOut) + ' atoms</button>'
+    + '</div></div>';
+  el.querySelectorAll('[data-bus]').forEach(function(b){ b.onclick = function(){ busAct(b.getAttribute('data-bus')); }; });
+}
+/* A panel tap plays the same text command the chat would — and, like
+   sendChat, renders the reply locally only when the cloud is down (in
+   cloud mode the reply comes back through the chat snapshot). */
+function busAct(a){
+  const r = handleBotCommand('!bus ' + a);
+  if (r && (!useCloud || !db)) renderBotLocal(r);
+}
+function handleBotCommand(text){
+  const res = savBot(text, {ions: wallet.ions, lastDaily: wallet.lastDaily || 0, bus: busRun}, Math.random);
+  if (!res) return null;
+  if ('bus' in res) busRun = res.bus;
+  renderBusPanel();
+  let changed = false;
+  if (typeof res.ions === 'number' && res.ions !== wallet.ions){ wallet.ions = res.ions; changed = true; }
+  if (typeof res.lastDaily === 'number' && res.lastDaily !== (wallet.lastDaily || 0)){ wallet.lastDaily = res.lastDaily; changed = true; }
+  if (changed){ saveWallet(); renderWallet(); }
+  if (res.bg) applyBotBg(res.bg);
+  if (res.open && typeof window !== 'undefined' && window.open){ try { window.open(res.open, '_blank', 'noopener'); } catch (e) {} }
+  if (useCloud && db){
+    db.collection('ion_chat').add({from: 'SAVBOT', name: 'SAV BOT', bot: true, text: res.reply, ts: Date.now()}).catch(function(){});
+  }
+  return res.reply;
+}
+
+/* ===== Live chat listener with retry (f1) ===== */
+let chatUnsub = null, chatRetryTimer = null, chatRetries = 0;
+function attachChatListener(){
+  if (!db) return;
+  if (chatUnsub){ try { chatUnsub(); } catch (e) {} chatUnsub = null; }
+  if (chatRetryTimer){ try { clearTimeout(chatRetryTimer); } catch (e) {} chatRetryTimer = null; }
+  chatUnsub = db.collection('ion_chat').orderBy('ts').limit(100).onSnapshot(function(snap){
+    chatRetries = 0;
+    renderChat(snap.docs.map(function(d){ return d.data(); }));
+  }, function(){
+    /* listener dead — keep the log on screen, retry with backoff */
+    chatUnsub = null;
+    chatRetries += 1;
+    setStatus('Chat dropped — retrying…', false);
+    var wait = Math.min(3000 * chatRetries, 15000);
+    chatRetryTimer = setTimeout(function(){ chatRetryTimer = null; attachChatListener(); }, wait);
+  });
+}
+
+/* ===== Duels — Fight first ===== */
+let myDuels = [];
+function renderDuels(){
+  const inbox = $('duel-inbox'), outbox = $('duel-outbox'), room = $('duel-room');
+  const incoming = myDuels.filter(function(d){ return d.to === myUid && d.status === 'pending'; });
+  const outgoing = myDuels.filter(function(d){ return d.from === myUid && d.status === 'pending'; });
+  const active = myDuels.filter(function(d){ return d.status === 'accepted' && (d.from === myUid || d.to === myUid); })[0] || null;
+  if (inbox) inbox.innerHTML = incoming.map(function(d){
+    return '<div class="duel-box"><b>' + esc(d.fromName || 'guest') + '</b> challenges you to a FIGHT duel!'
+      + '<br><button type="button" data-accept="' + esc(d.id) + '">ACCEPT ⚔️</button>'
+      + '<button type="button" class="ghost" data-decline="' + esc(d.id) + '">DECLINE</button></div>';
+  }).join('');
+  if (outbox) outbox.innerHTML = outgoing.map(function(d){
+    return '<div class="duel-box">Waiting on <b>' + esc(d.toName || 'guest') + '</b>… your duel request is out.</div>';
+  }).join('');
+  if (room){
+    if (active){
+      const foe = active.from === myUid ? active.toName : active.fromName;
+      const haveSkin = (wallet.owned || []).indexOf('skin-flame') >= 0;
+      room.innerHTML = '<div class="duel-box"><b>⚔️ DUEL ROOM ' + esc(active.id.slice(0, 8)) + '</b> — you vs <b>' + esc(foe || 'guest') + '</b>'
+        + '<br><span class="muted">Fight Stand 1v1 — the room is the meet-up and the fight opens on the arcade. Live two-device match sync is the next build.</span>'
+        + (haveSkin ? '<br><span class="muted">🔥 Your Wraith Flame duel skin is owned — it shows here until Fight duel skins land.</span>' : '')
+        + '<br><a href="' + FIGHT_URL + '" target="_blank" rel="noopener"><button type="button">▶ PLAY THE FIGHT</button></a>'
+        + ' <a href="https://swpvp-arcadio.vercel.app/" target="_blank" rel="noopener"><button type="button" class="ghost">ALL GAMES — ARCADIO</button></a></div>';
+    } else { room.innerHTML = ''; }
+  }
+  if (inbox) inbox.querySelectorAll('[data-accept]').forEach(function(b){ b.onclick = function(){ answerDuel(b.getAttribute('data-accept'), 'accepted'); }; });
+  if (inbox) inbox.querySelectorAll('[data-decline]').forEach(function(b){ b.onclick = function(){ answerDuel(b.getAttribute('data-decline'), 'declined'); }; });
+}
+async function sendDuel(toUid, toName){
+  if (!toUid || toUid === myUid) return;
+  if (!useCloud || !db){ setStatus('Duels need the cloud — offline for now.', false); return; }
+  try {
+    await db.collection('ion_duels').add({from: myUid, fromName: myName, to: toUid, toName: toName, game: 'fight', status: 'pending', ts: Date.now()});
+    setStatus('Duel request sent to ' + toName + '.', true);
+  } catch (e) { setStatus('Could not send the duel request.', false); }
+}
+async function answerDuel(id, status){
+  if (!useCloud || !db) return;
+  try { await db.collection('ion_duels').doc(id).update({status: status, ts: Date.now()}); } catch (e) {}
+}
+
+/* ===== TAVERN ambient — pause the hearth/embers when the tab is hidden =====
+   (battery-friendly: the CSS animations only run while the page is visible).
+   Guarded for the harness stub (no classList there) — a no-op there. */
+function tavernAmbient(){
+  try {
+    if (typeof document !== 'undefined' && document.addEventListener){
+      document.addEventListener('visibilitychange', function(){
+        if (document.body && document.body.classList) document.body.classList.toggle('paused', !!document.hidden);
+      });
+    }
+  } catch (e) {}
+}
+
+/* ===== Boot ===== */
+function boot(){
+  brightInit(); /* adaptive brightness — HIGH by default, fresh each load, never persisted */
+  tavernAmbient(); /* tavern: pause the hearth/embers when the tab is hidden */
+  try { var bg0 = localStorage.getItem('sw_ion_bg'); if (bg0 && BOT_THEMES.indexOf(bg0) >= 0) document.body.setAttribute('data-bg', bg0); } catch (e) {}
+  const sel = $('my-playing');
+  if (sel){ sel.innerHTML = PLAYING_CHOICES.map(function(p){ return '<option' + (p === myPlaying ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join(''); }
+  const nm = $('my-name'); if (nm) nm.value = myName;
+  const sv = $('save-me');
+  if (sv) sv.onclick = function(){
+    const n = (($('my-name') || {}).value || '').trim().slice(0, 16);
+    const p = ($('my-playing') || {}).value || 'Just hanging';
+    if (n) myName = n; myPlaying = p;
+    try { localStorage.setItem('sw_ion_name', myName); localStorage.setItem('sw_ion_playing', myPlaying); } catch (e) {}
+    renderWallet(); heartbeat(); renderLobby._last && renderLobby(renderLobby._last);
+    setStatus('Saved — you are ' + myName + ', playing ' + myPlaying + '.', true);
+  };
+  const cs = $('chat-send'); if (cs) cs.onclick = sendChat;
+  /* Command chips (mockup cmd-row): tap to send a real command through the
+     same sendChat path as typing it — offline it answers locally, in cloud
+     mode it posts to the chat and SAV BOT replies. */
+  if (typeof document !== 'undefined' && document.querySelectorAll){
+    document.querySelectorAll('[data-cmd]').forEach(function(b){
+      b.addEventListener('click', function(){
+        const ci2 = $('chat-input'); if (ci2) ci2.value = b.getAttribute('data-cmd');
+        sendChat();
+      });
+    });
+  }
+  const ci = $('chat-input');
+  if (ci) ci.addEventListener('keydown', function(e){ if (e.key === 'Enter') sendChat(); });
+  const cp = $('copy-ion-code');
+  if (cp) cp.onclick = function(){
+    const inp = $('ion-code');
+    const code = (inp && inp.value) || (myUid ? ionCodeFor(myUid) : '');
+    if (!code){ setStatus('No wallet code yet — still connecting.', false); return; }
+    function done(){ setStatus('Wallet code copied — paste it on the arcade (Wraith Pet / Tetris) to link this wallet.', true); }
+    function fail(){ setStatus('Copy failed — long-press the code to copy it by hand.', false); }
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(done, fail); }
+    else if (inp){ try { inp.select(); document.execCommand('copy'); done(); } catch (e) { fail(); } }
+    else fail();
+  };
+  const sp1 = $('sale-pack-ion1'); if (sp1) sp1.onclick = function(){ ionSaleStart('ion1'); };
+  const sp5 = $('sale-pack-ion5'); if (sp5) sp5.onclick = function(){ ionSaleStart('ion5'); };
+  const rb = $('atom-redeem-btn'); if (rb) rb.onclick = redeemAtomCode;
+  const ri = $('atom-redeem-input');
+  if (ri) ri.addEventListener('keydown', function(e){ if (e.key === 'Enter') redeemAtomCode(); });
+  const csc = $('copy-sale-code');
+  if (csc) csc.onclick = function(){
+    const inp = $('sale-code');
+    const code = (inp && inp.value) || '';
+    if (!code){ ionSaleStatus('No ATOM code yet — buy atoms first.'); return; }
+    function done(){ ionSaleStatus('ATOM code copied — redeem it on the main site.'); }
+    function fail(){ ionSaleStatus('Copy failed — long-press the code to copy it by hand.'); }
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(done, fail); }
+    else if (inp){ try { inp.select(); document.execCommand('copy'); done(); } catch (e) { fail(); } }
+    else fail();
+  };
+  loadWalletLocal(); renderWallet(); renderShop(); renderLobby([]);
+  ionSaleCheckSetup(); /* atom sale: show "not set up yet" if PayPal is not configured */
+  if (typeof firebase === 'undefined'){ setStatus('Could not load Firebase — offline mode, wallet saved on this device only.', false); return; }
+  try { firebase.initializeApp(firebaseConfig); } catch (e) { /* already initialized */ }
+  db = firebase.firestore();
+  firebase.auth().signInAnonymously().then(function(cred){
+    myUid = cred.user.uid;
+    myName = (function(){ try { return localStorage.getItem('sw_ion_name') || ('guest-' + myUid.slice(0, 5)); } catch (e) { return 'guest-' + myUid.slice(0, 5); } })();
+    const nm2 = $('my-name'); if (nm2) nm2.value = myName;
+    useCloud = true;
+    setStatus('Connected — hangout is live. Your atoms live in the cloud under your guest id.', true);
+    /* wallet: starter grant of 50 atoms */
+    const wref = db.collection('ion_wallets').doc(myUid);
+    wref.onSnapshot(function(doc){
+      if (doc.exists){
+        const d = doc.data();
+        const cloudTs = (typeof d.ts === 'number') ? d.ts : 0;
+        if (cloudTs < walletTs()){
+          /* STALE CLOUD DOC — local state is newer (a buy/redeem/bot win
+             whose cloud write is still in flight or was rejected). Do NOT
+             clobber the local state; push it up once so the cloud heals. */
+          if (typeof d.ions === 'number' && d.ions !== wallet.ions){
+            wref.set({uid: myUid, code: ionCodeFor(myUid), ions: wallet.ions, molecules: wallet.molecules || 0, owned: wallet.owned, equipped: wallet.equipped, lastDaily: wallet.lastDaily || 0, ts: wallet.ts}, {merge: true}).catch(function(){});
+          }
+        } else {
+          if (typeof d.ions === 'number') wallet.ions = d.ions;
+          if (typeof d.molecules === 'number') wallet.molecules = d.molecules;
+          if (Array.isArray(d.owned)) wallet.owned = d.owned;
+          if (d.equipped) wallet.equipped = d.equipped;
+          if (typeof d.lastDaily === 'number') wallet.lastDaily = d.lastDaily;
+          if (typeof d.ts === 'number') wallet.ts = d.ts;
+          saveWalletLocal(); /* keep the local copy as fresh as the cloud */
+          if (!d.code){ wref.set({code: ionCodeFor(myUid)}, {merge: true}).catch(function(){}); }
+          if (typeof d.molecules !== 'number'){ wref.set({molecules: 0}, {merge: true}).catch(function(){}); }
+        }
+      }
+      else { wref.set({uid: myUid, code: ionCodeFor(myUid), ions: STARTER_IONS, molecules: STARTER_MOLECULES, owned: [], equipped: {}, ts: Date.now()}, {merge: true}).catch(function(){}); }
+      renderWallet(); renderShop();
+    }, function(){ useCloud = false; setStatus('Cloud wallet refused — offline mode, wallet saved on this device only.', false); });
+    /* presence */
+    heartbeat();
+    presenceTimer = setInterval(heartbeat, HEARTBEAT_MS);
+    window.addEventListener('beforeunload', function(){ try { db.collection('ion_presence').doc(myUid).delete(); } catch (e) {} });
+    db.collection('ion_presence').orderBy('lastSeen', 'desc').limit(50).onSnapshot(function(snap){
+      const players = snap.docs.map(function(d){ return d.data(); });
+      renderLobby._last = players; renderLobby(players);
+    }, function(){});
+    /* live chat — listener with retry (f1). A Firestore onSnapshot error
+       callback means THAT listener is dead: the old code wrote "Chat is
+       offline." into the log and never re-attached, so one network blip
+       stopped the chat until a reload — and a failed Keeper's Wares write
+       flipping useCloud off stopped sends too. Now an error keeps the
+       messages already on screen, notes the retry in the status line, and
+       re-attaches with backoff. */
+    attachChatListener();
+    if (typeof drawAttachCloud === 'function') drawAttachCloud();
+    if (typeof mnAttachCloud === 'function') mnAttachCloud();
+    /* duels (two flat listeners — never nested, or they re-register on every snapshot) */
+    let duelIn = [], duelOut = [];
+    const mergeDuels = function(){ myDuels = duelIn.concat(duelOut); renderDuels(); };
+    db.collection('ion_duels').where('to', '==', myUid).onSnapshot(function(snap){
+      duelIn = snap.docs.map(function(d){ const x = d.data(); x.id = d.id; return x; });
+      mergeDuels();
+    }, function(){});
+    db.collection('ion_duels').where('from', '==', myUid).onSnapshot(function(snap){
+      duelOut = snap.docs.map(function(d){ const x = d.data(); x.id = d.id; return x; });
+      mergeDuels();
+    }, function(){});
+  }).catch(function(){
+    useCloud = false;
+    setStatus('Could not sign in — offline mode, wallet saved on this device only.', false);
+  });
+}
+if (typeof document !== 'undefined' && document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+/* ===== TAVERN MEDIA — YOUTUBE PLAYER (2026-11-03, Cee: "add the youtube
+   player here"). Search runs through the EXISTING /api/video-search
+   (no key, same endpoint the HIDEOUT uses) and plays in-page in a
+   youtube-nocookie embed — no new tab, no new api file, no new env var. ===== */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function embedUrl(id){return 'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0';}
+  window.__tvYt={embedUrl:embedUrl,search:search,play:play,renderResults:renderResults};
+  function setStatus(t){var el=$('tv-yt-status');if(el)el.textContent=t||'';}
+  function play(v){
+    var fr=$('tv-yt-frame'),wrap=$('tv-yt-player'),now=$('tv-yt-now');
+    if(!fr||!wrap||!v||!v.id)return;
+    fr.src=embedUrl(v.id);
+    wrap.style.display='';
+    initCast();
+    if(now)now.textContent='▶ '+v.title+(v.channel?' — '+v.channel:'');
+  }
+  function renderResults(list){
+    var box=$('tv-yt-results');if(!box)return;
+    box.innerHTML='';
+    (list||[]).forEach(function(v){
+      var b=document.createElement('button');
+      b.type='button';b.className='ghost';
+      b.style.cssText='display:flex;gap:8px;align-items:center;width:100%;text-align:left;padding:6px';
+      b.innerHTML='<img src="'+esc(v.thumb)+'" alt="" style="width:96px;height:54px;object-fit:cover;border-radius:8px;flex:none"><span style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(v.title)+'</b><span class="muted">'+esc(v.channel||'')+(v.dur?' · '+esc(v.dur):'')+'</span></span>';
+      b.addEventListener('click',function(){play(v);});
+      box.appendChild(b);
+    });
+  }
+  function search(){
+    var qEl=$('tv-yt-q');if(!qEl)return;
+    var q=qEl.value.trim();
+    if(!q){setStatus('Type something to search.');return;}
+    if(typeof fetch!=='function'){setStatus('YouTube search is unavailable right now — try again shortly.');return;}
+    setStatus('Searching YouTube…');
+    fetch('/api/video-search?q='+encodeURIComponent(q))
+      .then(function(r){if(!r.ok)throw new Error('search-'+r.status);return r.json();})
+      .then(function(d){
+        var list=(d&&d.results)||[];
+        if(!list.length){setStatus('No results — try a different search.');renderResults([]);return;}
+        setStatus('');
+        renderResults(list);
+      })
+      .catch(function(){setStatus('YouTube search is unavailable right now — try again shortly.');});
+  }
+  /* ===== TAVERN CAST — YOUTUBE (2026-11-03, Cee: "add a cast button").
+     HONEST LIMIT, READ THIS FIRST: the video plays in a cross-origin
+     youtube-nocookie iframe, so this page can NOT cast the video itself —
+     no site code can reach into the embed, and the generic Cast SDK's
+     Default Media Receiver cannot play YouTube at all (YouTube uses its own
+     receiver app, reachable only through the YouTube player's own cast
+     control). The YouTube player's own cast button IS the path — and it is
+     the better one: YouTube casts over DIAL as well as Cast, so it lists
+     Chromecast devices AND YouTube-ready TVs like Roku and Fire TV, while
+     a generic Cast button would only ever list Chromecast. So this button
+     is a finder + pointer, not a second cast stack:
+     - it only appears when real Cast devices are on the network (detected
+       with the official Cast Web Sender SDK, Default Media Receiver id —
+       public, no registration, no key, no new env var);
+     - on tap it pulses the video frame and tells the user to tap the cast
+       icon in the video's own controls, where the devices are listed.
+     No ad behaviour changes: ads still come from YouTube per viewer. ===== */
+  var castStarted=false;
+  function castBtnShow(show){var b=$('tv-yt-cast');if(b)b.style.display=show?'':'none';}
+  function castHintShow(){
+    var h=$('tv-yt-cast-hint'),fr=$('tv-yt-frame');
+    if(h){h.textContent='Tap the cast icon in the video\u2019s own controls — pick your TV or speaker there. It lists Chromecast and YouTube-ready TVs like Roku and Fire TV.';h.style.display='';}
+    if(fr){fr.style.outline='3px solid #b18cff';fr.style.outlineOffset='2px';setTimeout(function(){fr.style.outline='';fr.style.outlineOffset='';},2500);}
+  }
+  function castStateChanged(){
+    try{
+      var fw=window.cast&&window.cast.framework;if(!fw)return;
+      var st=fw.CastContext.getInstance().getCastState();
+      castBtnShow(st!==fw.CastState.NO_DEVICES_AVAILABLE);
+    }catch(e){castBtnShow(false);}
+  }
+  function castApiReady(isAvailable){
+    if(!isAvailable)return;
+    try{
+      var fw=window.cast&&window.cast.framework;if(!fw)return;
+      fw.CastContext.getInstance().setOptions({
+        receiverApplicationId:(window.chrome&&window.chrome.cast&&window.chrome.cast.media&&window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID)||'CC1AD845',
+        autoJoinPolicy:window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+      });
+      fw.CastContext.getInstance().addEventListener(fw.CastContextEventType.CAST_STATE_CHANGED,castStateChanged);
+      castStateChanged();
+    }catch(e){castBtnShow(false);}
+  }
+  function initCast(){
+    if(castStarted)return;castStarted=true;
+    try{
+      if(typeof document==='undefined'||!document.head||typeof document.createElement!=='function')return;
+      if(window.cast&&window.cast.framework){castApiReady(true);return;}
+      window.__onGCastApiAvailable=castApiReady;
+      var s=document.createElement('script');
+      s.src='https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+      s.onerror=function(){castBtnShow(false);};
+      document.head.appendChild(s);
+    }catch(e){castBtnShow(false);}
+  }
+  window.__tvYt.cast={show:castBtnShow,hint:castHintShow,init:initCast,state:castStateChanged,ready:castApiReady};
+  function init(){
+    var go=$('tv-yt-go');if(go)go.addEventListener('click',search);
+    var q=$('tv-yt-q');if(q)q.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();search();}});
+    var cb=$('tv-yt-cast');if(cb)cb.addEventListener('click',castHintShow);
+  }
+  init();
+})();
+
+/* ===== TAVERN MEDIA — SPOTIFY PLAYER (2026-11-03, Cee: "add … spotify").
+   Same Vault-style player, surfaced in the FREE MOVIES section. Visitors
+   connect their OWN Spotify (Authorization Code flow, /api/spotify-auth +
+   /api/spotify-callback — the client secret never reaches the browser).
+   Tokens live in sessionStorage on the visitor's device only, under the
+   SAME keys as the Vault (sw_spotify_*), so a visitor connected on the
+   Vault is already connected here (same origin, same tab). Full songs need
+   the visitor's Premium; free accounts get 30-sec previews. When nobody
+   is connected the card falls back to the WAS LISTENING snapshot
+   ("8" — Billie Eilish), refreshed once from /api/now-playing if Cee is
+   actually playing right now. When connection starts here, OAuth now returns
+   directly to /tavern.html after the same-tab sessionStorage token handoff.
+   Vault remains the default return destination when started there. ===== */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var store={
+    get:function(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},
+    set:function(k,v){try{sessionStorage.setItem(k,v);}catch(e){}},
+    del:function(k){try{sessionStorage.removeItem(k);}catch(e){}}
+  };
+  var K_ACCESS='sw_spotify_access',K_REFRESH='sw_spotify_refresh',K_EXP='sw_spotify_expires_at',K_NAME='sw_spotify_name';
+  var POLL_MS=15000;
+  var lastTrack=null,currentTrackId=null,timer=null,refreshing=null;
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fmt(ms){var s=Math.floor((ms||0)/1000);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+  function show(el,on){if(el)el.style.display=on?'':'none';}
+  function setStatus(t){var el=$('tv-sp-status');if(el)el.textContent=t;}
+  function tokens(){
+    var a=store.get(K_ACCESS),r=store.get(K_REFRESH),e=parseInt(store.get(K_EXP)||'0',10);
+    if(!a)return null;
+    return {access:a,refresh:r||'',exp:(isNaN(e)?0:e)};
+  }
+  function saveTokens(d){
+    store.set(K_ACCESS,d.access_token);
+    if(d.refresh_token)store.set(K_REFRESH,d.refresh_token);
+    store.set(K_EXP,String(Date.now()+((d.expires_in||3600)*1000)));
+  }
+  function clearTokens(){store.del(K_ACCESS);store.del(K_REFRESH);store.del(K_EXP);store.del(K_NAME);}
+  function refreshAccess(){
+    if(typeof fetch!=='function')return Promise.resolve(null);
+    if(refreshing)return refreshing;
+    var tk=tokens();
+    if(!tk||!tk.refresh)return Promise.resolve(null);
+    refreshing=fetch('/api/spotify-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh_token:tk.refresh})})
+      .then(function(r){if(!r.ok)throw new Error('refresh-failed');return r.json();})
+      .then(function(d){if(!d||!d.access_token)throw new Error('refresh-failed');saveTokens(d);return d.access_token;})
+      .catch(function(){return null;});
+    refreshing.then(function(){refreshing=null;});
+    return refreshing;
+  }
+  function authedFetch(url,opts){
+    if(typeof fetch!=='function')return Promise.reject(new Error('no-fetch'));
+    var tk=tokens();
+    if(!tk)return Promise.reject(new Error('no-token'));
+    function call(access){
+      var o={};for(var k in (opts||{}))o[k]=opts[k];
+      o.headers={};for(var h in ((opts||{}).headers||{}))o.headers[h]=opts.headers[h];
+      o.headers['Authorization']='Bearer '+access;
+      return fetch(url,o);
+    }
+    if(Date.now()>tk.exp-60000){
+      return refreshAccess().then(function(a){if(!a)throw new Error('refresh-failed');return call(a);});
+    }
+    return call(tk.access).then(function(r){
+      if(r.status!==401)return r;
+      return refreshAccess().then(function(a){if(!a)throw new Error('refresh-failed');return call(a);});
+    });
+  }
+  function setSnapshot(label,name,artist,url){
+    var l=$('tv-sp-snap-label'),s=$('tv-sp-snap-song'),a=$('tv-sp-snap-artist'),o=$('tv-sp-snap-open');
+    if(l)l.textContent=label;
+    if(s)s.textContent=name;
+    if(a)a.textContent=artist;
+    if(o&&url)o.href=url;
+  }
+  function loadSnapshot(){
+    if(typeof fetch!=='function')return; /* no fetch (stubbed env): keep the static snapshot */
+    fetch('/api/now-playing').then(function(r){if(!r.ok)throw new Error('np-'+r.status);return r.json();}).then(function(d){
+      if(d&&d.playing&&d.name){setSnapshot('NOW LISTENING',d.name,d.artist||'',d.url||('https://open.spotify.com/search/'+encodeURIComponent(d.name+' '+(d.artist||''))));}
+    }).catch(function(){/* not configured or Cee is not playing: keep the static snapshot */});
+  }
+  function setPlayerTrack(track){
+    lastTrack=track;
+    var now=$('tv-sp-now'),tm=$('tv-sp-now-time'),wrap=$('tv-sp-embed-wrap'),emb=$('tv-sp-embed'),link=$('tv-sp-open-link'),pp=$('tv-sp-playpause');
+    if(!track){
+      if(now)now.innerHTML='<b>Nothing playing</b>';
+      if(tm)tm.textContent='Start something on Spotify and it\u2019ll show up here.';
+      if(wrap)wrap.style.display='none';
+      if(emb)emb.src='';
+      if(pp)pp.textContent='▶ PLAY';
+      return;
+    }
+    if(now)now.innerHTML='<b>'+esc(track.name)+'</b> — '+esc(track.artist);
+    if(tm)tm.textContent=(track.playing?'▶ Playing ':'⏸ Paused at ')+fmt(track.progress_ms)+' / '+fmt(track.duration_ms);
+    if(pp)pp.textContent=track.playing?'⏸ PAUSE':'▶ PLAY';
+    if(track.trackId&&track.trackId!==currentTrackId){
+      currentTrackId=track.trackId;
+      if(emb)emb.src='https://open.spotify.com/embed/track/'+encodeURIComponent(track.trackId)+'?utm_source=generator&theme=0';
+      if(link&&track.url)link.href=track.url;
+      if(wrap)wrap.style.display='';
+    }
+  }
+  function poll(){
+    if(!tokens())return Promise.resolve();
+    return authedFetch('https://api.spotify.com/v1/me/player/currently-playing')
+      .then(function(r){
+        if(r.status===204)return null;
+        if(!r.ok)throw new Error('player-'+r.status);
+        return r.json();
+      })
+      .then(function(d){
+        if(!d||!d.item||!d.is_playing){setPlayerTrack(null);return;}
+        var item=d.item;
+        var artists=(item.artists||[]).map(function(a){return a.name;}).join(', ');
+        var track={name:item.name||'',artist:artists,progress_ms:d.progress_ms||0,duration_ms:item.duration_ms||0,playing:!!d.is_playing,trackId:item.id||'',url:(item.external_urls&&item.external_urls.spotify)||''};
+        setPlayerTrack(track);
+      })
+      .catch(function(){/* transient failure: leave the card alone, next poll retries */});
+  }
+  function control(path,method){
+    authedFetch('https://api.spotify.com/v1/me/player/'+path,{method:method||'POST'})
+      .then(function(){setTimeout(poll,800);})
+      .catch(function(){setStatus('Couldn\u2019t reach Spotify — check your connection and try again.');});
+  }
+  function disconnect(){
+    clearTokens();
+    currentTrackId=null;
+    if(timer){clearInterval(timer);timer=null;}
+    setPlayerTrack(null);
+    setStatus('Disconnected — connect your Spotify to play your music here.');
+    render();
+  }
+  function render(){
+    var tk=tokens();
+    var configured=window.__tvSpConfigured;
+    show($('tv-sp-connect'),!tk&&configured!==false);
+    show($('tv-sp-setup-missing'),!tk&&configured===false);
+    show($('tv-sp-player'),!!tk);
+    show($('tv-sp-snapshot'),!tk);
+    if(tk){
+      var name=store.get(K_NAME);
+      var who=$('tv-sp-who');
+      if(who)who.textContent=name?('Connected as '+name+' — the buttons below control your Spotify.'):'Connected — the buttons below control your Spotify.';
+    }
+  }
+  function probe(){
+    if(typeof fetch!=='function'){window.__tvSpConfigured=true;render();return Promise.resolve();}
+    return fetch('/api/spotify-auth?probe=1').then(function(r){return r.json();}).then(function(d){
+      window.__tvSpConfigured=!!(d&&d.configured);
+      render();
+    }).catch(function(){window.__tvSpConfigured=true;render();});
+  }
+  function param(name){
+    try{var m=new RegExp('[?&]'+name+'=([^&#]*)').exec(location.search||'');return m?decodeURIComponent(m[1]):'';}catch(e){return '';}
+  }
+  function init(){
+    var st=param('spotify');
+    if(st==='connected')setStatus('Connected — your Spotify is linked.');
+    else if(st==='denied')setStatus('Spotify connection was cancelled — nothing changed.');
+    else if(st==='not_configured')setStatus('Spotify isn\u2019t set up on this site yet.');
+    else if(st==='error')setStatus('Spotify couldn\u2019t connect — try again in a moment.');
+    if(st){try{history.replaceState(null,'',location.pathname);}catch(e){}}
+    var cb=$('tv-sp-connect-btn');if(cb)cb.addEventListener('click',function(){location.href='/api/spotify-auth?return_to=%2Ftavern.html';});
+    var pv=$('tv-sp-prev');if(pv)pv.addEventListener('click',function(){control('previous');});
+    var nx=$('tv-sp-next');if(nx)nx.addEventListener('click',function(){control('next');});
+    var pp=$('tv-sp-playpause');if(pp)pp.addEventListener('click',function(){control(lastTrack&&lastTrack.playing?'pause':'play','PUT');});
+    var dc=$('tv-sp-disconnect');if(dc)dc.addEventListener('click',disconnect);
+    probe();
+    if(tokens()){
+      render();
+      authedFetch('https://api.spotify.com/v1/me').then(function(r){return r.json();}).then(function(d){
+        if(d&&d.display_name){store.set(K_NAME,d.display_name);render();}
+      }).catch(function(){});
+      poll();
+      timer=setInterval(function(){if(!document.hidden)poll();},POLL_MS);
+    }else{
+      render();
+      loadSnapshot();
+    }
+  }
+  window.__tvSpPlayer={poll:poll,render:render,disconnect:disconnect,tokens:tokens};
+  init();
+})();
+
+/* ===== GUESS THE DRAWING + MOVIE NIGHT — Tavern activities (2026-11-05) =====
+   Both live IN the Tavern (tavern.html), not as hub cards. No new server,
+   no new API file, no ads, no login wall, no economy change.
+   - Drawing: SAV BOT draws (bot mode) or YOU draw (you mode). Guesses are
+     Tavern chat messages, watched in sendChat (your own typed guess) and in
+     renderChat (everyone else's, via the Firestore snapshot). First correct
+     guess wins the round. The word is NEVER posted to chat mid-round — the
+     drawer typing it is blocked in sendChat; the win reveal names it only
+     after the round is over. Shared state rides the same Firestore the chat
+     uses (ion_draw/current); offline it is all local and the bot still plays.
+   - Movie Night: same /api/video-search the YouTube card already uses.
+     The host's pick (video id + start time) rides Firestore
+     (ion_movie/current); everyone counts down from the same startAt, then
+     the youtube-nocookie embed starts for everyone present. Offline it is
+     local-only. Chat is never disabled while a video plays. */
+
+var DRAW_GUESS_MOL = 10;   /* guesser, correct first guess */
+var DRAW_DRAWER_MOL = 5;   /* drawer, when SAV BOT guesses your drawing */
+var DRAW_WORDS = ['Kavio','Vanix','Grinnoir','Balloon Guy','Wraith Pet','Delve','drum','guitar','moon','skull','chain','cloak','scythe','tavern','arcade','molecule','atom','ion','slime','dino','kart','crown','ghost','dagger','potion','dragon','castle','pirate','robot','rocket','pizza','coffee','sword','shield','helmet','boots','lantern','candle','spider','snake','wolf','raven','rose','key','chest','map','compass','mask'];
+/* Bot doodles: strokes in a 100 x 56 box (same ratio as the 640x360 canvas).
+   Original simple icons — no copied art, no copied word lists. */
+function _o(cx, cy, r){ var p = []; for (var i = 0; i <= 14; i++){ var a = i / 14 * Math.PI * 2; p.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.56]); } return p; }
+function _a(cx, cy, r, a0, a1){ var p = []; for (var i = 0; i <= 12; i++){ var a = (a0 + (a1 - a0) * i / 12) * Math.PI / 180; p.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.56]); } return p; }
+function _l(){ return Array.prototype.slice.call(arguments); }
+var DRAW_ART = {
+  'Kavio': [_a(50,26,20,180,360), _l([28,28],[72,28]), _l([34,22],[66,22])],
+  'Vanix': [_o(50,28,22), _l([38,26],[46,26]), _l([54,26],[62,26]), _l([46,36],[54,36])],
+  'Grinnoir': [_o(50,28,20), _a(50,30,12,20,160), _l([40,22],[44,22]), _l([56,22],[60,22])],
+  'Balloon Guy': [_o(50,20,14), _l([50,34],[50,52]), _a(50,20,7,20,160), _l([44,16],[47,16]), _l([53,16],[56,16])],
+  'Wraith Pet': [_o(50,34,14), _o(36,18,5), _o(50,14,5), _o(64,18,5)],
+  'Delve': [_a(50,52,26,180,360), _l([42,28],[50,18],[58,28],[50,38],[42,28])],
+  'drum': [_o(50,18,20), _l([30,18],[30,44],[70,44],[70,18]), _l([36,10],[44,16]), _l([64,10],[56,16])],
+  'guitar': [_o(42,36,14), _l([52,26],[72,8]), _o(42,36,6), _l([70,6],[76,12])],
+  'moon': [_a(46,28,18,60,300), _a(54,28,14,110,250)],
+  'skull': [_o(50,24,18), _l([36,38],[36,48],[64,48],[64,38]), _o(43,22,4), _o(57,22,4), _l([50,28],[47,33],[53,33])],
+  'chain': [_o(30,28,10), _o(50,28,10), _o(70,28,10)],
+  'cloak': [_l([50,6],[34,44],[66,44],[50,6]), _l([34,44],[26,52],[74,52],[66,44])],
+  'scythe': [_l([30,50],[60,10]), _a(62,14,16,200,340), _l([44,32],[56,36])],
+  'tavern': [_l([34,16],[34,48],[66,48],[66,16]), _a(70,32,7,270,90), _a(50,14,12,180,360)],
+  'arcade': [_l([30,48],[70,48]), _l([50,48],[50,24]), _o(50,18,7)],
+  'molecule': [_o(50,28,5), _o(30,16,5), _o(70,16,5), _o(50,46,5), _l([50,28],[30,16]), _l([50,28],[70,16]), _l([50,28],[50,46])],
+  'atom': [_o(50,28,4), _o(50,28,20), _l([30,14],[70,42]), _l([70,14],[30,42])],
+  'ion': [_l([58,4],[42,30],[52,30],[44,52],[66,24],[54,24],[58,4])],
+  'slime': [_o(50,32,20), _o(42,28,3), _o(58,28,3), _a(50,34,8,20,160)],
+  'dino': [_a(48,40,22,180,360), _o(72,20,8), _l([26,40],[12,28]), _l([38,48],[38,54]), _l([58,48],[58,54])],
+  'kart': [_l([26,34],[74,34],[70,44],[30,44],[26,34]), _o(36,48,6), _o(64,48,6), _o(50,26,4)],
+  'crown': [_l([28,44],[28,18],[40,30],[50,12],[60,30],[72,18],[72,44],[28,44])],
+  'ghost': [_a(50,34,18,180,360), _l([32,34],[32,50],[38,44],[44,50],[50,44],[56,50],[62,44],[68,50],[68,34]), _o(43,28,3), _o(57,28,3)],
+  'dagger': [_l([50,6],[56,26],[50,34],[44,26],[50,6]), _l([38,36],[62,36]), _l([50,36],[50,50])],
+  'potion': [_l([46,8],[46,18],[38,26],[38,46],[62,46],[62,26],[54,18],[54,8]), _o(46,38,3), _o(56,32,2)],
+  'dragon': [_l([20,46],[40,14],[52,30],[66,10],[80,40],[60,46],[40,48],[20,46]), _l([20,46],[84,46])],
+  'castle': [_l([26,50],[26,20],[34,20],[34,50]), _l([46,50],[46,12],[54,12],[54,50]), _l([66,50],[66,20],[74,20],[74,50]), _l([26,50],[74,50]), _l([46,50],[46,40],[54,40],[54,50])],
+  'pirate': [_a(50,22,20,180,360), _l([30,22],[70,22]), _o(50,34,12), _o(44,32,3), _l([44,32],[56,26])],
+  'robot': [_l([36,16],[64,16],[64,34],[36,34],[36,16]), _l([50,16],[50,8]), _o(50,6,2), _o(43,25,3), _o(57,25,3), _l([40,34],[40,50],[60,50],[60,34])],
+  'rocket': [_l([50,6],[58,26],[58,42],[42,42],[42,26],[50,6]), _l([42,34],[30,48],[42,44]), _l([58,34],[70,48],[58,44]), _l([46,42],[50,52],[54,42]), _o(50,20,4)],
+  'pizza': [_l([50,6],[30,48],[70,48],[50,6]), _o(48,26,3), _o(56,38,3), _o(42,40,3)],
+  'coffee': [_l([34,18],[34,46],[66,46],[66,18]), _a(70,32,6,270,90), _l([44,12],[42,6]), _l([56,12],[54,6])],
+  'sword': [_l([50,6],[54,30],[50,36],[46,30],[50,6]), _l([36,38],[64,38]), _l([50,38],[50,52]), _o(50,54,3)],
+  'shield': [_l([50,6],[72,12],[72,32],[50,52],[28,32],[28,12],[50,6]), _o(50,28,7)],
+  'helmet': [_a(50,30,20,180,360), _l([28,30],[72,30]), _a(50,8,6,180,360), _l([36,30],[36,40],[64,40],[64,30])],
+  'boots': [_l([38,8],[50,8],[50,36],[66,44],[66,50],[32,50],[32,40],[38,40],[38,8])],
+  'lantern': [_l([40,14],[60,14],[60,46],[40,46],[40,14]), _a(50,12,8,180,360), _o(50,32,5), _l([40,46],[60,46])],
+  'candle': [_l([44,16],[44,48],[56,48],[56,16]), _o(50,10,4), _l([46,20],[44,28])],
+  'spider': [_o(50,30,8), _o(50,18,5), _l([44,26],[30,14]), _l([56,26],[70,14]), _l([44,32],[30,40]), _l([56,32],[70,40]), _l([44,28],[28,28]), _l([56,28],[72,28])],
+  'snake': [_l([16,40],[28,28],[40,40],[52,28],[64,40],[76,28],[84,34]), _o(86,32,4), _l([88,34],[94,36])],
+  'wolf': [_l([34,40],[30,14],[44,24],[56,24],[70,14],[66,40],[50,50],[34,40]), _o(42,32,3), _o(58,32,3), _l([44,42],[56,42])],
+  'raven': [_l([24,40],[44,20],[60,24],[72,34],[60,44],[36,46],[24,40]), _l([60,24],[74,28]), _l([44,20],[36,34]), _o(58,28,2)],
+  'rose': [_o(50,18,10), _a(50,18,5,0,300), _l([50,28],[50,52]), _l([50,40],[38,34]), _l([50,44],[62,38])],
+  'key': [_o(34,28,10), _l([44,28],[72,28]), _l([64,28],[64,36]), _l([72,28],[72,36])],
+  'chest': [_l([28,24],[28,50],[72,50],[72,24]), _a(50,24,22,180,360), _l([46,24],[46,34],[54,34],[54,24]), _o(50,29,2)],
+  'map': [_l([24,12],[76,12],[76,48],[24,48],[24,12]), _l([30,40],[44,30],[52,34],[66,20]), _l([64,18],[72,26]), _l([72,18],[64,26])],
+  'compass': [_o(50,28,20), _l([50,12],[58,28],[50,44],[42,28],[50,12]), _l([50,4],[50,8])],
+  'mask': [_l([28,24],[72,24],[68,36],[32,36],[28,24]), _o(40,30,4), _o(60,30,4), _l([28,30],[20,28]), _l([72,30],[80,28])]
+};
+
+var drawGame = {active: false, mode: 'bot', word: '', round: 0, startedAt: 0, roundWon: false, drawerUid: null, drawerName: '', drawerIsMe: false, strokes: [], visible: 0, color: '#222222', size: 4, drawing: false, curStroke: null, timedOut: false};
+var drawScores = {};
+try { var _ds = JSON.parse(localStorage.getItem('sw_draw_scores_v1') || 'null'); if (_ds && typeof _ds === 'object') drawScores = _ds; } catch (e) {}
+function drawSaveScores(){ try { localStorage.setItem('sw_draw_scores_v1', JSON.stringify(drawScores)); } catch (e) {} }
+function drawNorm(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function drawWordRe(w){ var n = drawNorm(w); return new RegExp('(^| )' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '( |$)'); }
+function drawBlanks(w){
+  var out = '';
+  for (var i = 0; i < w.length; i++){ var c = w.charAt(i); out += (c === ' ') ? '   ' : '_ '; }
+  return out.trim();
+}
+function drawBankMolecules(n){
+  /* Same banking as the other games (drum-kit endRun): the Tavern wallet's
+     molecules + the shared wraith_coins purse + the parent postMessage. */
+  wallet.molecules = (wallet.molecules || 0) + n;
+  stampWallet(); saveWalletLocal(); renderWallet();
+  try { saveWallet(); } catch (e) {}
+  try { var mc = parseFloat(localStorage.getItem('wraith_coins')) || 0; localStorage.setItem('wraith_coins', String(mc + n)); } catch (e) {}
+  try { if (window.parent && window.parent !== window) window.parent.postMessage({type: 'vanix-win-molecules', amt: n, game: 'draw'}, '*'); } catch (e) {}
+}
+function drawSetStatus(t){ var el = $('draw-status'); if (el) el.textContent = t || ''; }
+function drawSetWordLine(t){ var el = $('draw-word-line'); if (el) el.textContent = t || ''; }
+function drawSetHint(t){ var el = $('draw-hint-line'); if (el) el.textContent = t || ''; }
+function drawRenderScores(){
+  var el = $('draw-scores'); if (!el) return;
+  var names = Object.keys(drawScores).sort(function(a, b){ return drawScores[b] - drawScores[a]; });
+  if (!names.length){ el.innerHTML = '<span class="muted">No scores yet — guess a drawing to get on the board.</span>'; return; }
+  el.innerHTML = '<b>SCOREBOARD</b> — ' + names.map(function(n){ return esc(n) + ' · ' + drawScores[n] + ' pts'; }).join(' &nbsp;·&nbsp; ');
+}
+function drawCanvas(){ return $('draw-canvas'); }
+function drawRender(){
+  var cv = drawCanvas(); if (!cv) return;
+  var ctx = null;
+  try { ctx = cv.getContext('2d'); } catch (e) { ctx = null; }
+  if (!ctx) return;
+  var W = cv.width || 640, H = cv.height || 360;
+  try {
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+    var list = drawGame.strokes.slice(0, drawGame.visible);
+    if (drawGame.curStroke && drawGame.curStroke.pts.length > 1) list = list.concat([drawGame.curStroke]);
+    for (var i = 0; i < list.length; i++){
+      var s = list[i]; if (!s.pts || s.pts.length < 2) continue;
+      ctx.strokeStyle = s.color || '#222222'; ctx.lineWidth = s.size || 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(s.pts[0][0] / 100 * W, s.pts[0][1] / 56 * H);
+      for (var j = 1; j < s.pts.length; j++) ctx.lineTo(s.pts[j][0] / 100 * W, s.pts[j][1] / 56 * H);
+      ctx.stroke();
+    }
+  } catch (e) {}
+}
+function drawVisibleCount(){
+  if (drawGame.mode !== 'bot') return drawGame.strokes.length;
+  var el = Date.now() - drawGame.startedAt;
+  if (el < 1200) return 0;
+  return Math.min(drawGame.strokes.length, 1 + Math.floor((el - 1200) / 2200));
+}
+function drawTick(){
+  if (!drawGame.active) return;
+  var v = drawVisibleCount();
+  if (v !== drawGame.visible){ drawGame.visible = v; drawRender(); }
+  /* Hint: blanks + letter count; first letter after 30s with no win. */
+  if (drawGame.mode === 'bot' && !drawGame.roundWon){
+    var w = drawGame.word, el = Date.now() - drawGame.startedAt;
+    var hint = 'Word: ' + drawBlanks(w) + '  (' + w.replace(/ /g, '').length + ' letters)';
+    if (el > 30000) hint += ' — starts with ' + w.charAt(0).toUpperCase();
+    drawSetHint(hint);
+    if (el > 90000 && !drawGame.timedOut){
+      drawGame.timedOut = true; drawGame.roundWon = true;
+      drawGame.visible = drawGame.strokes.length; drawRender();
+      drawBotAnnounce('⏰ Time! Nobody guessed it — the word was ' + w + '. New round coming up…');
+      setTimeout(function(){ drawStartBotRound(false); }, 5000);
+    }
+  }
+}
+function drawBotAnnounce(text){
+  /* A SAV BOT message in the chat — cloud: post to ion_chat like
+     handleBotCommand does; offline: render locally. Never contains the
+     word mid-round; only called after a round ends. */
+  if (useCloud && db){
+    try { db.collection('ion_chat').add({from: 'SAVBOT', name: 'SAV BOT', bot: true, text: text, ts: Date.now()}).catch(function(){}); } catch (e) { renderBotLocal(text); }
+  } else renderBotLocal(text);
+}
+function drawPickWord(){
+  var w = DRAW_WORDS[Math.floor(Math.random() * DRAW_WORDS.length)];
+  if (w === drawGame.word && DRAW_WORDS.length > 1) w = DRAW_WORDS[(DRAW_WORDS.indexOf(w) + 1) % DRAW_WORDS.length];
+  return w;
+}
+function drawArtStrokes(word){
+  var art = DRAW_ART[word] || DRAW_ART['moon'];
+  return art.map(function(pts){ return {pts: pts, color: '#222222', size: 4}; });
+}
+function drawDocWrite(){
+  if (!useCloud || !db) return;
+  try {
+    db.collection('ion_draw').doc('current').set({
+      round: drawGame.round, mode: drawGame.mode, word: drawGame.word,
+      drawerUid: drawGame.drawerUid, drawerName: drawGame.drawerName,
+      strokes: drawGame.strokes, startedAt: drawGame.startedAt, ts: Date.now()
+    }, {merge: true}).catch(function(){});
+  } catch (e) {}
+}
+function drawStartBotRound(announce){
+  var w = drawPickWord();
+  drawGame.active = true; drawGame.mode = 'bot'; drawGame.word = w;
+  drawGame.round = (drawGame.round || 0) + 1; drawGame.startedAt = Date.now();
+  drawGame.roundWon = false; drawGame.timedOut = false;
+  drawGame.drawerUid = 'SAVBOT'; drawGame.drawerName = 'SAV BOT'; drawGame.drawerIsMe = false;
+  drawGame.strokes = drawArtStrokes(w); drawGame.visible = 0; drawGame.curStroke = null;
+  drawSetWordLine('🤖 SAV BOT is drawing… guess the word in the chat!');
+  drawSetHint('Word: ' + drawBlanks(w) + '  (' + w.replace(/ /g, '').length + ' letters)');
+  drawSetStatus('First right guess in the chat wins +' + DRAW_GUESS_MOL + ' molecules.');
+  drawRenderScores(); drawRender(); drawDocWrite();
+  if (announce) drawBotAnnounce('🎨 Guess the drawing! SAV BOT is drawing a word — first right guess in the chat wins +' + DRAW_GUESS_MOL + ' molecules.');
+}
+function drawStartYouRound(){
+  var w = drawPickWord();
+  drawGame.active = true; drawGame.mode = 'you'; drawGame.word = w;
+  drawGame.round = (drawGame.round || 0) + 1; drawGame.startedAt = Date.now();
+  drawGame.roundWon = false; drawGame.timedOut = false;
+  drawGame.drawerUid = myUid || ('local:' + myName); drawGame.drawerName = myName; drawGame.drawerIsMe = true;
+  drawGame.strokes = []; drawGame.visible = 0; drawGame.curStroke = null;
+  drawSetWordLine('✏️ YOUR WORD: ' + w + ' — draw it, do NOT type it in chat!');
+  drawSetHint('Draw it on the canvas — SAV BOT will guess when you tap DONE DRAWING.');
+  drawSetStatus('Draw with mouse or touch. CLEAR wipes the canvas. When you are done, tap DONE DRAWING and SAV BOT guesses.');
+  drawRenderScores(); drawRender(); drawDocWrite();
+}
+function drawWin(name){
+  if (!drawGame.active || drawGame.roundWon) return false;
+  drawGame.roundWon = true;
+  drawGame.visible = drawGame.strokes.length; drawRender();
+  drawScores[name] = (drawScores[name] || 0) + 1; drawSaveScores(); drawRenderScores();
+  var me = (name === myName);
+  if (me) drawBankMolecules(DRAW_GUESS_MOL);
+  var msg = '🎨 ' + drawGame.word + ' — ' + name + ' guessed it first! +' + DRAW_GUESS_MOL + ' molecules' + (me ? ' (banked to your purse)' : '') + '.';
+  drawSetStatus(msg);
+  drawSetHint('The word was ' + drawGame.word + '.');
+  if (me) drawBotAnnounce(msg);
+  setTimeout(function(){ drawStartBotRound(false); }, 5000);
+  return true;
+}
+/* Guess check — called for every chat message, yours (sendChat) and
+   everyone else's (renderChat scan). Returns true when it scored. */
+function drawCheckGuess(name, text, fromUid, isMe){
+  if (!drawGame.active || drawGame.roundWon || !drawGame.word) return false;
+  if (isMe && drawGame.drawerIsMe) return false;
+  if (fromUid && drawGame.drawerUid && fromUid === drawGame.drawerUid) return false;
+  if (!text || text.charAt(0) === '!') return false;
+  var n = drawNorm(text);
+  if (!n) return false;
+  if (drawWordRe(drawGame.word).test(n)) return drawWin(name || 'guest');
+  return false;
+}
+/* sendChat hook — returns true when the message must NOT be posted:
+   the drawer typed the word (cheat + leak). Otherwise scores guesses. */
+function drawChatGuard(text){
+  if (!drawGame.active || drawGame.roundWon || !drawGame.word) return false;
+  if (drawGame.drawerIsMe && drawWordRe(drawGame.word).test(drawNorm(text))){
+    drawSetStatus('That is your word, drawer — it stays secret. Draw it, do not type it!');
+    return true;
+  }
+  drawCheckGuess(myName, text, myUid || ('local:' + myName), true);
+  return false;
+}
+var drawSeenKeys = {};
+function drawScanChat(list){
+  if (!drawGame.active || drawGame.roundWon) return;
+  var arr = list || [];
+  for (var i = 0; i < arr.length; i++){
+    var m = arr[i]; if (!m || m.bot) continue;
+    var k = String(m.ts || '') + '|' + String(m.name || '') + '|' + String(m.text || '');
+    if (drawSeenKeys[k]) continue;
+    drawSeenKeys[k] = 1;
+    drawCheckGuess(m.name, m.text, m.from, false);
+    if (drawGame.roundWon) return;
+  }
+}
+function drawAttachCloud(){
+  if (!useCloud || !db) return;
+  try {
+    db.collection('ion_draw').doc('current').onSnapshot(function(doc){
+      if (!doc || !doc.exists) return;
+      var d = doc.data(); if (!d || typeof d.round !== 'number') return;
+      if (d.drawerUid === myUid && d.round === drawGame.round) return; /* own echo */
+      if (d.round === drawGame.round && d.startedAt === drawGame.startedAt && d.mode === drawGame.mode) {
+        if (d.mode === 'you' && Array.isArray(d.strokes)){ drawGame.strokes = d.strokes; drawGame.visible = d.strokes.length; drawRender(); }
+        return;
+      }
+      if (d.round < drawGame.round) return;
+      drawGame.active = true; drawGame.mode = d.mode || 'bot'; drawGame.word = d.word || '';
+      drawGame.round = d.round; drawGame.startedAt = d.startedAt || Date.now();
+      drawGame.roundWon = false; drawGame.timedOut = false;
+      drawGame.drawerUid = d.drawerUid || null; drawGame.drawerName = d.drawerName || '';
+      drawGame.drawerIsMe = !!(myUid && d.drawerUid === myUid);
+      drawGame.strokes = Array.isArray(d.strokes) ? d.strokes : (d.mode === 'bot' && d.word ? drawArtStrokes(d.word) : []);
+      drawGame.visible = 0; drawGame.curStroke = null;
+      if (drawGame.mode === 'bot'){
+        drawSetWordLine('🤖 ' + (drawGame.drawerName || 'SAV BOT') + ' is drawing… guess the word in the chat!');
+        drawSetHint('Word: ' + drawBlanks(drawGame.word) + '  (' + drawGame.word.replace(/ /g, '').length + ' letters)');
+      } else if (drawGame.drawerIsMe){
+        drawSetWordLine('✏️ YOUR WORD: ' + drawGame.word + ' — draw it, do NOT type it in chat!');
+        drawSetHint('Draw it on the canvas — SAV BOT will guess when you tap DONE DRAWING.');
+      } else {
+        drawSetWordLine('✏️ ' + (drawGame.drawerName || 'Someone') + ' is drawing… guess the word in the chat!');
+        drawSetHint('Word: ' + drawBlanks(drawGame.word) + '  (' + drawGame.word.replace(/ /g, '').length + ' letters)');
+      }
+      drawSetStatus('First right guess in the chat wins +' + DRAW_GUESS_MOL + ' molecules.');
+      drawRenderScores(); drawRender();
+    }, function(){});
+  } catch (e) {}
+}
+/* Free drawing (you mode, drawer only): mouse + touch via pointer events. */
+function drawPos(e){
+  var cv = drawCanvas(); if (!cv) return null;
+  var r = {left: 0, top: 0, width: 640, height: 360};
+  try { if (cv.getBoundingClientRect) r = cv.getBoundingClientRect(); } catch (e) {}
+  if (!r.width) r.width = 640; if (!r.height) r.height = 360;
+  return [(e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 56];
+}
+function drawWireCanvas(){
+  var cv = drawCanvas(); if (!cv || !cv.addEventListener) return;
+  cv.addEventListener('pointerdown', function(e){
+    if (!drawGame.active || drawGame.mode !== 'you' || !drawGame.drawerIsMe || drawGame.roundWon) return;
+    var p = drawPos(e); if (!p) return;
+    drawGame.drawing = true;
+    drawGame.curStroke = {pts: [p], color: drawGame.color, size: drawGame.size};
+    try { if (cv.setPointerCapture && e.pointerId != null) cv.setPointerCapture(e.pointerId); } catch (e2) {}
+    if (e.preventDefault) e.preventDefault();
+  });
+  cv.addEventListener('pointermove', function(e){
+    if (!drawGame.drawing || !drawGame.curStroke) return;
+    var p = drawPos(e); if (!p) return;
+    drawGame.curStroke.pts.push(p);
+    drawRender();
+    if (e.preventDefault) e.preventDefault();
+  });
+  function endStroke(){
+    if (!drawGame.drawing) return;
+    drawGame.drawing = false;
+    if (drawGame.curStroke && drawGame.curStroke.pts.length > 1){
+      drawGame.strokes.push(drawGame.curStroke);
+      drawGame.visible = drawGame.strokes.length;
+      drawDocWrite();
+    }
+    drawGame.curStroke = null; drawRender();
+  }
+  cv.addEventListener('pointerup', endStroke);
+  cv.addEventListener('pointercancel', function(){ drawGame.drawing = false; drawGame.curStroke = null; drawRender(); });
+}
+function drawBotGuess(){
+  if (!drawGame.active || drawGame.mode !== 'you' || drawGame.roundWon) return;
+  if (drawGame.strokes.length < 2){
+    drawSetStatus('Draw a bit more first — SAV BOT needs something to look at.');
+    drawBotAnnounce('🤖 SAV BOT: draw a bit more first — I need something to look at!');
+    return;
+  }
+  drawGame.roundWon = true;
+  drawScores[myName] = (drawScores[myName] || 0) + 1; drawSaveScores(); drawRenderScores();
+  drawBankMolecules(DRAW_DRAWER_MOL);
+  var msg = '🤖 SAV BOT guessed it — ' + drawGame.word + '! Nice drawing, ' + myName + ' — +' + DRAW_DRAWER_MOL + ' molecules for a drawable word.';
+  drawSetStatus(msg);
+  drawBotAnnounce(msg);
+  setTimeout(function(){ drawStartBotRound(false); }, 5000);
+}
+function drawInit(){
+  var bb = $('draw-bot-btn'); if (bb) bb.onclick = function(){ drawStartBotRound(true); };
+  var yb = $('draw-you-btn'); if (yb) yb.onclick = function(){ drawStartYouRound(); };
+  var nb = $('draw-new-btn'); if (nb) nb.onclick = function(){ if (drawGame.mode === 'you') drawStartYouRound(); else drawStartBotRound(false); };
+  var cb = $('draw-clear-btn'); if (cb) cb.onclick = function(){
+    if (!drawGame.active || drawGame.mode !== 'you' || !drawGame.drawerIsMe) return;
+    drawGame.strokes = []; drawGame.visible = 0; drawGame.curStroke = null; drawRender(); drawDocWrite();
+    drawSetStatus('Canvas cleared — draw it again.');
+  };
+  var db = $('draw-done-btn'); if (db) db.onclick = drawBotGuess;
+  var br = $('draw-brush'); if (br) br.onchange = function(){ drawGame.size = parseInt(br.value, 10) || 4; };
+  if (typeof document !== 'undefined' && document.querySelectorAll){
+    document.querySelectorAll('[data-draw-color]').forEach(function(b){
+      b.addEventListener('click', function(){
+        drawGame.color = b.getAttribute('data-draw-color');
+        document.querySelectorAll('[data-draw-color]').forEach(function(x){ x.classList.toggle('sel', x === b); });
+      });
+    });
+  }
+  drawWireCanvas();
+  drawRenderScores();
+  drawStartBotRound(false);
+  setInterval(drawTick, 600);
+}
+var drawApi = {game: drawGame, WORDS: DRAW_WORDS, ART: DRAW_ART, GUESS_MOL: DRAW_GUESS_MOL, DRAWER_MOL: DRAW_DRAWER_MOL,
+  startBot: drawStartBotRound, startYou: drawStartYouRound, checkGuess: drawCheckGuess, guard: drawChatGuard,
+  scan: drawScanChat, tick: drawTick, render: drawRender, botGuess: drawBotGuess, bank: drawBankMolecules,
+  get scores(){ return drawScores; }};
+
+/* ===== MOVIE NIGHT — shared viewing (same /api/video-search as the
+   YouTube card, same youtube-nocookie embed). The host's pick rides
+   Firestore (ion_movie/current) as {videoId, title, channel, startAt}:
+   everyone counts down to the same startAt, then the embed starts for
+   everyone present. Late joiners (startAt already past) start at once.
+   Offline it is local-only. When the video ends the host picks the next
+   one — the embed is cross-origin, so end-of-video is not detectable
+   from this page. Chat is never touched: it stays open below. ===== */
+var mnState = {videoId: '', title: '', channel: '', startAt: 0, hostName: '', state: 'idle', playedKey: ''};
+function mnSetStatus(t){ var el = $('mn-status'); if (el) el.textContent = t || ''; }
+function mnShowCountdown(n){
+  var el = $('mn-countdown');
+  if (!el) return;
+  if (n == null){ el.style.display = 'none'; el.textContent = ''; return; }
+  el.style.display = ''; el.textContent = '🎬 Starting in ' + n + '…';
+}
+function mnPlay(){
+  var fr = $('mn-frame'), wrap = $('mn-player'), now = $('mn-now');
+  if (!fr || !wrap || !mnState.videoId) return;
+  mnState.state = 'playing';
+  mnShowCountdown(null);
+  var key = mnState.videoId + '|' + mnState.startAt;
+  if (mnState.playedKey !== key){
+    mnState.playedKey = key;
+    fr.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(mnState.videoId) + '?autoplay=1&rel=0';
+  }
+  wrap.style.display = '';
+  if (now) now.textContent = '▶ ' + mnState.title + (mnState.channel ? ' — ' + mnState.channel : '') + (mnState.hostName ? ' · picked by ' + mnState.hostName : '');
+  mnSetStatus('Now showing — chat stays open below, keep talking while it plays.');
+}
+function mnTick(){
+  if (mnState.state !== 'countdown' || !mnState.startAt) return;
+  var left = Math.ceil((mnState.startAt - Date.now()) / 1000);
+  if (left <= 0){ mnPlay(); return; }
+  mnShowCountdown(left);
+}
+function mnPick(v){
+  if (!v || !v.id) return;
+  mnState.videoId = v.id; mnState.title = v.title || ''; mnState.channel = v.channel || '';
+  mnState.startAt = Date.now() + 5000; mnState.hostName = myName; mnState.state = 'countdown'; mnState.playedKey = '';
+  var wrap = $('mn-player'); if (wrap) wrap.style.display = 'none';
+  mnShowCountdown(5);
+  mnSetStatus('🎬 ' + mnState.title + ' — starting in 5 seconds for everyone here…');
+  if (useCloud && db){
+    try {
+      db.collection('ion_movie').doc('current').set({videoId: v.id, title: v.title || '', channel: v.channel || '', startAt: mnState.startAt, hostName: myName, ts: Date.now()}, {merge: true}).catch(function(){});
+    } catch (e) {}
+  }
+}
+function mnStop(){
+  mnState.state = 'idle'; mnState.videoId = ''; mnState.startAt = 0; mnState.playedKey = '';
+  var fr = $('mn-frame'); if (fr) fr.removeAttribute('src');
+  var wrap = $('mn-player'); if (wrap) wrap.style.display = 'none';
+  var now = $('mn-now'); if (now) now.textContent = '';
+  mnShowCountdown(null);
+  mnSetStatus('Movie night stopped — search and pick the next one.');
+  if (useCloud && db){
+    try { db.collection('ion_movie').doc('current').set({videoId: '', title: '', channel: '', startAt: 0, hostName: myName, ts: Date.now()}, {merge: true}).catch(function(){}); } catch (e) {}
+  }
+}
+function mnRenderResults(list){
+  var box = $('mn-results'); if (!box) return;
+  box.innerHTML = '';
+  (list || []).forEach(function(v){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'ghost mn-result';
+    b.style.cssText = 'display:flex;gap:8px;align-items:center;width:100%;text-align:left;padding:6px';
+    b.innerHTML = '<img src="' + esc(v.thumb) + '" alt="" style="width:96px;height:54px;object-fit:cover;border-radius:8px;flex:none"><span style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(v.title) + '</b><span class="muted">' + esc(v.channel || '') + (v.dur ? ' · ' + esc(v.dur) : '') + '</span></span>';
+    b.addEventListener('click', function(){ mnPick(v); });
+    box.appendChild(b);
+  });
+}
+function mnSearch(){
+  var qEl = $('mn-q'); if (!qEl) return;
+  var q = qEl.value.trim();
+  if (!q){ mnSetStatus('Type something to search.'); return; }
+  if (typeof fetch !== 'function'){ mnSetStatus('Video search is unavailable right now — try again shortly.'); return; }
+  mnSetStatus('Searching YouTube…');
+  fetch('/api/video-search?q=' + encodeURIComponent(q))
+    .then(function(r){ if (!r.ok) throw new Error('search-' + r.status); return r.json(); })
+    .then(function(d){
+      var list = (d && d.results) || [];
+      if (!list.length){ mnSetStatus('No results — try a different search.'); mnRenderResults([]); return; }
+      mnSetStatus(list.length + ' result' + (list.length === 1 ? '' : 's') + ' — tap one to start movie night.');
+      mnRenderResults(list);
+    })
+    .catch(function(){ mnSetStatus('Video search is unavailable right now — try again shortly.'); });
+}
+function mnAttachCloud(){
+  if (!useCloud || !db) return;
+  try {
+    db.collection('ion_movie').doc('current').onSnapshot(function(doc){
+      if (!doc || !doc.exists) return;
+      var d = doc.data(); if (!d) return;
+      if (!d.videoId){ if (mnState.state !== 'idle') mnStop(); return; }
+      var key = d.videoId + '|' + d.startAt;
+      if (key === mnState.playedKey && mnState.state === 'playing') return;
+      if (d.startAt && d.startAt === mnState.startAt && d.videoId === mnState.videoId && mnState.state !== 'idle') return;
+      mnState.videoId = d.videoId; mnState.title = d.title || ''; mnState.channel = d.channel || '';
+      mnState.startAt = d.startAt || 0; mnState.hostName = d.hostName || ''; mnState.state = 'countdown'; mnState.playedKey = '';
+      var wrap = $('mn-player'); if (wrap) wrap.style.display = 'none';
+      mnShowCountdown(5);
+      mnSetStatus('🎬 ' + mnState.title + ' — picked by ' + (mnState.hostName || 'the host') + ', starting soon…');
+      mnTick();
+    }, function(){});
+  } catch (e) {}
+}
+function mnInit(){
+  var go = $('mn-go'); if (go) go.addEventListener('click', mnSearch);
+  var q = $('mn-q'); if (q) q.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); mnSearch(); } });
+  var st = $('mn-stop'); if (st) st.addEventListener('click', mnStop);
+  setInterval(mnTick, 250);
+}
+var mnApi = {state: mnState, search: mnSearch, pick: mnPick, play: mnPlay, stop: mnStop, tick: mnTick, renderResults: mnRenderResults};
+drawInit();
+mnInit();
+
+/* Harness hooks (pure logic, no Firebase needed) */
+window.ION = {SHOP: SHOP, STARTER_IONS: STARTER_IONS, STARTER_MOLECULES: STARTER_MOLECULES, ION_SATS_PER_ION: ION_SATS_PER_ION, ionsToSats: ionsToSats, ionsToBtc: ionsToBtc, ionBtcLine: ionBtcLine, ionCodeFor: ionCodeFor, ionUidFromCode: ionUidFromCode, ionCodeHash: ionCodeHash, canAfford: canAfford, applyBuy: applyBuy, isOnline: isOnline, shopById: shopById, duelFor: duelFor, FIGHT_URL: FIGHT_URL, savBot: savBot, busPayouts: busPayouts, busNewDeck: busNewDeck, handleBotCommand: handleBotCommand, BOT_THEMES: BOT_THEMES, ION_SALE_PACKS: ION_SALE_PACKS, ionSalePack: ionSalePack, ionSaleAtomCodeValid: ionSaleAtomCodeValid, ionSaleStart: ionSaleStart, ionSaleFinish: ionSaleFinish, ionSaleCheckSetup: ionSaleCheckSetup, ionSaleLoadSdk: ionSaleLoadSdk, ionSaleShowCode: ionSaleShowCode, ionSaleStatus: ionSaleStatus, redeemAtomCodeNorm: redeemAtomCodeNorm, redeemAtomCodeCheck: redeemAtomCodeCheck, redeemAtomCodeMsg: redeemAtomCodeMsg, redeemAtomCode: redeemAtomCode, BRIGHT_LEVELS: BRIGHT_LEVELS, brightSet: brightSet, brightApply: brightApply, brightFromLux: brightFromLux, brightInit: brightInit, BRIGHT_WHEEL_ANGLES: BRIGHT_WHEEL_ANGLES, brightWheelAngleForStop: brightWheelAngleForStop, brightWheelStopForAngle: brightWheelStopForAngle, tavernAmbient: tavernAmbient, buyItem: buyItem, toggleEquip: toggleEquip, saveWallet: saveWallet, saveWalletLocal: saveWalletLocal, loadWalletLocal: loadWalletLocal, stampWallet: stampWallet, walletTs: walletTs, renderWallet: renderWallet, renderShop: renderShop, renderLobby: renderLobby, heartbeat: heartbeat, attachChatListener: attachChatListener, AVATAR_ICONS: AVATAR_ICONS, equippedIcon: equippedIcon, renderAvatarPicker: renderAvatarPicker, setAvatarIcon: setAvatarIcon, shopSwatchHtml: shopSwatchHtml, shopTileHtml: shopTileHtml, draw: drawApi, movieNight: mnApi, get wallet(){ return wallet; }, get useCloud(){ return useCloud; }, get chatRetries(){ return chatRetries; }, get chatAttached(){ return !!chatUnsub; }};
+</script>
+<style id="arc-quality-styles">
+:root{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-low{--arc-q-glow:0 0 0 transparent;--arc-q-sat:1;--arc-q-contrast:1}
+body.arc-quality-medium{--arc-q-glow:0 0 9px rgba(80,160,255,.12);--arc-q-sat:1.04;--arc-q-contrast:1.015}
+body.arc-quality-high{--arc-q-glow:0 0 16px rgba(65,165,255,.22),0 0 34px rgba(90,95,255,.10);--arc-q-sat:1.13;--arc-q-contrast:1.04}
+body.arc-quality-ultra{--arc-q-glow:0 0 22px rgba(65,185,255,.32),0 0 52px rgba(105,85,255,.18);--arc-q-sat:1.22;--arc-q-contrast:1.07}
+body.arc-quality-low canvas{filter:none!important;box-shadow:none!important;image-rendering:pixelated}
+body.arc-quality-medium canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 5px rgba(92,190,255,.24));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-ultra canvas{filter:saturate(var(--arc-q-sat)) contrast(var(--arc-q-contrast)) drop-shadow(0 0 9px rgba(91,190,255,.38));box-shadow:var(--arc-q-glow);image-rendering:auto}
+body.arc-quality-high canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.14);outline-offset:1px}
+body.arc-quality-ultra canvas:not([width="40"]):not([width="64"]):not([width="96"]){outline:1px solid rgba(135,205,255,.23);outline-offset:2px}
+#arc-quality-widget{position:fixed;z-index:2147483000;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));font:600 12px/1.3 system-ui,sans-serif;color:#f4f7ff}
+#arc-quality-toggle{border:1px solid #6288b9;background:rgba(10,17,31,.94);color:#fff;border-radius:999px;padding:9px 13px;box-shadow:0 4px 18px #0008;cursor:pointer;backdrop-filter:blur(10px)}
+#arc-quality-menu{display:none;position:absolute;right:0;bottom:44px;min-width:176px;padding:10px;background:rgba(9,15,28,.97);border:1px solid #456184;border-radius:14px;box-shadow:0 8px 28px #000a;backdrop-filter:blur(14px)}
+#arc-quality-menu[aria-hidden="false"]{display:block}
+#arc-quality-menu strong{display:block;margin:2px 4px 8px;color:#b9d8ff;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#arc-quality-menu button{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 10px;margin:3px 0;border:1px solid transparent;border-radius:9px;background:#18253a;color:#fff;text-align:left;cursor:pointer}
+#arc-quality-menu button[aria-pressed="true"]{border-color:#70b8ff;background:#203b5b}
+#arc-quality-menu small{display:block;color:#9eafc6;font-weight:400;margin:7px 4px 2px}
+#arc-quality-fx{position:fixed;inset:0;width:100%;height:100%;z-index:2147482000;pointer-events:none;mix-blend-mode:screen;opacity:.0;transition:opacity .35s ease}
+body.arc-quality-medium #arc-quality-fx{opacity:.22}body.arc-quality-high #arc-quality-fx{opacity:.48}body.arc-quality-ultra #arc-quality-fx{opacity:.72}
+@keyframes arcAura{0%,100%{filter:drop-shadow(0 0 5px rgba(60,160,255,.14))}50%{filter:drop-shadow(0 0 13px rgba(110,105,255,.26))}}
+body.arc-quality-high canvas{animation:arcAura 5s ease-in-out infinite}body.arc-quality-ultra canvas{animation:arcAura 3.5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){#arc-quality-widget *,#arc-quality-fx,body.arc-quality-high canvas,body.arc-quality-ultra canvas{animation:none!important;transition:none!important}}
+</style>
+<script id="arc-quality-controller">
+(()=>{
+ const KEY='arcadio.graphicsQuality.v1',levels=['low','medium','high','ultra'];
+ const labels={low:'Low',medium:'Medium',high:'High',ultra:'Ultra'};
+ const descriptions={low:'Minimal effects · best performance',medium:'Balanced color and ambient sparkle',high:'Animated glow, lighting and particle accents',ultra:'Maximum glow, denser particles and interaction bursts'};
+ const counts={low:0,medium:9,high:20,ultra:36};let current='medium';
+ try{const saved=localStorage.getItem(KEY);if(levels.includes(saved))current=saved;}catch(e){}
+ const widget=document.createElement('div');widget.id='arc-quality-widget';
+ widget.innerHTML='<button id="arc-quality-toggle" type="button" aria-expanded="false" aria-controls="arc-quality-menu">✦ Graphics: <span id="arc-quality-current">Medium</span></button><div id="arc-quality-menu" role="group" aria-label="Graphics quality" aria-hidden="true"><strong>Graphics quality</strong>'+levels.map(v=>'<button type="button" data-quality="'+v+'" aria-pressed="false"><span>'+labels[v]+'</span><span aria-hidden="true">'+(v==='low'?'◌':v==='medium'?'◐':v==='high'?'✧':'✦')+'</span></button>').join('')+'<small id="arc-quality-description"></small></div>';
+ document.body.appendChild(widget);
+ const fx=document.createElement('canvas');fx.id='arc-quality-fx';fx.setAttribute('aria-hidden','true');document.body.appendChild(fx);
+ const ctx=fx.getContext('2d');let w=0,h=0,dpr=1,particles=[],bursts=[],raf=0,last=0;
+ const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ function resize(){dpr=Math.min(window.devicePixelRatio||1,current==='ultra'?1.6:current==='high'?1.35:1.15);w=innerWidth;h=innerHeight;fx.width=Math.round(w*dpr);fx.height=Math.round(h*dpr);fx.style.width=w+'px';fx.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);}
+ function seed(){particles=Array.from({length:counts[current]},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:-(.08+Math.random()*.25),r:.5+Math.random()*(current==='ultra'?2:1.2),a:.12+Math.random()*.35,phase:Math.random()*6.28}));}
+ function burst(x,y){if(current==='low'||reduced)return;const n=current==='ultra'?22:current==='high'?13:6;for(let i=0;i<n;i++){const a=Math.PI*2*i/n+(Math.random()-.5)*.35,s=1+Math.random()*(current==='ultra'?3:2);bursts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,r:1+Math.random()*2});}}
+ function frame(t){raf=0;if(!ctx||document.hidden||current==='low'||reduced)return;if(t-last<32){raf=requestAnimationFrame(frame);return;}last=t;ctx.clearRect(0,0,w,h);
+  for(const p of particles){p.x+=p.vx;p.y+=p.vy;if(p.y<-5){p.y=h+5;p.x=Math.random()*w;}p.phase+=.018;ctx.globalAlpha=p.a*(.65+.35*Math.sin(p.phase));ctx.fillStyle=current==='ultra'?'#9fe7ff':'#8ecfff';ctx.shadowBlur=current==='ultra'?12:6;ctx.shadowColor='#63aaff';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+  ctx.shadowBlur=0;bursts=bursts.filter(p=>p.life>0);for(const p of bursts){p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=.025;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle='#b8eaff';ctx.shadowBlur=10;ctx.shadowColor='#72baff';ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.shadowBlur=0;
+  raf=requestAnimationFrame(frame);
+ }
+ function syncFrame(){if(document.hidden||current==='low'||reduced){if(raf)cancelAnimationFrame(raf);raf=0;}else if(!raf)raf=requestAnimationFrame(frame);}
+ document.addEventListener('visibilitychange',syncFrame);window.addEventListener('pageshow',syncFrame);
+ resize();addEventListener('resize',resize,{passive:true});
+ function apply(value,save=true){if(!levels.includes(value))return;current=value;document.body.classList.remove(...levels.map(v=>'arc-quality-'+v));document.body.classList.add('arc-quality-'+value);
+  widget.querySelector('#arc-quality-current').textContent=labels[value];widget.querySelector('#arc-quality-description').textContent=descriptions[value];widget.querySelectorAll('[data-quality]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.quality===value)));
+  document.querySelectorAll('canvas').forEach(c=>{try{const c2=c.getContext('2d');if(c2){c2.imageSmoothingEnabled=value!=='low';if('imageSmoothingQuality'in c2)c2.imageSmoothingQuality=value==='ultra'?'high':value==='high'?'high':'medium';}}catch(e){}});
+  if(save){try{localStorage.setItem(KEY,value)}catch(e){}}seed();if(value==='low'){if(raf)cancelAnimationFrame(raf);raf=0;ctx.clearRect(0,0,w,h);bursts=[];}syncFrame();window.dispatchEvent(new CustomEvent('arcadio:graphicsqualitychange',{detail:{quality:value}}));
+ }
+ const toggle=widget.querySelector('#arc-quality-toggle'),menu=widget.querySelector('#arc-quality-menu');toggle.addEventListener('click',()=>{const open=menu.getAttribute('aria-hidden')==='true';menu.setAttribute('aria-hidden',String(!open));toggle.setAttribute('aria-expanded',String(open));});
+ widget.querySelectorAll('[data-quality]').forEach(b=>b.addEventListener('click',()=>{apply(b.dataset.quality);menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}));
+ document.addEventListener('click',e=>{if(!widget.contains(e.target)){menu.setAttribute('aria-hidden','true');toggle.setAttribute('aria-expanded','false')}});
+ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('canvas'))burst(e.clientX,e.clientY)},{passive:true});
+ document.addEventListener('keydown',e=>{if([' ','Enter','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){const c=document.querySelector('canvas');if(c){const r=c.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2)}}});
+ apply(current,false);if(reduced)fx.style.display='none';syncFrame();
+})();
+</script>
+
+<script src="/swpvp-skins.js" defer></script>
+</body>
+</html>
