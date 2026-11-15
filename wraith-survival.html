@@ -1579,8 +1579,12 @@ var F=[],P=null,projs=[],cubes=[];
 /* HIT FX (2026-11-13, trio rework): lightweight combat feedback — hit sparks, muzzle flashes, super bursts, elimination bursts. Pure visuals, no stats or balance change. */
 var FX=[];
 function addFx(x,y,kind,col){if(FX.length>80)FX.shift();FX.push({x:x,y:y,t:0,ttl:kind==='boom'?450:(kind==='super'?520:(kind==='muzzle'?150:220)),kind:kind,col:col||'#fff'});}
+/* SHARED JUICE (2026-11-14, Cee: VFX is the hook — and the same animation every time gets boring, so every event twists it: random shake size, flash colour/intensity by event, hitstop only on the big moments. Pure visuals, no stats or balance change.) */
+function juiceShake(m){bShake=Math.max(bShake,m);}
+function juiceFlash(ms,col){bFlash=Math.max(bFlash,ms);bFlashCol=col||'#ffd94d';}
 function drawFx(){for(var i=0;i<FX.length;i++){var fx=FX[i],k=1-fx.t/fx.ttl;if(k<=0)continue;ctx.save();ctx.globalAlpha=Math.max(0,k);if(fx.kind==='hit'||fx.kind==='muzzle'){ctx.fillStyle=fx.col;ctx.shadowColor=fx.col;ctx.shadowBlur=8;var r=(fx.kind==='muzzle'?9:11)*k+2;ctx.beginPath();ctx.arc(fx.x,fx.y,r,0,7);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(fx.x-r*1.6,fx.y);ctx.lineTo(fx.x+r*1.6,fx.y);ctx.moveTo(fx.x,fx.y-r*1.6);ctx.lineTo(fx.x,fx.y+r*1.6);ctx.stroke();}else{var rr=fx.kind==='super'?10+(1-k)*52:6+(1-k)*30;ctx.strokeStyle=fx.col;ctx.lineWidth=fx.kind==='super'?4:3;ctx.beginPath();ctx.arc(fx.x,fx.y,rr,0,7);ctx.stroke();ctx.fillStyle=fx.col;for(var s2=0;s2<6;s2++){var sa=s2*1.047+fx.t/90;ctx.beginPath();ctx.arc(fx.x+Math.cos(sa)*rr,fx.y+Math.sin(sa)*rr,2.5,0,7);ctx.fill();}}ctx.restore();}}
 var elapsed=0,sudden=false,msgT=0,lastTs=0,hudT=0;
+var bShake=0,bHitStop=0,bFlash=0,bFlashCol='#ffd94d';
 /* JUNGLE BEAST (Brawl objective, Cee 2026-11-03): a neutral beast in the
  * lower-center pit — slay it and your TEAM gets BEAST BLESSING (+25% basic
  * damage, full heal). First spawn 20s in, respawn 45s after each kill. The
@@ -1940,12 +1944,12 @@ function showMsg(t){msgEl.textContent=t;msgT=2000;}
 function killF(o,from){
   /* MOBA: no elimination — the fighter respawns at base after 5s. The nexus decides the match, not takedowns. */
   if(isMoba()){
-    o.hp=0;o.alive=false;o.respawnT=5000;addFx(o.x,o.y,'boom',o.col);
+    o.hp=0;o.alive=false;o.respawnT=5000;addFx(o.x,o.y,'boom',o.col);juiceShake(4+Math.random()*2);juiceFlash(180+Math.random()*60,o.col);bHitStop=Math.max(bHitStop,35);
     if(from&&from!==o)from.kills++;
     showMsg(o===P?'YOU ARE DOWN — RESPAWN IN 5s':(o.n+' IS DOWN — RESPAWN IN 5s'));
     return;
   }
-  o.hp=0;o.alive=false;addFx(o.x,o.y,'boom',o.col);
+  o.hp=0;o.alive=false;addFx(o.x,o.y,'boom',o.col);juiceShake(5+Math.random()*2);juiceFlash(280+Math.random()*90,o.col);bHitStop=Math.max(bHitStop,60+Math.random()*15);
   if(from&&from!==o)from.kills++;
   showMsg(o.n+' IS OUT');
   if(MODES[mode]&&MODES[mode].tag&&reserves[o.team]&&reserves[o.team].length){
@@ -1966,7 +1970,7 @@ function hurt(o,dmg,from,kind){
     if(o.n==='KAVIO'&&(kind==='shot'||kind==='spec')){o.blkFx=120;if(o===P)showMsg('PHASED!');return;}
     blocked=true;dmg=Math.ceil(dmg*0.3);
   }
-  o.hp-=dmg;o.flash=120;addFx(o.x,o.y,'hit',from?from.col:'#fff');
+  o.hp-=dmg;o.flash=120;addFx(o.x+(Math.random()-.5)*6,o.y+(Math.random()-.5)*6,'hit',from?from.col:'#fff');if(kind!=='dot')juiceShake(1+Math.min(1.5,(dmg||10)/12)+(kind==='melee'?0.5:0)+Math.random()*0.5);
   if(kind==='melee'&&from&&from!==o){var ka=Math.atan2(o.y-from.y,o.x-from.x),nx2=o.x+Math.cos(ka)*6,ny2=o.y+Math.sin(ka)*6;if(!hitWall(nx2,o.y,o.r))o.x=nx2;if(!hitWall(o.x,ny2,o.r))o.y=ny2;}
   if(blocked)o.blkFx=120;
   if(from&&from!==o)from.charge=Math.min(100,from.charge+12);
@@ -2078,7 +2082,7 @@ function fireSuper(f){
   /* MOBA: the special costs 10 mana (max 100, regen 4/s) — the Fight mana rule — and stays usable all match. Other modes keep the charge gate (fire at 100, finisher spent). */
   if(isMoba()){if((f.mn||0)<10)return false;f.mn-=10;}
   else{if(f.charge<100)return false;f.charge=0;f.supUsed=true; /* the finisher is spent — no 2nd phase from here on */}
-  f.supFx=350;addFx(f.x,f.y,'super',f.col);
+  f.supFx=350;addFx(f.x,f.y,'super',f.col);if(isMoba()){juiceShake(2+Math.random()*2);}else{juiceShake(4+Math.random()*2);juiceFlash(220+Math.random()*80,'#ffd94d');bHitStop=Math.max(bHitStop,45+Math.random()*15);}
   var i,a,an;
   if(f.n==='KAVIO'){
     for(i=-2;i<=2;i++){an=f.dir+i*0.35;projs.push({x:f.x+Math.cos(an)*18,y:f.y+Math.sin(an)*18,vx:Math.cos(an)*320,vy:Math.sin(an)*320,dmg:10,from:f,r:5,life:800,kind:'spec',homing:false});}
@@ -2138,6 +2142,10 @@ function botThink(b,dt){
 
 function update(dt){
   if(state!=='fight'||paused)return;
+  /* SHARED JUICE: hitstop freezes the sim for a beat (draw still runs, so the frozen frame shakes) — big moments only, never every hit. Clamped at 0 so it never goes negative. */
+  if(bHitStop>0){bHitStop-=dt;if(bHitStop>0)return;bHitStop=0;}
+  bShake=Math.max(0,bShake-dt*0.03);
+  bFlash=Math.max(0,bFlash-dt);
   elapsed+=dt;
   if(elapsed>75000&&!sudden&&!isMoba()){sudden=true;showMsg('SUDDEN DEATH — THE NIGHT CLOSES IN');}
   if(sudden){
@@ -2281,7 +2289,7 @@ function update(dt){
   for(var c=0;c<cubes.length;c++){
     var cb=cubes[c];if(cb.taken)continue;
     for(var f2=0;f2<F.length;f2++){var ff=F[f2];if(!ff.alive)continue;
-      if(Math.hypot(ff.x-cb.x,ff.y-cb.y)<ff.r+16){cb.taken=true;ff.cubes++;ff.maxhp+=20;ff.hp=Math.min(ff.maxhp,ff.hp+20);if(ff===P)showMsg('POWER UP — +12% DAMAGE');break;}}
+      if(Math.hypot(ff.x-cb.x,ff.y-cb.y)<ff.r+16){cb.taken=true;ff.cubes++;ff.maxhp+=20;ff.hp=Math.min(ff.maxhp,ff.hp+20);if(ff===P)showMsg('POWER UP — +12% DAMAGE');addFx(ff.x,ff.y,'boom','#ffd94d');juiceShake(2);juiceFlash(120,'#ffd94d');break;}}
   }
   if(msgT>0){msgT-=dt;if(msgT<=0)msgEl.textContent='';}
   hudT-=dt;if(hudT<=0){hudT=100;renderHud();}
@@ -2414,6 +2422,7 @@ function draw(){
    * The old trio-only dungeon-dark theme is gone. Gameplay untouched. */
   ctx.fillStyle='#0a0a14';
   ctx.fillRect(0,0,AW,AH);
+  ctx.save();if(bShake>0)ctx.translate((Math.random()-.5)*2*bShake,(Math.random()-.5)*2*bShake);
   ctx.strokeStyle='#12121e';ctx.lineWidth=1;
   for(var g=0;g<AW;g+=40){ctx.beginPath();ctx.moveTo(g,0);ctx.lineTo(g,AH);ctx.stroke();}
   for(var g2=0;g2<AH;g2+=40){ctx.beginPath();ctx.moveTo(0,g2);ctx.lineTo(AW,g2);ctx.stroke();}
@@ -2549,6 +2558,7 @@ function draw(){
     ctx.fillText(f.n+(f.cubes>0?' ✦'+f.cubes:''),lx,ly);
   }
   drawFx();
+  ctx.restore();
   if(sudden){ctx.strokeStyle='rgba(255,40,40,.7)';ctx.lineWidth=6;ctx.strokeRect(3,3,AW-6,AH-6);}
   /* Wraith Verdict flash: the verdict art over the arena for 900ms after a verdict. */
   if(verdictFxUntil>0&&elapsed<verdictFxUntil){
@@ -2556,6 +2566,8 @@ function draw(){
     if(_vi){var _vw=Math.min(AW*0.62,300),_vh=_vw*_vi.naturalHeight/_vi.naturalWidth;ctx.save();ctx.globalAlpha=Math.max(0.35,1-(elapsed-(verdictFxUntil-900))/900);ctx.drawImage(_vi,(AW-_vw)/2,(AH-_vh)/2-30,_vw,_vh);ctx.restore();}
     else{ctx.save();ctx.fillStyle='#ffd94d';ctx.font='bold 26px monospace';ctx.textAlign='center';ctx.fillText('★ WRAITH VERDICT ★',AW/2,AH/2-30);ctx.restore();}
   }
+  /* SHARED JUICE flash: full-screen wash in the event's colour — gold for supers and cubes, the fallen fighter's colour for KOs — fading as bFlash counts down. */
+  if(bFlash>0){ctx.save();ctx.globalAlpha=Math.min(.45,bFlash/500);ctx.fillStyle=bFlashCol;ctx.fillRect(0,0,AW,AH);ctx.restore();}
 }
 
 function loop(ts){
@@ -3064,7 +3076,7 @@ function fpsEnd(win){
 /* click the arena to shoot (mouse / touch tap) */
 (function(){try{var _cv=document.getElementById('bcv');if(_cv)_cv.addEventListener('pointerdown',function(){if(fpsActive&&fpsPlayer&&fpsPlayer.alive)fpsMouse=true;});}catch(e){}})();
 
-window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,fpsStop:fpsStop,get fpsActive(){return fpsActive;},get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
+window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,fpsStop:fpsStop,get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
 
 })();
 
