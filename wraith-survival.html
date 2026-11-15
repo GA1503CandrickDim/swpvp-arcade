@@ -2746,6 +2746,7 @@ bHold(document.getElementById('bExit'),function(){if(brawlActive)exitBrawl();},f
 function togglePause(){
   if(!brawlActive||state!=='fight')return;
   paused=!paused;
+  if(paused)fpsMouseUnlock();
   if(paused){ovb.innerHTML='<h1>PAUSED</h1><p>'+MODES[mode].label+' — PRESS P TO KEEP FIGHTING</p><p><button class="big" onclick="BRAWL.resume()">▶ RESUME</button></p><p><button onclick="goTopModes()">← ALL MODES</button></p>';ov.style.display='flex';}
   else ov.style.display='none';
 }
@@ -2820,6 +2821,7 @@ function exitBrawl(){if(typeof fpsStop==='function')fpsStop();brawlActive=false;
  * Controls: WASD move, LEFT/RIGHT turn, J or click shoot, L special,
  * P pause, gamepad left stick moves + right stick turns + RT shoots. */
 var fpsActive=false, fpsPaused=false, fpsPick=0, fpsTime=0, fpsOver=false;
+var fpsMouseSens=0.0022; // radians per pixel of mouse movement (pointer lock)
 /* GYRO AIM — SHOWDOWN FPS ONLY (2026-11-14, Cee): optional, OFF by default. Tilt the phone left/right to turn, like the right stick. Portrait reads gamma, landscape reads beta. Baseline is zeroed on enable and at every match start, so your natural hold is centre; RECENTER re-zeroes it. Deadzone +-2.5 deg + smoothing so a still phone never drifts. iOS needs a motion-permission tap (asked from the toggle). */
 var fpsGyroOn=false, fpsGyroBase=0, fpsGyroRaw=0, fpsGyroSmooth=0;
 function fpsGyroLean(ev){var a=0;try{a=(screen.orientation&&screen.orientation.angle)||window.orientation||0;}catch(e){}if(a===90)return ev.beta||0;if(a===-90||a===270)return -(ev.beta||0);return ev.gamma||0;}
@@ -2830,6 +2832,10 @@ function fpsGyroSet(on){fpsGyroOn=!!on;try{localStorage.setItem('vf_fps_gyro',fp
 function fpsGyroToggle(){if(fpsGyroOn){fpsGyroSet(false);return;}if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){try{DeviceOrientationEvent.requestPermission().then(function(st){if(st==='granted')fpsGyroSet(true);else showMsg('GYRO AIM NEEDS MOTION PERMISSION');}).catch(function(){showMsg('GYRO AIM NEEDS MOTION PERMISSION');});}catch(e){fpsGyroSet(true);}}else{fpsGyroSet(true);}}
 function fpsGyroBtn(){var b=document.getElementById('fGyroBtn');if(b){b.textContent='🎯 GYRO AIM: '+(fpsGyroOn?'ON':'OFF');var touch=false;try{touch=('ontouchstart' in window)||(navigator.maxTouchPoints>0);}catch(e){}b.style.display=(touch||fpsGyroOn)?'':'none';}var r=document.getElementById('bGyroRe');if(r)r.style.display=(fpsGyroOn&&fpsActive)?'':'none';}
 function fpsGyroInit(){var on=false;try{on=localStorage.getItem('vf_fps_gyro')==='1';}catch(e){}if(on)fpsGyroSet(true);else fpsGyroBtn();}
+/* MOUSE-LOOK — CS-STYLE FOR PC (2026-11-14, Cee): pointer lock on the arena canvas. Same touch test as the gyro toggle, so a touch device never tries to lock. */
+function fpsMouseLookOK(){try{var cv=document.getElementById('bcv');if(!cv||!cv.requestPointerLock)return false;if(('ontouchstart' in window)||((navigator.maxTouchPoints||0)>0))return false;return true;}catch(e){return false;}}
+function fpsTryMouseLock(){try{var cv=document.getElementById('bcv');if(!cv||document.pointerLockElement===cv)return false;if(!fpsMouseLookOK())return false;var pr=null;try{pr=cv.requestPointerLock();if(pr&&pr.catch)pr.catch(function(){});}catch(e){}return true;}catch(e){return false;}}
+function fpsMouseUnlock(){try{if(document.exitPointerLock)document.exitPointerLock();}catch(e){}}
 /* FPS SKILL BUTTONS (2026-11-14, Cee: Vainglory x Paladins): the Brawl mini-row + attack-cluster do nothing in FPS, so they hide while an FPS match runs and the FPS cluster takes their place. Restored on end/stop, so 3v3/6v6 are untouched. */
 function fpsSkillBarShow(on){try{if(fpsSkillBar)fpsSkillBar.style.display=on?'':'none';var ac=ctl.querySelector('.attack-cluster');if(ac)ac.style.display=on?'none':'';var mr=ctl.querySelector('.mini-row');if(mr)mr.style.display=on?'none':'';}catch(e){}}
 var FPS_TARGET=10, FPS_LIMIT=180000;
@@ -2884,9 +2890,9 @@ function fpsStart(pickIdx){
   if(skillBar)skillBar.style.display='none';if(mobaSkillBar)mobaSkillBar.style.display='none';
   fpsActive=true;
   if(fpsGyroOn){fpsGyroBase=fpsGyroRaw;fpsGyroSmooth=0;}fpsGyroBtn();fpsSkillBarShow(true);
-  showMsg('SHOWDOWN FPS — FIRST TO '+FPS_TARGET+' ELIMINATIONS · '+R.n+' · YOUR SPECIAL: '+R.sup);
+  showMsg('SHOWDOWN FPS — FIRST TO '+FPS_TARGET+' ELIMINATIONS · '+R.n+' · YOUR SPECIAL: '+R.sup+(fpsMouseLookOK()?' · CLICK THE ARENA TO LOCK YOUR MOUSE':''));
 }
-function fpsStop(){fpsActive=false;fpsPaused=false;fpsGyroBtn();fpsSkillBarShow(false);}
+function fpsStop(){fpsActive=false;fpsPaused=false;fpsGyroBtn();fpsSkillBarShow(false);fpsMouseUnlock();}
 function fpsRespawn(who){
   var others=[fpsPlayer].concat(fpsFoes);
   var sp=fpsSpawnFar(others);
@@ -3079,7 +3085,7 @@ function fpsDraw(){
   ctx.restore();
 }
 function fpsEnd(win){
-  if(fpsOver)return;fpsOver=true;fpsActive=false;state='over';fpsGyroBtn();fpsSkillBarShow(false);
+  if(fpsOver)return;fpsOver=true;fpsActive=false;state='over';fpsGyroBtn();fpsSkillBarShow(false);fpsMouseUnlock();
   for(var i=0;i<fpsFoes.length;i++)fpsFoes[i].respawnT=0;
   var top=fpsPlayer,topS=fpsPlayer.score;
   for(var j=0;j<fpsFoes.length;j++)if(fpsFoes[j].score>topS){topS=fpsFoes[j].score;top=fpsFoes[j];}
@@ -3100,10 +3106,12 @@ function fpsEnd(win){
   if(!win){if(typeof rvShow==='function'){rvShow(true,'bov');window.__rvMode='brawl';}}
 }
 /* click the arena to shoot (mouse / touch tap) */
-(function(){try{var _cv=document.getElementById('bcv');if(_cv)_cv.addEventListener('pointerdown',function(){if(fpsActive&&fpsPlayer&&fpsPlayer.alive)fpsMouse=true;});}catch(e){}})();
+(function(){try{var _cv=document.getElementById('bcv');if(_cv)_cv.addEventListener('pointerdown',function(){if(fpsActive&&fpsPlayer&&fpsPlayer.alive){if(fpsTryMouseLock())return;fpsMouse=true;}});}catch(e){}})();
+/* MOUSE-LOOK: while the pointer is locked on the arena, mouse movement turns the view (no pitch — the raycaster is flat, so up/down does nothing). */
+(function(){try{document.addEventListener('mousemove',function(e){if(document.pointerLockElement!==document.getElementById('bcv'))return;if(!fpsActive||fpsPaused||!fpsPlayer||!fpsPlayer.alive)return;var dx=e.movementX||0;fpsPlayer.ang+=dx*fpsMouseSens;});}catch(e){}})();
 try{fpsGyroInit();}catch(e){}
 
-window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
+window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsMouseSens(){return fpsMouseSens;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
 
 })();
 
