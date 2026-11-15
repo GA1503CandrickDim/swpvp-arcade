@@ -378,7 +378,7 @@ var vfTab='hero';
 var vfGridTop=0;
 function renderSel(){state='select';bossMode=false;showCtl(false);var tw=$('tmwrap');if(tw)tw.style.visibility='hidden';var g0=document.getElementById('vfGrid');if(g0)vfGridTop=g0.scrollTop;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx],role=roleOf(R.n);var pr=role+' · '+R.sp;if(!grimUnlocked)pr+=' · GRIM: BEAT THE BOSS TO UNLOCK';var h='';h+='<div class="vf-sel"><div class="vf-sel-main">';h+='<div class="vf-sel-left">';h+='<div class="vf-card"><span class="vf-card-tag">YOU</span><b>'+R.n+'</b><span class="vf-dot" style="background:'+R.spc+';color:'+R.spc+'"></span></div>';h+='<div class="vf-vs">VS</div>';h+='<div class="vf-card"><span class="vf-card-tag">CPU</span><b>???</b><span class="vf-dot" style="background:#666;color:#666"></span></div>';h+='<div class="vf-skills">';h+='<div class="vf-skill" style="border-color:'+R.spc+';color:'+R.spc+'">✦ '+R.sp+'</div>';h+='<div class="vf-skill">👊 PUNCH</div><div class="vf-skill">🦶 KICK</div><div class="vf-skill">🛡️ BLOCK</div>';h+='</div></div>';h+='<div class="vf-sel-center">';h+='<canvas id="selStage" width="180" height="200"></canvas>';h+='<div class="vf-picked">'+vfPickedHtml()+'</div>';h+='<div class="vf-hint">PICK UP TO 3 — 1V1 USES 1ST · 2V2 USES 1ST+2ND · 3V3 USES ALL 3</div>';h+='</div>';h+='<div class="vf-sel-right">';h+='<div class="vf-tabs"><button class="vf-tab'+(vfTab==='hero'?' sel':'')+'" onclick="vfTabHero()">HERO</button><button class="vf-tab'+(vfTab==='skins'?' sel':'')+'" onclick="vfTabSkins()">SKINS</button></div>';h+='<button class="vf-scroll" onclick="vfScrollGrid(-1)">▲ SCROLL</button>';if(vfTab==='skins'){h+=vfSkinsHtml(R,role);}else{h+='<div class="vf-grid" id="vfGrid">'+vfGridHtml()+'</div>';}h+='<button class="vf-scroll" onclick="vfScrollGrid(1)">▼ SCROLL</button>';h+='</div></div>';h+='<div class="vf-sel-bottom"><button class="vf-back" onclick="goFightModeSelect()">← MODES</button>'+vfModeChipsHtml()+'<button class="vf-ok" onclick="vfConfirm()">▶ OK</button></div>';h+='</div>';showOv('<span style="color:'+R.spc+'">'+R.n+'</span>',pr,h);var g1=document.getElementById('vfGrid');if(g1)g1.scrollTop=vfGridTop;drawSelFighter();}
 function vfGridHtml(){var h='';for(var i=0;i<FTR.length;i++){if(FTR[i].boss)continue;var R=FTR[i],pi=sel.indexOf(i);if(R.locked&&!grimUnlocked){h+='<button class="vf-port" onclick="grimLocked()"><span class="vf-ava" style="background:#1a1a22;border-color:#444;color:#888">🔒</span><span class="vf-pname">GRIM · LOCKED</span>'+(R.lore?'<span class="vf-plore">'+R.lore+'</span>':'')+'</button>';}else{h+='<button class="vf-port'+(pi>=0?' sel':'')+'" onclick="pickSel('+i+')"><span class="vf-ava" style="background:'+R.hood+';border-color:'+R.spc+'">'+R.n.charAt(0)+(pi>=0?'<span class="vf-pnum">'+(pi+1)+'</span>':'')+'</span><span class="vf-pname">'+R.n+'</span>'+(R.lore?'<span class="vf-plore">'+R.lore+'</span>':'')+'</button>';}}h+='<button class="vf-port'+(wavesHero==='kynth'?' sel':'')+'" onclick="pickWavesHero(\'kynth\')"><span class="vf-ava" style="background:#16233d;border-color:#7fa8d8">K</span><span class="vf-pname">KYNTH · WAVES</span></button>';h+='<button class="vf-port'+(wavesHero==='goldraven'?' sel':'')+'" onclick="pickWavesHero(\'goldraven\')"><span class="vf-ava" style="background:#3a2a10;border-color:#f2b91e">G</span><span class="vf-pname">GOLDRAVEN · WAVES</span></button>';return h;}
-function vfModeChipsHtml(){var M=[['1v1','🥊 1V1'],['boss','★ BOSS'],['2v2','👥 2V2'+(tagUnlocked()?'':' 🔒')],['3v3','⚡ 3V3'],['6v6','⚔️ 6V6'],['fps','🎯 SHOWDOWN FPS'],['mobaFps','⚔️ MOBA FPS']];var h='';for(var k=0;k<M.length;k++){var _im=(M[k][0]==='fps'||M[k][0]==='mobaFps')?'':vfModeImgTag('mode-'+M[k][0]);h+='<button class="vf-chip'+(vfSelMode===M[k][0]?' sel':'')+'" onclick="vfPickMode(\''+M[k][0]+'\')">'+_im+M[k][1]+'</button>';}return h;}
+function vfModeChipsHtml(){var M=[['1v1','🥊 1V1'],['boss','★ BOSS'],['2v2','👥 2V2'+(tagUnlocked()?'':' 🔒')],['3v3','⚡ 3V3'],['6v6','⚔️ 6V6'],['fps','🎯 SHOWDOWN FPS'],['mobaFps','⚔️ MOBA FPS'],['fusion','⚡ FUSION']];var h='';for(var k=0;k<M.length;k++){var _im=(M[k][0]==='fps'||M[k][0]==='mobaFps'||M[k][0]==='fusion')?'':vfModeImgTag('mode-'+M[k][0]);h+='<button class="vf-chip'+(vfSelMode===M[k][0]?' sel':'')+'" onclick="vfPickMode(\''+M[k][0]+'\')">'+_im+M[k][1]+'</button>';}return h;}
 function vfPickedHtml(){var h='';for(var k=0;k<3;k++){var fi=sel[k];if(fi!==undefined&&FTR[fi])h+='<span class="vf-pick">'+(k+1)+'. '+FTR[fi].n+'</span>';else h+='<span class="vf-pick empty">'+(k+1)+'. —</span>';}return h;}
 function vfTabHero(){vfTab='hero';renderSel();}
 function vfTabSkins(){vfTab='skins';renderSel();}
@@ -387,7 +387,7 @@ if(!_so){h+='<br><br>SIGILOS — <b>SIGILIZED DEVIL</b> · 250 ATOMS<br><span st
 else{h+='<br><br>SIGILOS SKINS<br><button class="vf-chip'+(_sc==='main'?' sel':'')+'" onclick="vfSigSkinSet(\'main\')">MAIN</button> <button class="vf-chip'+(_sc==='sigilized'?' sel':'')+'" onclick="vfSigSkinSet(\'sigilized\')">SIGILIZED DEVIL</button><br><span style="color:#999">Sigilos — Sigilized Devil. Clean standing art.</span>'+(_sc==='sigilized'?' <b>· SIGILIZED DEVIL</b>':'');}
 return h+'</div></div>';}
 function vfPickMode(id){vfSelMode=id;renderSel();}
-function vfConfirm(){if(vfSelMode==='1v1')start1v1();else if(vfSelMode==='boss')startBoss();else if(vfSelMode==='2v2')start2v2();else if(vfSelMode==='3v3')startBrawl3();else if(vfSelMode==='6v6')start6v6();else if(vfSelMode==='fps')startShowdownFPS();else if(vfSelMode==='mobaFps')startMobaFps();else if(vfSelMode==='showdown')startShowdown();else if(vfSelMode==='waves')startWaves();else if(vfSelMode==='defense')goDefense();else start1v1();}
+function vfConfirm(){if(vfSelMode==='1v1')start1v1();else if(vfSelMode==='boss')startBoss();else if(vfSelMode==='2v2')start2v2();else if(vfSelMode==='3v3')startBrawl3();else if(vfSelMode==='6v6')start6v6();else if(vfSelMode==='fps')startShowdownFPS();else if(vfSelMode==='mobaFps')startMobaFps();else if(vfSelMode==='fusion')startFusion();else if(vfSelMode==='showdown')startShowdown();else if(vfSelMode==='waves')startWaves();else if(vfSelMode==='defense')goDefense();else start1v1();}
 function vfScrollGrid(d){var g=document.getElementById('vfGrid');if(g)g.scrollTop+=d*(g.clientHeight*.8);}
 function drawSelFighter(){var sc=document.getElementById('selStage');if(!sc)return;var g=sc.getContext('2d');if(!g)return;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx];var W2=sc.width,H2=sc.height;g.clearRect(0,0,W2,H2);try{var gr=g.createRadialGradient(W2/2,100,8,W2/2,100,100);gr.addColorStop(0,R.spc);gr.addColorStop(1,'rgba(0,0,0,0)');g.globalAlpha=.28;g.fillStyle=gr;g.fillRect(0,0,W2,H2);g.globalAlpha=1;}catch(e){}g.fillStyle='#15151d';g.strokeStyle=R.spc;g.lineWidth=2;g.beginPath();g.ellipse(W2/2,184,66,10,0,0,Math.PI*2);g.fill();g.stroke();g.fillStyle='#39d353';g.globalAlpha=.5;g.beginPath();g.ellipse(W2/2,184,24,4,0,0,Math.PI*2);g.fill();g.globalAlpha=1;var saved=ctx;try{ctx=g;drawF({ti:idx,x:W2/2,y:180,dir:1,cr:false,ko:false,side:0,hit:0,walk:0,atkT:0,blk:false,phase2:false},2.5);}catch(e){}ctx=saved;}
 function grimLocked(){$('ovp').innerHTML='GRIM IS LOCKED — BEAT THE BOSS TO UNLOCK';beep(300,.08);}
@@ -460,6 +460,19 @@ function startMobaFps(){
   hideOv();showCtl(false);
   try{showOnly('brawlGame');}catch(e){}
   try{BRAWL.startMobaFps(ri);}catch(e){}
+}
+
+
+function startFusion(){
+  if(!sel.length){setMsg('PICK A FIGHTER FIRST!');return;}
+  if(!window.BRAWL||!window.BRAWL.ROSTER||!window.BRAWL.startFusion){setMsg('BRAWL NOT READY');return;}
+  var ri=ftrToRosterIdx(sel[0]);
+  if(ri<0){setMsg('PICK A FIGHTER FIRST!');return;}
+  var R=window.BRAWL.ROSTER[ri];
+  if(R&&R.n==='GRIM'&&!grimUnlocked){grimLocked();return;}
+  hideOv();showCtl(false);
+  try{showOnly('brawlGame');}catch(e){}
+  try{BRAWL.startFusion(ri);}catch(e){}
 }
 
 
@@ -2839,7 +2852,7 @@ function exitBrawl(){if(typeof fpsStop==='function')fpsStop();brawlActive=false;
  * Controls: WASD move, LEFT/RIGHT turn, J or click shoot, L special,
  * P pause, gamepad left stick moves + right stick turns + RT shoots. */
 var fpsActive=false, fpsPaused=false, fpsPick=0, fpsTime=0, fpsOver=false;
-var fpsMobaMode=false, fpsAllies=[], fpsTeamScore=[0,0], fpsPrevDash=false, fpsDashHeld=false;
+var fpsMobaMode=false, fpsAllies=[], fpsTeamScore=[0,0], fpsPrevDash=false, fpsDashHeld=false, fpsFusionMode=false, fpsCharges=[], fpsCubes=[];
 var fpsMouseSens=0.0022; // radians per pixel of mouse movement (pointer lock)
 /* GYRO AIM — SHOWDOWN FPS ONLY (2026-11-14, Cee): optional, OFF by default. Tilt the phone left/right to turn, like the right stick. Portrait reads gamma, landscape reads beta. Baseline is zeroed on enable and at every match start, so your natural hold is centre; RECENTER re-zeroes it. Deadzone +-2.5 deg + smoothing so a still phone never drifts. iOS needs a motion-permission tap (asked from the toggle). */
 var fpsGyroOn=false, fpsGyroBase=0, fpsGyroRaw=0, fpsGyroSmooth=0;
@@ -2900,13 +2913,51 @@ function fpsOpenCells(){var out=[];for(var y=1;y<fpsCurMap.length-1;y++)for(var 
 function fpsSpawnFar(others){var cells=fpsOpenCells(),best=null,bd=-1;for(var t=0;t<40;t++){var c=cells[Math.floor(Math.random()*cells.length)];var d=1e9;for(var i=0;i<others.length;i++)d=Math.min(d,Math.hypot(c.x-others[i].x,c.y-others[i].y));if(d>bd){bd=d;best=c;}}return best||cells[0];}
 function fpsMkFoe(ri){
   var R=ROSTER[ri];
-  return {ri:ri,n:R.n,col:R.col,spr:R.spr,sup:R.sup,team:1,x:0,y:0,ang:0,hp:100,alive:true,respawnT:0,score:0,shootCd:0,aiT:0,wx:0,wy:0,flash:0,dashT:0,dashCd:0};
+  return {ri:ri,n:R.n,col:R.col,spr:R.spr,sup:R.sup,team:1,x:0,y:0,ang:0,hp:100,alive:true,respawnT:0,score:0,shootCd:0,aiT:0,wx:0,wy:0,flash:0,dashT:0,dashCd:0,cubes:0,chargeCd:0};
 }
 function fpsSpawnTeam(team,others){var cells=fpsOpenCells();var half=[];for(var i=0;i<cells.length;i++){var c=cells[i];if((team===0&&c.x<384)||(team===1&&c.x>=384))half.push(c);}if(!half.length)half=cells;var best=null,bd=-1;for(var t=0;t<40;t++){var c2=half[Math.floor(Math.random()*half.length)];var d=1e9;for(var j=0;j<others.length;j++)d=Math.min(d,Math.hypot(c2.x-others[j].x,c2.y-others[j].y));if(d>bd){bd=d;best=c2;}}return best||half[0];}
 function fpsIsMelee(f){var R=ROSTER[f.ri]||{};return R.rng==='melee';}
 function fpsEnemiesOf(shooter){if(!fpsMobaMode)return shooter===fpsPlayer?fpsFoes:[fpsPlayer].concat(fpsFoes.filter(function(f){return f!==shooter;}));return shooter.team===0?fpsFoes:[fpsPlayer].concat(fpsAllies.filter(function(f){return f!==shooter;}));}
-function fpsSwipe(shooter){if(!shooter||!shooter.alive)return;var best=null,bd=1e9;var targets=fpsEnemiesOf(shooter);for(var i=0;i<targets.length;i++){var o=targets[i];if(!o||!o.alive||o.dashT>0)continue;var dx=o.x-shooter.x,dy=o.y-shooter.y,d=Math.hypot(dx,dy);if(d>95||d<8)continue;var da=Math.atan2(dy,dx)-shooter.ang;while(da>Math.PI)da-=6.28318;while(da<-Math.PI)da+=6.28318;if(Math.abs(da)<0.5&&d<bd&&fpsLOS(shooter.x,shooter.y,o.x,o.y)){bd=d;best=o;}}fpsShots.push({x:shooter.x,y:shooter.y,ang:shooter.ang,dist:best?bd:95,t:0,ttl:120,col:shooter.col});if(shooter===fpsPlayer){fpsFlash=60;}if(best){best.hp-=30;best.flash=120;addFx(best.x,best.y,'hit',shooter.col);if(shooter===fpsPlayer)fpsPlayer.charge=Math.min(100,fpsPlayer.charge+6);if(best.hp<=0)fpsKill(best,shooter);}}
+function fpsSwipe(shooter){if(!shooter||!shooter.alive)return;var best=null,bd=1e9;var targets=fpsEnemiesOf(shooter);for(var i=0;i<targets.length;i++){var o=targets[i];if(!o||!o.alive||o.dashT>0)continue;var dx=o.x-shooter.x,dy=o.y-shooter.y,d=Math.hypot(dx,dy);if(d>95||d<8)continue;var da=Math.atan2(dy,dx)-shooter.ang;while(da>Math.PI)da-=6.28318;while(da<-Math.PI)da+=6.28318;if(Math.abs(da)<0.5&&d<bd&&fpsLOS(shooter.x,shooter.y,o.x,o.y)){bd=d;best=o;}}fpsShots.push({x:shooter.x,y:shooter.y,ang:shooter.ang,dist:best?bd:95,t:0,ttl:120,col:shooter.col});if(shooter===fpsPlayer){fpsFlash=60;}if(best){best.hp-=Math.round(30*fpsDmgMult(shooter));best.flash=120;addFx(best.x,best.y,'hit',shooter.col);if(shooter===fpsPlayer)fpsPlayer.charge=Math.min(100,fpsPlayer.charge+6);if(best.hp<=0)fpsKill(best,shooter);}}
 function fpsDash(f){if(!f||!f.alive||f.dashCd>0)return;f.dashCd=2000;f.dashT=200;}
+/* FUSION — placed skill charges + power cubes (2026-11-15, Cee: merge all Vanix Fight modes, first-person, controller-first, kills by placed skill charges — Bomberman-style mechanism, no Bomberman name/art/IP). The special becomes a PLACED CHARGE: it sits for 1.5s, then detonates in a CROSS (4 arms, 96 units) that is wall-limited (LOS) and team-safe — only enemies die, and the owner gets the elimination. Power cubes (the Brawl element) scatter on the map: +12% damage and +20 max HP each, max 3, they stay with you through a respawn. */
+function fpsDmgMult(f){return 1+0.12*((f&&f.cubes)||0);}
+function fpsPlaceCharge(f){
+  if(!f||!f.alive)return;
+  if(f===fpsPlayer){if(f.charge<100)return;f.charge=0;}
+  else{if((f.chargeCd||0)>0)return;f.chargeCd=6000;}
+  var _sn=(ROSTER[f.ri]||{}).sup||'SKILL';
+  var cx=f.x+Math.cos(f.ang)*30,cy=f.y+Math.sin(f.ang)*30;
+  if(fpsWall(cx,cy,8)){cx=f.x;cy=f.y;}
+  fpsCharges.push({x:cx,y:cy,team:f.team,owner:f,fuse:1500,col:f.col,sup:_sn});
+  addFx(cx,cy,'super',f.col);
+  if(f===fpsPlayer)showMsg(f.n+' ▸ PLANTS '+_sn);
+}
+function fpsDetonateCharge(c){
+  var arms=[[1,0],[-1,0],[0,1],[0,-1]];
+  for(var a=0;a<4;a++){fpsShots.push({x:c.x,y:c.y,ang:Math.atan2(arms[a][1],arms[a][0]),dist:96,t:0,ttl:220,col:c.col});}
+  addFx(c.x,c.y,'boom',c.col);
+  var en=fpsEnemiesOf(c.owner);
+  for(var i=0;i<en.length;i++){var o=en[i];if(!o||!o.alive||o.dashT>0)continue;
+    var dx=o.x-c.x,dy=o.y-c.y;
+    if(!((Math.abs(dx)<=96&&Math.abs(dy)<=14)||(Math.abs(dy)<=96&&Math.abs(dx)<=14)))continue;
+    if(!fpsLOS(c.x,c.y,o.x,o.y))continue;
+    fpsKill(o,c.owner);
+  }
+  if(c.owner===fpsPlayer)fpsFlash=120;
+}
+function fpsCubePickup(f){
+  if(!f||!f.alive||!fpsFusionMode)return;
+  for(var i=0;i<fpsCubes.length;i++){var c=fpsCubes[i];if(c.taken)continue;
+    if(Math.hypot(f.x-c.x,f.y-c.y)<30){
+      c.taken=true;
+      f.cubes=Math.min(3,(f.cubes||0)+1);
+      f.maxhp=(f.maxhp||150)+20;f.hp+=20;
+      addFx(c.x,c.y,'super','#ffd94d');
+      if(f===fpsPlayer)showMsg('POWER CUBE ✦ +12% DAMAGE · +20 HP ('+f.cubes+'/3)');
+    }
+  }
+}
 function fpsStart(pickIdx){
   if(pickIdx==null||pickIdx<0||pickIdx>=ROSTER.length)pickIdx=0;
   var R=ROSTER[pickIdx];
@@ -2917,10 +2968,10 @@ function fpsStart(pickIdx){
   var foes=[];
   while(foes.length<5&&pool.length){var v=pool.splice(Math.floor(Math.random()*pool.length),1)[0];if(!seen[v]){seen[v]=1;foes.push(fpsMkFoe(v));}}
   var spots=[{x:0,y:0}];
-  fpsPlayer={ri:pickIdx,n:R.n,col:R.col,spr:R.spr,sup:R.sup,team:0,x:0,y:0,ang:0,hp:100,alive:true,respawnT:0,score:0,charge:0,shootCd:0,dashT:0,dashCd:0};
+  fpsPlayer={ri:pickIdx,n:R.n,col:R.col,spr:R.spr,sup:R.sup,team:0,x:0,y:0,ang:0,hp:100,alive:true,respawnT:0,score:0,charge:0,shootCd:0,dashT:0,dashCd:0,cubes:0,maxhp:100,chargeCd:0};
   var sp=fpsSpawnFar(spots);fpsPlayer.x=sp.x;fpsPlayer.y=sp.y;fpsPlayer.ang=Math.random()*6.283;spots.push(fpsPlayer);
   for(var j=0;j<foes.length;j++){var s2=fpsSpawnFar(spots);foes[j].x=s2.x;foes[j].y=s2.y;foes[j].ang=Math.random()*6.283;foes[j].wx=s2.x;foes[j].wy=s2.y;spots.push(foes[j]);}
-  fpsCurMap=FPS_MAP;fpsMobaMode=false;fpsAllies=[];fpsTeamScore=[0,0];
+  fpsCurMap=FPS_MAP;fpsMobaMode=false;fpsFusionMode=false;fpsCharges=[];fpsCubes=[];fpsAllies=[];fpsTeamScore=[0,0];
   fpsFoes=foes;fpsShots=[];fpsTime=0;fpsOver=false;fpsPaused=false;fpsFlash=0;fpsHurtT=0;fpsPrevL=false;fpsPrevDash=false;
   brawlSetCanvas(480,360);
   F=[];P=null;projs=[];cubes=[];FX=[];beast.alive=false;
@@ -2945,12 +2996,12 @@ function fpsMobaStart(pickIdx){
   var allies=[],foes=[];
   while(allies.length<5&&pool.length){var v=pool.splice(Math.floor(Math.random()*pool.length),1)[0];if(!seen[v]){seen[v]=1;allies.push(fpsMkFoe(v));}}
   while(foes.length<6&&pool.length){var v2=pool.splice(Math.floor(Math.random()*pool.length),1)[0];if(!seen[v2]){seen[v2]=1;foes.push(fpsMkFoe(v2));}}
-  fpsCurMap=FPS_MOBA_MAP;fpsMobaMode=true;fpsTeamScore=[0,0];
+  fpsCurMap=FPS_MOBA_MAP;fpsMobaMode=true;fpsFusionMode=false;fpsCharges=[];fpsCubes=[];fpsTeamScore=[0,0];
   var spots=[{x:0,y:0}];
-  fpsPlayer={ri:pickIdx,n:R.n,col:R.col,spr:R.spr,sup:R.sup,team:0,x:0,y:0,ang:0,hp:150,alive:true,respawnT:0,score:0,charge:0,shootCd:0,dashT:0,dashCd:0};
+  fpsPlayer={ri:pickIdx,n:R.n,col:R.col,spr:R.spr,sup:R.sup,team:0,x:0,y:0,ang:0,hp:150,alive:true,respawnT:0,score:0,charge:0,shootCd:0,dashT:0,dashCd:0,cubes:0,maxhp:150,chargeCd:0};
   var sp=fpsSpawnTeam(0,spots);fpsPlayer.x=sp.x;fpsPlayer.y=sp.y;fpsPlayer.ang=0;spots.push(fpsPlayer);
-  for(var j=0;j<allies.length;j++){allies[j].team=0;allies[j].hp=150;var s2=fpsSpawnTeam(0,spots);allies[j].x=s2.x;allies[j].y=s2.y;allies[j].ang=0;allies[j].wx=s2.x;allies[j].wy=s2.y;spots.push(allies[j]);}
-  for(var k=0;k<foes.length;k++){foes[k].team=1;foes[k].hp=150;var s3=fpsSpawnTeam(1,spots);foes[k].x=s3.x;foes[k].y=s3.y;foes[k].ang=Math.PI;foes[k].wx=s3.x;foes[k].wy=s3.y;spots.push(foes[k]);}
+  for(var j=0;j<allies.length;j++){allies[j].team=0;allies[j].hp=150;allies[j].cubes=0;allies[j].maxhp=150;allies[j].chargeCd=0;var s2=fpsSpawnTeam(0,spots);allies[j].x=s2.x;allies[j].y=s2.y;allies[j].ang=0;allies[j].wx=s2.x;allies[j].wy=s2.y;spots.push(allies[j]);}
+  for(var k=0;k<foes.length;k++){foes[k].team=1;foes[k].hp=150;foes[k].cubes=0;foes[k].maxhp=150;foes[k].chargeCd=0;var s3=fpsSpawnTeam(1,spots);foes[k].x=s3.x;foes[k].y=s3.y;foes[k].ang=Math.PI;foes[k].wx=s3.x;foes[k].wy=s3.y;spots.push(foes[k]);}
   fpsAllies=allies;fpsFoes=foes;fpsShots=[];fpsTime=0;fpsOver=false;fpsPaused=false;fpsFlash=0;fpsHurtT=0;fpsPrevL=false;fpsPrevDash=false;
   brawlSetCanvas(480,360);
   F=[];P=null;projs=[];cubes=[];FX=[];beast.alive=false;
@@ -2964,11 +3015,21 @@ function fpsMobaStart(pickIdx){
   var db=document.getElementById('fpsDashBtn');if(db)db.style.display='';
   showMsg('MOBA FPS — 6V6 TEAM DEATHMATCH · FIRST TO '+FPS_MOBA_TARGET+' · '+R.n+' · YOUR SPECIAL: '+R.sup+(fpsMouseLookOK()?' · CLICK THE ARENA TO LOCK YOUR MOUSE':'')+' · SHIFT = DASH');
 }
+/* FUSION (2026-11-15, Cee: merge all Vanix Fight modes, first-person, controller-first, kills by placed skill charges — Bomberman-style mechanism, no Bomberman name/art/IP): 6v6 team deathmatch, first-person, on the MOBA-layout grid. First team to FPS_MOBA_TARGET eliminations wins; 3-minute timer, ties go to BLUE. Same shell as MOBA FPS (150 HP, melee 1.35x + dash + swing, ranged shoot), plus: the special PLANTS A CHARGE that detonates in a cross after a 1.5s fuse (wall-limited, team-safe, owner gets the elim), and 4 power cubes (+12% damage, +20 max HP, max 3) scattered on the map. No minions, no Nexus objective, no boss. The other modes are NOT deleted. */
+function fpsFusionStart(pickIdx){
+  fpsMobaStart(pickIdx);
+  if(!fpsActive)return;
+  fpsFusionMode=true;
+  fpsCharges=[];
+  fpsCubes=[{x:216,y:168,taken:false},{x:552,y:168,taken:false},{x:360,y:312,taken:false},{x:216,y:408,taken:false}];
+  var R=ROSTER[pickIdx]||{};
+  showMsg('⚡ FUSION — 6V6 TEAM DEATHMATCH · FIRST TO '+FPS_MOBA_TARGET+' · '+(R.n||'')+' · YOUR SPECIAL PLANTS A CHARGE · IT BLOWS UP IN A CROSS · GRAB CUBES FOR +DAMAGE');
+}
 function fpsStop(){fpsActive=false;fpsPaused=false;fpsGyroBtn();fpsSkillBarShow(false);fpsMouseUnlock();}
 function fpsRespawn(who){
   var others=[fpsPlayer].concat(fpsFoes).concat(fpsAllies);
   var sp=fpsMobaMode?fpsSpawnTeam(who.team||0,others):fpsSpawnFar(others);
-  who.x=sp.x;who.y=sp.y;who.ang=Math.random()*6.283;who.hp=fpsMobaMode?150:100;who.alive=true;who.respawnT=0;who.flash=0;
+  who.x=sp.x;who.y=sp.y;who.ang=Math.random()*6.283;who.hp=who.maxhp||(fpsMobaMode?150:100);who.alive=true;who.respawnT=0;who.flash=0;
   if(who===fpsPlayer){showMsg('BACK IN THE FIGHT — '+who.n);}
 }
 function fpsKill(victim,killer){
@@ -2989,11 +3050,12 @@ function fpsShoot(shooter){
   for(var i=0;i<targets.length;i++){var o=targets[i];if(!o||!o.alive||o.dashT>0)continue;var dx=o.x-shooter.x,dy=o.y-shooter.y,d=Math.hypot(dx,dy);if(d>520||d<8)continue;var da=Math.atan2(dy,dx)-a;while(da>Math.PI)da-=6.28318;while(da<-Math.PI)da+=6.28318;if(Math.abs(da)<0.09&&d<bd&&fpsLOS(shooter.x,shooter.y,o.x,o.y)){bd=d;best=o;}}
   fpsShots.push({x:shooter.x,y:shooter.y,ang:a,dist:best?bd:520,t:0,ttl:120,col:shooter.col});
   if(shooter===fpsPlayer){fpsFlash=90;}
-  if(best){best.hp-=25;best.flash=120;addFx(best.x,best.y,'hit',shooter.col);if(shooter===fpsPlayer)fpsPlayer.charge=Math.min(100,fpsPlayer.charge+6);if(best.hp<=0)fpsKill(best,shooter);}
+  if(best){best.hp-=Math.round(25*fpsDmgMult(shooter));best.flash=120;addFx(best.x,best.y,'hit',shooter.col);if(shooter===fpsPlayer)fpsPlayer.charge=Math.min(100,fpsPlayer.charge+6);if(best.hp<=0)fpsKill(best,shooter);}
 }
 function fpsSpecial(){
   var p=fpsPlayer;
   if(!p||!p.alive||p.charge<100)return;
+  if(fpsFusionMode){fpsPlaceCharge(p);return;}
   p.charge=0;fpsFlash=200;addFx(p.x,p.y,'super',p.col);
   var R=ROSTER[p.ri]||{};
   if(p.n==='KAVIO'){for(var i=-2;i<=2;i++){var a=p.ang+i*0.3;fpsShots.push({x:p.x,y:p.y,ang:a,dist:520,t:0,ttl:150,col:p.col});var t2=fpsRayHit(p,a,18);if(t2)showMsg('FAN SHOT ▸ '+t2.n);}}
@@ -3038,11 +3100,12 @@ function fpsFrame(dt){
     if(ml>0.01){mx/=Math.max(1,ml);my/=Math.max(1,ml);var fx=Math.cos(p.ang),fy=Math.sin(p.ang);var pSpd=150*(fpsMobaMode&&fpsIsMelee(p)?1.35:1);var vx=(fx*(-my)+-fy*(mx))*pSpd*dt/1000,vy=(fy*(-my)+fx*(mx))*pSpd*dt/1000;var nx=p.x+vx,ny=p.y+vy;if(!fpsWall(nx,p.y,12))p.x=nx;if(!fpsWall(p.x,ny,12))p.y=ny;}
     if(p.dashT>0){p.dashT-=dt;var ddx=Math.cos(p.ang)*500*dt/1000,ddy=Math.sin(p.ang)*500*dt/1000;if(!fpsWall(p.x+ddx,p.y,12))p.x+=ddx;if(!fpsWall(p.x,p.y+ddy,12))p.y+=ddy;}
     if(p.dashCd>0)p.dashCd-=dt;
+    fpsCubePickup(p);
     if(p.shootCd>0)p.shootCd-=dt;
     var wantShoot=keys['KeyJ']||fpsMouse||fpsShootHeld;fpsMouse=false;
     if(gp){try{if(padEdge(gp,7)||padEdge(gp,2)||padEdge(gp,0))wantShoot=true;}catch(e){}}
     if(wantShoot&&p.shootCd<=0){p.shootCd=180;if(fpsMobaMode&&fpsIsMelee(p))fpsSwipe(p);else fpsShoot(p);}
-    var wantSpec=!!keys['KeyL'];
+    var wantSpec=!!keys['KeyL'];if(gp){try{if(padEdge(gp,3))wantSpec=true;}catch(e){}}
     if(wantSpec&&!fpsPrevL)fpsSpecial();
     fpsPrevL=wantSpec;
     var wantDash=!!keys['ShiftLeft']||!!keys['ShiftRight']||fpsDashHeld;
@@ -3057,9 +3120,11 @@ function fpsFrame(dt){
     var f=fpsBots[i];
     if(f.flash>0)f.flash-=dt;
     if(f.dashCd>0)f.dashCd-=dt;
+    if(f.chargeCd>0)f.chargeCd-=dt;
     if(!f.alive){if(f.respawnT>0){f.respawnT-=dt;if(f.respawnT<=0)fpsRespawn(f);}continue;}
     fpsFoeThink(f,dt);
     if(f.dashT>0){f.dashT-=dt;var ddx=Math.cos(f.ang)*500*dt/1000,ddy=Math.sin(f.ang)*500*dt/1000;if(!fpsWall(f.x+ddx,f.y,12))f.x+=ddx;if(!fpsWall(f.x,f.y+ddy,12))f.y+=ddy;continue;}
+    fpsCubePickup(f);
     if(fpsMobaMode){
       var bSpd=110*(fpsIsMelee(f)?1.35:1);
       var enemies=fpsEnemiesOf(f);
@@ -3069,12 +3134,13 @@ function fpsFrame(dt){
         var want=Math.atan2(aimT.y-f.y,aimT.x-f.x);
         var da=want-f.ang;while(da>Math.PI)da-=6.28318;while(da<-Math.PI)da+=6.28318;
         f.ang+=Math.max(-3*dt/1000,Math.min(3*dt/1000,da));
+        if(fpsFusionMode&&adT<96&&f.chargeCd<=0)fpsPlaceCharge(f);
         if(f.shootCd>0)f.shootCd-=dt;
         if(fpsIsMelee(f)){
           if(adT<95&&Math.abs(da)<0.5&&f.shootCd<=0){f.shootCd=950;fpsSwipe(f);}
           else if(adT>120&&f.dashCd<=0){fpsDash(f);f.ang=want;}
           else if(adT>95){var mdx=aimT.x-f.x,mdy=aimT.y-f.y,mdl=Math.hypot(mdx,mdy);if(mdl>1){mdx/=mdl;mdy/=mdl;var nx3=f.x+mdx*bSpd*dt/1000,ny3=f.y+mdy*bSpd*dt/1000;if(!fpsWall(nx3,f.y,12))f.x=nx3;if(!fpsWall(f.x,ny3,12))f.y=ny3;}}
-        }else if(Math.abs(da)<0.15&&f.shootCd<=0){f.shootCd=950;var hitP=Math.max(0.25,1-adT/400);if(Math.random()<hitP){var dmg=6+Math.floor(Math.random()*7);if(aimT===fpsPlayer){if(p.dashT<=0){p.hp-=dmg;fpsHurtT=200;addFx(p.x,p.y,'hit',f.col);if(p.hp<=0)fpsKill(p,f);}}else{aimT.hp-=dmg;aimT.flash=120;if(aimT.hp<=0)fpsKill(aimT,f);}}fpsShots.push({x:f.x,y:f.y,ang:f.ang,dist:adT,t:0,ttl:120,col:f.col});}
+        }else if(Math.abs(da)<0.15&&f.shootCd<=0){f.shootCd=950;var hitP=Math.max(0.25,1-adT/400);if(Math.random()<hitP){var dmg=Math.round((6+Math.floor(Math.random()*7))*fpsDmgMult(f));if(aimT===fpsPlayer){if(p.dashT<=0){p.hp-=dmg;fpsHurtT=200;addFx(p.x,p.y,'hit',f.col);if(p.hp<=0)fpsKill(p,f);}}else{aimT.hp-=dmg;aimT.flash=120;if(aimT.hp<=0)fpsKill(aimT,f);}}fpsShots.push({x:f.x,y:f.y,ang:f.ang,dist:adT,t:0,ttl:120,col:f.col});}
       }else{
         var dx=f.wx-f.x,dy=f.wy-f.y,dl=Math.hypot(dx,dy);
         if(dl>12){dx/=dl;dy/=dl;f.ang=Math.atan2(dy,dx);var nx2=f.x+dx*bSpd*dt/1000,ny2=f.y+dy*bSpd*dt/1000;if(!fpsWall(nx2,f.y,12))f.x=nx2;if(!fpsWall(f.x,ny2,12))f.y=ny2;}
@@ -3100,6 +3166,8 @@ function fpsFrame(dt){
       if(f.shootCd>0)f.shootCd-=dt;
     }
   }
+  /* --- skill charges (FUSION: the placed skill) --- */
+  for(var ci=fpsCharges.length-1;ci>=0;ci--){var ch=fpsCharges[ci];ch.fuse-=dt;if(ch.fuse<=0){fpsCharges.splice(ci,1);fpsDetonateCharge(ch);}}
   /* --- homing serpents + shot tracers --- */
   for(var s=fpsShots.length-1;s>=0;s--){var sh=fpsShots[s];sh.t+=dt;if(sh.t>=sh.ttl){fpsShots.splice(s,1);continue;}if(sh.homing){var nb=null,nd=1e9;for(var h2=0;h2<fpsFoes.length;h2++){var o2=fpsFoes[h2];if(!o2.alive)continue;var dd2=Math.hypot(o2.x-sh.x,o2.y-sh.y);if(dd2<nd){nd=dd2;nb=o2;}}if(nb){var wa=Math.atan2(nb.y-sh.y,nb.x-sh.x),da2=wa-sh.ang;while(da2>Math.PI)da2-=6.28318;while(da2<-Math.PI)da2+=6.28318;sh.ang+=Math.max(-0.09,Math.min(0.09,da2));if(nd<20){nb.hp-=20;nb.flash=120;if(nb.hp<=0)fpsKill(nb,fpsPlayer);fpsShots.splice(s,1);continue;}}sh.x+=Math.cos(sh.ang)*260*dt/1000;sh.y+=Math.sin(sh.ang)*260*dt/1000;if(fpsMapAt(Math.floor(sh.x/FPS_CELL),Math.floor(sh.y/FPS_CELL))){fpsShots.splice(s,1);continue;}}}
   /* --- HUD --- */
@@ -3107,11 +3175,11 @@ function fpsFrame(dt){
   var mm=Math.floor(secs/60),ss=('0'+(secs%60)).slice(-2);
   var top2=fpsPlayer,topS=fpsPlayer.score;
   for(var h3=0;h3<fpsFoes.length;h3++)if(fpsFoes[h3].score>topS){topS=fpsFoes[h3].score;top2=fpsFoes[h3];}
-  hudL.innerHTML=fpsMobaMode?('<b>⚔️ MOBA FPS</b> · '+mm+':'+ss+' · FIRST TO '+FPS_MOBA_TARGET+' · BLUE '+fpsTeamScore[0]+' — RED '+fpsTeamScore[1]):('<b>🎯 SHOWDOWN FPS</b> · '+mm+':'+ss+' · FIRST TO '+FPS_TARGET+' · LEADER: '+top2.n+' '+topS);
+  hudL.innerHTML=fpsFusionMode?('<b>⚡ FUSION</b> · '+mm+':'+ss+' · FIRST TO '+FPS_MOBA_TARGET+' · BLUE '+fpsTeamScore[0]+' — RED '+fpsTeamScore[1]):(fpsMobaMode?('<b>⚔️ MOBA FPS</b> · '+mm+':'+ss+' · FIRST TO '+FPS_MOBA_TARGET+' · BLUE '+fpsTeamScore[0]+' — RED '+fpsTeamScore[1]):('<b>🎯 SHOWDOWN FPS</b> · '+mm+':'+ss+' · FIRST TO '+FPS_TARGET+' · LEADER: '+top2.n+' '+topS));
   hudR.textContent='ELIMS '+fpsPlayer.score+' · DEATHS '+(fpsPlayer.deaths||0);
-  if(hpFill)hpFill.style.width=(Math.max(0,fpsPlayer.hp)/(fpsMobaMode?150:100)*100)+'%';
+  if(hpFill)hpFill.style.width=(Math.max(0,fpsPlayer.hp)/((fpsPlayer.maxhp)||(fpsMobaMode?150:100))*100)+'%';
   if(supFill)supFill.style.width=fpsPlayer.charge+'%';
-  if(bsupLbl)bsupLbl.textContent=fpsPlayer.charge>=100?'★ '+(ROSTER[fpsPlayer.ri]?ROSTER[fpsPlayer.ri].sup:'SPECIAL')+' — TAP L ★':'SPECIAL '+Math.floor(fpsPlayer.charge)+'%';
+  if(bsupLbl)bsupLbl.textContent=fpsFusionMode?(fpsPlayer.charge>=100?'★ '+(ROSTER[fpsPlayer.ri]?ROSTER[fpsPlayer.ri].sup:'SPECIAL')+' — TAP L TO PLANT ★':'SKILL '+Math.floor(fpsPlayer.charge)+'%'):(fpsPlayer.charge>=100?'★ '+(ROSTER[fpsPlayer.ri]?ROSTER[fpsPlayer.ri].sup:'SPECIAL')+' — TAP L ★':'SPECIAL '+Math.floor(fpsPlayer.charge)+'%');
   if(fpsSpecName)fpsSpecName.textContent=ROSTER[fpsPlayer.ri]?ROSTER[fpsPlayer.ri].sup:'SPECIAL';
   if(fpsSpecChg)fpsSpecChg.textContent=Math.floor(fpsPlayer.charge)+'%';
   if(fpsSpecBtn){if(fpsPlayer.charge>=100)fpsSpecBtn.classList.add('ready');else fpsSpecBtn.classList.remove('ready');}
@@ -3173,10 +3241,15 @@ function fpsDraw(){
     else{ctx.fillStyle=fo.flash>0?'#fff':fo.col;ctx.fillRect(col-wdt/2,top,wdt,hgt);ctx.fillStyle='#0a0a0a';ctx.beginPath();ctx.arc(col,top+hgt*0.16,wdt*0.22,0,7);ctx.fill();ctx.fillStyle=fo.col;ctx.beginPath();ctx.arc(col,top+hgt*0.16,wdt*0.16,0,7);ctx.fill();}
     ctx.restore();
     ctx.fillStyle='#220505';ctx.fillRect(col-18,top-10,36,4);
-    ctx.fillStyle=fo.hp>50?'#37d67a':(fo.hp>25?'#ffb35c':'#ff5252');ctx.fillRect(col-18,top-10,36*Math.max(0,fo.hp)/100,4);
+    ctx.fillStyle=fo.hp>50?'#37d67a':(fo.hp>25?'#ffb35c':'#ff5252');ctx.fillRect(col-18,top-10,36*Math.max(0,fo.hp)/(fo.maxhp||100),4);
     ctx.fillStyle=fpsMobaMode?(fo.team===0?'#6db3ff':'#ff7a6b'):'#fff';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText(fo.n,col,top-13);
   }
-  /* respawn ghosts: show where dead foes will return is skipped — keep the arena clean. */
+    /* skill charges + power cubes (FUSION): billboards so you can see them and dodge the blast */
+  if(fpsFusionMode){
+    for(var _ci=0;_ci<fpsCharges.length;_ci++){var _cg=fpsCharges[_ci];var _cdx=_cg.x-p.x,_cdy=_cg.y-p.y;var _cdd=Math.hypot(_cdx,_cdy);if(_cdd<8||_cdd>620)continue;var _crA=Math.atan2(_cdy,_cdx)-p.ang;while(_crA>Math.PI)_crA-=6.28318;while(_crA<-Math.PI)_crA+=6.28318;if(Math.abs(_crA)>FOV/2+0.15)continue;if(!fpsLOS(p.x,p.y,_cg.x,_cg.y))continue;var _ccol=Math.floor((_crA/(FOV/2))*(W2/2)+(W2/2));var _cidx=Math.max(0,Math.min(RAYS-1,Math.floor((_ccol/W2)*RAYS)));if(_cdd>zbuf[_cidx]+8)continue;var _chgt=(FPS_CELL*proj)/Math.max(1,_cdd*Math.cos(_crA));var _pulse=1+0.25*Math.sin(fpsTime/90);var _cr=_chgt*0.22*_pulse;ctx.save();ctx.fillStyle=_cg.col;ctx.beginPath();ctx.arc(_ccol,H2/2,_cr,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.arc(_ccol,H2/2,_cr*0.4,0,7);ctx.fill();ctx.restore();}
+    for(var _cu=0;_cu<fpsCubes.length;_cu++){var _cb=fpsCubes[_cu];if(_cb.taken)continue;var _udx=_cb.x-p.x,_udy=_cb.y-p.y;var _udd=Math.hypot(_udx,_udy);if(_udd<8||_udd>620)continue;var _urA=Math.atan2(_udy,_udx)-p.ang;while(_urA>Math.PI)_urA-=6.28318;while(_urA<-Math.PI)_urA+=6.28318;if(Math.abs(_urA)>FOV/2+0.15)continue;if(!fpsLOS(p.x,p.y,_cb.x,_cb.y))continue;var _ucol=Math.floor((_urA/(FOV/2))*(W2/2)+(W2/2));var _uidx=Math.max(0,Math.min(RAYS-1,Math.floor((_ucol/W2)*RAYS)));if(_udd>zbuf[_uidx]+8)continue;var _uhgt=(FPS_CELL*proj)/Math.max(1,_udd*Math.cos(_urA));var _us=_uhgt*0.16;ctx.save();ctx.fillStyle='#ffd94d';ctx.beginPath();ctx.moveTo(_ucol,H2/2-_us);ctx.lineTo(_ucol+_us,H2/2);ctx.lineTo(_ucol,H2/2+_us);ctx.lineTo(_ucol-_us,H2/2);ctx.closePath();ctx.fill();ctx.restore();}
+  }
+/* respawn ghosts: show where dead foes will return is skipped — keep the arena clean. */
   /* crosshair + damage flash + muzzle flash */
   ctx.save();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(W2/2-8,H2/2);ctx.lineTo(W2/2+8,H2/2);ctx.moveTo(W2/2,H2/2-8);ctx.lineTo(W2/2,H2/2+8);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W2/2,H2/2,1.5,0,7);ctx.fill();ctx.restore();
   if(fpsHurtT>0){fpsHurtT-=16;ctx.save();ctx.strokeStyle='rgba(255,40,40,'+Math.max(0,fpsHurtT/200)*0.8+')';ctx.lineWidth=14;ctx.strokeRect(4,4,W2-8,H2-8);ctx.restore();}
@@ -3184,9 +3257,9 @@ function fpsDraw(){
   /* bottom strip: your fighter, HP, score */
   ctx.save();ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H2-26,W2,26);
   ctx.fillStyle=p.col||'#fff';ctx.font='bold 11px monospace';ctx.textAlign='left';
-  ctx.fillText(fpsMobaMode?('YOU: '+p.n+'  ·  BLUE '+fpsTeamScore[0]+' — RED '+fpsTeamScore[1]+'  ·  HP '+Math.max(0,Math.ceil(p.hp))):('YOU: '+p.n+'  ·  ELIMS '+p.score+'  ·  HP '+Math.max(0,Math.ceil(p.hp))),10,H2-9);
+  ctx.fillText(fpsFusionMode?('YOU: '+p.n+'  ·  FUSION · BLUE '+fpsTeamScore[0]+' — RED '+fpsTeamScore[1]+'  ·  HP '+Math.max(0,Math.ceil(p.hp))):(fpsMobaMode?('YOU: '+p.n+'  ·  BLUE '+fpsTeamScore[0]+' — RED '+fpsTeamScore[1]+'  ·  HP '+Math.max(0,Math.ceil(p.hp))):('YOU: '+p.n+'  ·  ELIMS '+p.score+'  ·  HP '+Math.max(0,Math.ceil(p.hp)))),10,H2-9);
   ctx.textAlign='right';ctx.fillStyle='#ffd94d';
-  ctx.fillText('SPECIAL '+(p.charge>=100?'READY — L':Math.floor(p.charge)+'%'),W2-10,H2-9);
+  ctx.fillText(fpsFusionMode?('SKILL '+(p.charge>=100?'READY — L TO PLANT':Math.floor(p.charge)+'%')):('SPECIAL '+(p.charge>=100?'READY — L':Math.floor(p.charge)+'%')),W2-10,H2-9);
   ctx.restore();
 }
 function fpsEnd(win){
@@ -3195,7 +3268,7 @@ function fpsEnd(win){
   for(var a=0;a<fpsAllies.length;a++)fpsAllies[a].respawnT=0;
   var top=fpsPlayer,topS=fpsPlayer.score;
   for(var j=0;j<fpsFoes.length;j++)if(fpsFoes[j].score>topS){topS=fpsFoes[j].score;top=fpsFoes[j];}
-  var h='<h1>'+(fpsMobaMode?(win?'MOBA FPS — BLUE TEAM WINS!':'MOBA FPS — RED TEAM WINS!'):(win?'SHOWDOWN FPS — YOU WIN!':'SHOWDOWN FPS — '+top.n+' WINS'))+'</h1>';
+  var h='<h1>'+(fpsMobaMode?(fpsFusionMode?(win?'FUSION — BLUE TEAM WINS!':'FUSION — RED TEAM WINS!'):(win?'MOBA FPS — BLUE TEAM WINS!':'MOBA FPS — RED TEAM WINS!')):(win?'SHOWDOWN FPS — YOU WIN!':'SHOWDOWN FPS — '+top.n+' WINS'))+'</h1>';
   h+='<h2>'+(fpsMobaMode?('FIRST TO '+FPS_MOBA_TARGET+' · BLUE '+fpsTeamScore[0]+' — RED '+fpsTeamScore[1]+' · '+Math.floor(fpsTime/1000)+'s'):('FIRST TO '+FPS_TARGET+' · '+Math.floor(fpsTime/1000)+'s · LEADER '+top.n+' '+topS))+'</h2>';
   var line='YOU '+fpsPlayer.score+' ELIMS';
   for(var k=0;k<fpsFoes.length;k++)line+=' · '+fpsFoes[k].n+' '+fpsFoes[k].score;
@@ -3207,7 +3280,7 @@ function fpsEnd(win){
     try{if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanix-win-molecules',amt:amt,game:'fight'},'*');}catch(e){}
     h+='<p>• +'+amt+' MOLECULES</p>';
   }
-  h+='<p><button class="big" onclick="BRAWL.'+(fpsMobaMode?'startMobaFps':'startFps')+'('+fpsPick+')">REMATCH</button></p>';
+  h+='<p><button class="big" onclick="BRAWL.'+(fpsFusionMode?'startFusion':(fpsMobaMode?'startMobaFps':'startFps'))+'('+fpsPick+')">REMATCH</button></p>';
   h+='<p><button onclick="BRAWL.exit()">CHANGE FIGHTER</button></p><p><button onclick="goTopModes()">← ALL MODES</button></p>';
   ovb.innerHTML=h;ov.style.display='flex';
   if(!win){if(typeof rvShow==='function'){rvShow(true,'bov');window.__rvMode='brawl';}}
@@ -3218,7 +3291,7 @@ function fpsEnd(win){
 (function(){try{document.addEventListener('mousemove',function(e){if(document.pointerLockElement!==document.getElementById('bcv'))return;if(!fpsActive||fpsPaused||!fpsPlayer||!fpsPlayer.alive)return;var dx=e.movementX||0;fpsPlayer.ang+=dx*fpsMouseSens;});}catch(e){}})();
 try{fpsGyroInit();}catch(e){}
 
-window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,startMobaFps:fpsMobaStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsMouseSens(){return fpsMouseSens;},get fpsAllies(){return fpsAllies;},get fpsMobaMode(){return fpsMobaMode;},get fpsTeamScore(){return fpsTeamScore;},set fpsTeamScore(v){fpsTeamScore=v;},get fpsCurMap(){return fpsCurMap;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
+window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,startMobaFps:fpsMobaStart,startFusion:fpsFusionStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsMouseSens(){return fpsMouseSens;},get fpsAllies(){return fpsAllies;},get fpsMobaMode(){return fpsMobaMode;},get fpsTeamScore(){return fpsTeamScore;},set fpsTeamScore(v){fpsTeamScore=v;},get fpsFusionMode(){return fpsFusionMode;},get fpsCharges(){return fpsCharges;},get fpsCubes(){return fpsCubes;},get fpsCurMap(){return fpsCurMap;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
 
 })();
 
