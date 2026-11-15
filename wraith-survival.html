@@ -1510,7 +1510,10 @@ var ROSTER=[
   {n:'LESTES',spr:'lestes',hood:'#ff8c1e',mask:'#2a1f18',eye:'#ffe27a',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ff8c1e',sup:'BELT SHIFT',supc:'#ff8c1e',desc:'Belt spheres — BEAR/WOLF/HAWK/FIREFLY, MECHA suits the AEGIS'},
 /* +21 ported Classic Fight heroes (2026-11-03 merge): baseline Brawl
    * stats (hp 100 / spd 1.0 / dmg 12 / cd 460 — the LESTES precedent, no new
-   * numbers); sup/supc/col/desc reuse each hero's Fight FTR sp/spc. The six
+   * numbers); sup/supc/col/desc reuse each hero's Fight FTR sp/spc.
+   * BALANCE (2026-11-14, Cee): hp/spd/dmg ported from the Fight FTR table
+   * (dmg = round(12 x FTR dmg)) so melee keeps up with shot; Fight reach
+   * (rng) heroes are 'shot' here; cd stays 460. The six
    * code-drawn heroes have no spr — Brawl draws them as a vector fighter
    * (hood + mask + glowing eyes, Fight colours) instead of a bare circle.
    * LESTES has spr:'lestes' but no sprite data anywhere, so he draws vector too.
@@ -1519,23 +1522,23 @@ var ROSTER=[
   {n:'THRONE KEEPER',hood:'#2c3a5e',mask:'#ded8c4',eye:'#a9c6e8',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#7fa8d8',sup:'SWORD TEMPEST',supc:'#7fa8d8',desc:'Crowned keeper — SWORD TEMPEST'},
   {n:'WHITE MASK',hood:'#565660',mask:'#f7f4ec',eye:'#ff4040',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ff6b5a',sup:'CRACK PULSE',supc:'#ff6b5a',desc:'Cracked mask — CRACK PULSE'},
   {n:'TATTERED',hood:'#4a2a18',mask:'#2a1f18',eye:'#ff8c1e',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ff5a1e',sup:'TATTER ROAR',supc:'#ff5a1e',desc:'Tattered brawler — TATTER ROAR'},
-  {n:'GRAVE WARDEN',hood:'#27543a',mask:'#5a6b52',eye:'#39d353',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#39d353',sup:'GRAVE SURGE',supc:'#39d353',desc:'Bulky warden — GRAVE SURGE'},
-  {n:'RUNE WRAITH',hood:'#2a2140',mask:'#3a3348',eye:'#b46bff',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#c07dff',sup:'RUNE FLARE',supc:'#c07dff',desc:'Rune swordsman — RUNE FLARE'},
+  {n:'GRAVE WARDEN',hood:'#27543a',mask:'#5a6b52',eye:'#39d353',hp:106,spd:0.9,dmg:14,rng:'melee',cd:460,col:'#39d353',sup:'GRAVE SURGE',supc:'#39d353',desc:'Bulky warden — GRAVE SURGE'},
+  {n:'RUNE WRAITH',hood:'#2a2140',mask:'#3a3348',eye:'#b46bff',hp:98,spd:1.15,dmg:11,rng:'melee',cd:460,col:'#c07dff',sup:'RUNE FLARE',supc:'#c07dff',desc:'Rune swordsman — RUNE FLARE'},
   {n:'GRIM',spr:'grim',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ff2a6b',sup:'MISMATCH BEAM',supc:'#ff2a6b',locked:1,desc:'The boss, unleashed — MISMATCH BEAM'},
   {n:'NIGHTWRAITH1',spr:'nightwraith1',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#b46bff',sup:'MOON SLASH',supc:'#b46bff',desc:'Moon slasher — MOON SLASH'},
-  {n:'CHRYSOKERAS',spr:'chrysokeras',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ffd94d',sup:'GOLD LEAK',supc:'#ffd94d',desc:'Golden horn — GOLD LEAK'},
-  {n:'SIGILOS',spr:'sigilos',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#c07dff',sup:'TRUE NAME',supc:'#c07dff',desc:'Sigil mage — TRUE NAME'},
-  {n:'EREBAR',spr:'erebar',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#39d353',sup:'FERRY FARE',supc:'#39d353',desc:'Ferryman of the dead — FERRY FARE'},
-  {n:'AETHERIS',spr:'aetheris',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#39d353',sup:'MYTH GLITCH',supc:'#39d353',desc:'Living glitch — MYTH GLITCH'},
-  {n:'GRINNOIR',spr:'grinnoir',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#e8e8f0',sup:'JESTER GRIN',supc:'#e8e8f0',desc:'Grinning jester — JESTER GRIN'},
-  {n:'HASHBONE',spr:'hashbone',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ff5a5a',sup:'SCYTHE CHAIN',supc:'#ff5a5a',desc:'Reaper scythe — SCYTHE CHAIN'},
-  {n:'BALLOON GUY',spr:'balloonguy',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ff9a1e',sup:'SOFT BOUNCE',supc:'#ff9a1e',desc:'Big soft tank — SOFT BOUNCE'},
-  {n:'KID',spr:'kid',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#ff5a1e',sup:'FIRE BEND',supc:'#ff5a1e',desc:'Flame kid — FIRE BEND'},
-  {n:'LYKO',spr:'lykonax',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#39d353',sup:'PACK RISE',supc:'#39d353',desc:'Wolf king — PACK RISE'},
-  {n:'HIPPOTHANATOS',spr:'hippothanatos',hp:100,spd:1.0,dmg:12,rng:'shot',cd:460,col:'#ff8c1e',sup:'SOUL SHOT',supc:'#ff8c1e',desc:'Shotgun rider — SOUL SHOT'},
+  {n:'CHRYSOKERAS',spr:'chrysokeras',hp:105,spd:0.95,dmg:13,rng:'melee',cd:460,col:'#ffd94d',sup:'GOLD LEAK',supc:'#ffd94d',desc:'Golden horn — GOLD LEAK'},
+  {n:'SIGILOS',spr:'sigilos',hp:100,spd:1.05,dmg:12,rng:'melee',cd:460,col:'#c07dff',sup:'TRUE NAME',supc:'#c07dff',desc:'Sigil mage — TRUE NAME'},
+  {n:'EREBAR',spr:'erebar',hp:108,spd:0.9,dmg:13,rng:'melee',cd:460,col:'#39d353',sup:'FERRY FARE',supc:'#39d353',desc:'Ferryman of the dead — FERRY FARE'},
+  {n:'AETHERIS',spr:'aetheris',hp:98,spd:1.2,dmg:12,rng:'shot',cd:460,col:'#39d353',sup:'MYTH GLITCH',supc:'#39d353',desc:'Living glitch — MYTH GLITCH'},
+  {n:'GRINNOIR',spr:'grinnoir',hp:100,spd:1.05,dmg:12,rng:'melee',cd:460,col:'#e8e8f0',sup:'JESTER GRIN',supc:'#e8e8f0',desc:'Grinning jester — JESTER GRIN'},
+  {n:'HASHBONE',spr:'hashbone',hp:104,spd:1.0,dmg:13,rng:'shot',cd:460,col:'#ff5a5a',sup:'SCYTHE CHAIN',supc:'#ff5a5a',desc:'Reaper scythe — SCYTHE CHAIN'},
+  {n:'BALLOON GUY',spr:'balloonguy',hp:120,spd:0.85,dmg:11,rng:'melee',cd:460,col:'#ff9a1e',sup:'SOFT BOUNCE',supc:'#ff9a1e',desc:'Big soft tank — SOFT BOUNCE'},
+  {n:'KID',spr:'kid',hp:95,spd:1.15,dmg:12,rng:'shot',cd:460,col:'#ff5a1e',sup:'FIRE BEND',supc:'#ff5a1e',desc:'Flame kid — FIRE BEND'},
+  {n:'LYKO',spr:'lykonax',hp:112,spd:0.95,dmg:14,rng:'melee',cd:460,col:'#39d353',sup:'PACK RISE',supc:'#39d353',desc:'Wolf king — PACK RISE'},
+  {n:'HIPPOTHANATOS',spr:'hippothanatos',hp:106,spd:1.05,dmg:13,rng:'shot',cd:460,col:'#ff8c1e',sup:'SOUL SHOT',supc:'#ff8c1e',desc:'Shotgun rider — SOUL SHOT'},
   {n:'PHARMAKON',spr:'pharmakon',hp:100,spd:1.0,dmg:12,rng:'shot',cd:460,col:'#39d353',sup:'CURE OR PLAGUE',supc:'#39d353',desc:'Plague cannon — CURE OR PLAGUE'},
-  {n:'MACHAIRA',spr:'machaira',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#39d353',sup:'GREEN FLASH',supc:'#39d353',desc:'Fastest blade — GREEN FLASH'},
-  {n:'ICARON',spr:'sorceress',hp:100,spd:1.0,dmg:12,rng:'melee',cd:460,col:'#c07dff',sup:'SKULL HEX',supc:'#c07dff',desc:'Spider sorceress — SKULL HEX'},
+  {n:'MACHAIRA',spr:'machaira',hp:94,spd:1.25,dmg:11,rng:'melee',cd:460,col:'#39d353',sup:'GREEN FLASH',supc:'#39d353',desc:'Fastest blade — GREEN FLASH'},
+  {n:'ICARON',spr:'sorceress',hp:100,spd:1.1,dmg:12,rng:'shot',cd:460,col:'#c07dff',sup:'SKULL HEX',supc:'#c07dff',desc:'Spider sorceress — SKULL HEX'},
 ];
 var WALLS=[{x:88,y:64,w:72,h:18},{x:320,y:64,w:72,h:18},{x:88,y:278,w:72,h:18},{x:320,y:278,w:72,h:18},{x:206,y:148,w:68,h:64}];
 var BUSH=[{x:16,y:148,w:58,h:64},{x:406,y:148,w:58,h:64},{x:206,y:14,w:68,h:38},{x:206,y:308,w:68,h:38}];
