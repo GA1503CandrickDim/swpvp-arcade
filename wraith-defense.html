@@ -476,6 +476,59 @@ document.addEventListener('keydown',function(e){
   if(e.code==='KeyQ'){window.useAb();return;}
   if(e.code==='Escape'){selTower=null;selHero=null;selHeroMode=false;placeHeroId=null;hover=null;updPanel();}
 });
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD (Wraith Defense) — the pad drives a cursor (stick analog, D-pad steps)
+   over the field: A taps/selects/places at the cursor, LB/RB cycle tower type,
+   X hero mode, Y start wave, B siege cannon, LT hero ability, RT clear selection,
+   Start pause. In siege-aim mode the D-pad aims and A fires. The cursor only
+   takes over hover while the pad is actually moved, so mouse hover keeps working. */
+var __pdHov=null;
+function __pdTapDef(){
+  if(!cv||!__pdHov)return;
+  var r=cv.getBoundingClientRect();
+  var s=Math.min(r.width/W,r.height/H),ox=(r.width-W*s)/2,oy=(r.height-H*s)/2;
+  var cx=r.left+ox+__pdHov.x*s,cy=r.top+oy+__pdHov.y*s;
+  try{cv.dispatchEvent(new PointerEvent('pointerdown',{clientX:cx,clientY:cy,bubbles:true}));}
+  catch(e){try{cv.dispatchEvent(new MouseEvent('pointerdown',{clientX:cx,clientY:cy,bubbles:true}));}catch(e2){}}
+}
+function __pdPollDef(){
+  var p=__pdGet();if(!p)return;
+  var d=__pdDir(p);
+  if(!__pdHov)__pdHov={x:W/2,y:H/2};
+  var ax=__pdAx(p,0),ay=__pdAx(p,1);
+  __pdHov.x+=ax*7;__pdHov.y+=ay*7;
+  if(d.l)__pdHov.x-=6;if(d.r)__pdHov.x+=6;if(d.u)__pdHov.y-=6;if(d.d)__pdHov.y+=6;
+  __pdHov.x=Math.max(0,Math.min(W,__pdHov.x));__pdHov.y=Math.max(0,Math.min(H,__pdHov.y));
+  if(ax||ay||d.l||d.r||d.u||d.d)hover=__pdHov;
+  if(S&&S.sgAim&&!S.pz){
+    if(d.l)S.sgAn=Math.max(5,Math.min(85,S.sgAn-2));
+    if(d.r)S.sgAn=Math.max(5,Math.min(85,S.sgAn+2));
+    if(d.u)S.sgPw=Math.max(10,Math.min(100,S.sgPw+2));
+    if(d.d)S.sgPw=Math.max(10,Math.min(100,S.sgPw-2));
+    if(__pdEdge(p,0))sgFire(S);
+  }else{
+    if(__pdEdge(p,0))__pdTapDef();
+    if(__pdEdge(p,4))pickType((selType+4)%5);
+    if(__pdEdge(p,5))pickType((selType+1)%5);
+    if(__pdEdge(p,2))window.pickHeroMode();
+    if(__pdEdge(p,6))window.useAb();
+    if(__pdEdge(p,7)){selTower=null;selHero=null;selHeroMode=false;placeHeroId=null;hover=null;updPanel();}
+  }
+  if(__pdEdge(p,3)){if(!S)return;if(S.pz){ru();return;}if(S.phase==='build')window.startWaveBtn();else if(!S.over)window.tg();}
+  if(__pdEdge(p,1))window.toggleSiege();
+  if(__pdEdge(p,9))window.tg();
+}
+
 document.addEventListener('visibilitychange',function(){
   if(!S||S.over||S.phase==='menu')return;
   if(document.hidden){if(!S.pz){pg(S,true);ps();}}
@@ -564,6 +617,7 @@ function draw(){
 }
 function loop(ts){
   requestAnimationFrame(loop);
+  __pdPollDef();
   if(!S)return;
   if(S.pz){draw();return;}
   var dt=ts-lastTs;lastTs=ts;acc+=Math.min(dt,100);var q=0;

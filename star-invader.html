@@ -143,6 +143,33 @@ if(e.code==='ArrowRight'||e.code==='KeyD')keys.r=true;
 });
 document.addEventListener('click',function(e){if(state==='over'&&Date.now()-overAt>600&&!(e.target&&e.target.closest&&e.target.closest('#rv-box'))&&!(e.target&&e.target.closest&&e.target.closest('#cov')))goHub();});
 document.addEventListener('keyup',function(e){if(e.code==='ArrowLeft'||e.code==='KeyA')keys.l=false;if(e.code==='ArrowRight'||e.code==='KeyD')keys.r=false;});
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD (Star Invader) — stick/D-pad move, A or X fire, Start pause.
+   A/X also start the game / resume from pause, like the FIRE button. */
+var __pdPrevD={l:false,r:false,u:false,d:false};
+function __pdPollSI(){
+  var p=__pdGet();if(!p)return;
+  var d=__pdDir(p);
+  if(d.l||__pdPrevD.l)keys.l=d.l;
+  if(d.r||__pdPrevD.r)keys.r=d.r;
+  var aE=__pdEdge(p,0),xE=__pdEdge(p,2);
+  if(state==='play'&&paused){if(aE||xE){paused=false;hideOv();}}
+  else if(state!=='play'){if(aE||xE)startGame();}
+  else if(aE||xE)shoot();
+  if(__pdEdge(p,9)&&state==='play'){paused=!paused;if(paused)showOv('PAUSED','PRESS P TO KEEP PLAYING','▶ RESUME');else hideOv();}
+  __pdPrevD={l:d.l,r:d.r,u:d.u,d:d.d};
+}
+
 function update(dt){
 /* Frame-rate fix (2026-11-04 botfix): per-frame moves are scaled by
    f=dt/16.667 so the game runs the same speed at 60Hz and 120Hz. dt was
@@ -206,6 +233,7 @@ if(waveT>0){ctx.fillStyle='#0f0';ctx.font='bold 26px monospace';ctx.fillText('WA
 }
 var last=0;
 function loop(t){var dt=Math.min(50,t-last||16);last=t;
+__pdPollSI();
 if(state==='play'&&!paused){
 if(boomT>0){boomT-=dt;if(boomT<=0){if(overPending)endGame('CANNON DOWN');else px=W/2;}}
 else update(dt);

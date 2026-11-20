@@ -269,6 +269,40 @@ if(e.code==='ArrowLeft'||e.code==='KeyA'){keys.l||sq('L');keys.l=true;}
 if(e.code==='ArrowRight'||e.code==='KeyD'){keys.r||sq('R');keys.r=true;}
 });
 document.addEventListener('keyup',function(e){if(e.code==='ArrowLeft'||e.code==='KeyA')keys.l=false;if(e.code==='ArrowRight'||e.code==='KeyD')keys.r=false;if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){keys.j=false;if(P.vy<-3)P.vy=-3;}});
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD (SAV) — stick/D-pad move + jump (A / up), X or Y shoot, B warp/dismount,
+   Start pause. A also starts the game from the menu, like Space. */
+var __pdPrevD={l:false,r:false,u:false,d:false},__pdSavJ=false;
+function __pdPollSav(){
+  var p=__pdGet();if(!p)return;
+  var d=__pdDir(p);
+  if(d.l||__pdPrevD.l)keys.l=d.l;
+  if(d.r||__pdPrevD.r)keys.r=d.r;
+  var aE=__pdEdge(p,0);
+  if(state!=='play'){if(aE){if(state==='clear')nextLevel();else startGame();}}
+  else{
+    var jNow=__pdBtn(p,0)||d.u;
+    if(jNow&&!__pdSavJ){keys.j||sq('J');keys.j=true;jbuf=100;}
+    if(!jNow&&__pdSavJ){keys.j=false;if(P&&P.vy<-3)P.vy=-3;}
+    __pdSavJ=jNow;
+    var xE=__pdEdge(p,2),yE=__pdEdge(p,3);
+    if(xE||yE)shoot();
+    if((d.d&&!__pdPrevD.d)||__pdEdge(p,1)){if(riding)dismount();else tryWarp();}
+    if(__pdEdge(p,9))ckSetPaused(!paused);
+  }
+  __pdPrevD={l:d.l,r:d.r,u:d.u,d:d.d};
+}
+
 function hurt(){if(invT>0||state!=='play'||starT>0)return;if(P.big){P.big=false;P.h=20;invT=1500;beep(200,.15,'sawtooth',.06);return;}lives--;beep(140,.25,'sawtooth',.08);hud();if(lives<=0){pet=false;riding=false;gulp=null;hatchT=0;tongueT=0;state='over';if(typeof ckNoteScore==='function')ckNoteScore(score);showOv('GAME OVER','SCORE '+score+'<br>MOLECULES '+coinN+(typeof ckBestSuffix==='function'?ckBestSuffix():''),'');rvShow(true);}else{pet=false;riding=false;gulp=null;hatchT=0;tongueT=0;resetP();loadFoes();}}
 function loadFoes(){wilds=[];if(bonus){foes=[];return;}var rows=LEVELS[level];foes=[];for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var ch=(rows[r]||'')[c];if(ch==='w')foes.push({x:c*TW+4,y:r*TW+8,w:16,h:14,vx:-.6,spike:false,dead:false,ph:0});if(ch==='s')foes.push({x:c*TW+4,y:r*TW+8,w:16,h:14,vx:-1.1,spike:true,dead:false,ph:0});}}
 function bump(c,r){var ch=grid[r][c];if(ch==='?'||ch==='Q'||ch==='!'||ch==='*'||ch==='U'){grid[r][c]='B';bumps.push({c:c,r:r,t:150});if(ch==='?'){score+=100;coinN++;beep(1320,.07);}else{var k=ch==='Q'?'M':(ch==='!'?'P':(ch==='*'?'S':'U'));picks.push({x:c*TW+12,y:r*TW-6,vy:-1.5,kind:k,dead:false});beep(980,.08);}}
@@ -448,6 +482,7 @@ if(flashT>0){ctx.fillStyle='rgba(0,0,0,'+Math.min(.9,flashT/200)+')';ctx.fillRec
 }
 var last=0;
 function loop(t){var dt=Math.min(50,t-last||16);last=t;
+__pdPollSav();
 if(flashT>0)flashT-=dt;
 if(state==='play'&&!paused)update(dt);
 var bd=$('bd');if(bd)bd.style.visibility=(state==='play'&&(nearPipe()||riding))?'visible':'hidden';

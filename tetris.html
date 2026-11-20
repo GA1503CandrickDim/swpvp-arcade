@@ -374,6 +374,40 @@ else if(e.code==='Space'){ e.preventDefault(); window.vg_hard(); }
 else if(e.code==='KeyC'||e.code==='KeyH'||e.code==='ShiftLeft'||e.code==='ShiftRight'){ e.preventDefault(); window.vg_hold(); }
 else if(e.code==='KeyP'){ window.vg_pause(); }
 });
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD (Tetris) — D-pad/stick move (hold repeats via vg_rep), down soft-drops,
+   A rotate, X hold, Y hard drop, Start pause. A also starts a new game.
+   Own rAF poll: the game loop stops while paused, so the pad must poll itself. */
+var __pdTetPrevD={l:false,r:false,d:false},__pdTetSoftT=0;
+function __pdPollTetris(){
+  requestAnimationFrame(__pdPollTetris);
+  var p=__pdGet();if(!p)return;
+  var d=__pdDir(p);
+  var aE=__pdEdge(p,0);
+  if(!running){if(aE)window.vg_start();}
+  else if(!paused){
+    if(d.l&&!__pdTetPrevD.l)window.vg_rep(-1);
+    if(d.r&&!__pdTetPrevD.r)window.vg_rep(1);
+    if(!d.l&&!d.r&&(__pdTetPrevD.l||__pdTetPrevD.r))window.vg_rep(undefined);
+    if(d.d){var now=performance.now();if(now-__pdTetSoftT>90){__pdTetSoftT=now;window.vg_soft();}}
+    if(aE)window.vg_rotate();
+    if(__pdEdge(p,2))window.vg_hold();
+    if(__pdEdge(p,3))window.vg_hard();
+  }
+  if(__pdEdge(p,9))window.vg_pause();
+  __pdTetPrevD={l:d.l,r:d.r,d:d.d};
+}
+requestAnimationFrame(__pdPollTetris);
 let vg_dragging=false, vg_dragStartX=0, vg_dragStartY=0, vg_dragMoved=false;
 canvas.addEventListener('pointerdown', e=>{
 if(!running||paused||!cur) return;

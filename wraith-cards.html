@@ -139,7 +139,48 @@ document.addEventListener('visibilitychange',function(){if(document.hidden){if(s
 $('wrap').addEventListener('pointerdown',function(){if(paused)resumeGame();});
 $('grid').addEventListener('keydown',function(e){var t=e.target;if(!t.dataset||t.dataset.i===undefined)return;var i=+t.dataset.i,j=null;if(e.code==='ArrowLeft'&&i%4>0)j=i-1;else if(e.code==='ArrowRight'&&i%4<3)j=i+1;else if(e.code==='ArrowUp'&&i-4>=0)j=i-4;else if(e.code==='ArrowDown'&&i+4<G.deck.length)j=i+4;if(j!==null){e.preventDefault();els[j].focus();}});
 document.addEventListener('keydown',function(e){if(e.code==='KeyP')pauseToggle();if(e.code==='KeyR'&&(state==='play'||state==='won'))startGame();});
-function loop(ts){requestAnimationFrame(loop);if(!G)return;if(state==='play'&&!paused){var dt=ts-lastTs;lastTs=ts;if(tsReset){dt=0;tsReset=false;}dt=Math.min(dt,100);var pend=G.pending.slice(),wasLock=G.lock;tick(G,dt);if(wasLock&&!G.lock)pend.forEach(updateCard);var tm=fmtTime(G.elapsed);if(tm!==lastTm){lastTm=tm;$('tm').textContent=tm;}}else{lastTs=ts;}}
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD (Wraith Cards) — D-pad moves the card focus (hold repeats),
+   A flips the focused card (or presses the overlay button on menu / win),
+   X restarts, Start pauses. */
+var __pdPrevD={l:false,r:false,u:false,d:false},__pdRepT=0,__pdCardIdx=0;
+function __pdPollCards(){
+  var p=__pdGet();if(!p)return;
+  var d=__pdDir(p);
+  var now=performance.now();
+  function mv(di){
+    if(!G||state!=='play')return;
+    var ae=document.activeElement;
+    var i=(ae&&ae.dataset&&ae.dataset.i!==undefined)?+ae.dataset.i:__pdCardIdx;
+    var j=null;
+    if(di==='l'&&i%4>0)j=i-1;else if(di==='r'&&i%4<3)j=i+1;
+    else if(di==='u'&&i-4>=0)j=i-4;else if(di==='d'&&i+4<G.deck.length)j=i+4;
+    if(j!==null&&els[j]){els[j].focus();__pdCardIdx=j;}
+  }
+  if(d.l&&(!__pdPrevD.l||now-__pdRepT>180)){mv('l');__pdRepT=now;}
+  if(d.r&&(!__pdPrevD.r||now-__pdRepT>180)){mv('r');__pdRepT=now;}
+  if(d.u&&(!__pdPrevD.u||now-__pdRepT>180)){mv('u');__pdRepT=now;}
+  if(d.d&&(!__pdPrevD.d||now-__pdRepT>180)){mv('d');__pdRepT=now;}
+  __pdPrevD={l:d.l,r:d.r,u:d.u,d:d.d};
+  if(__pdEdge(p,0)){
+    if(state==='play'){var ae2=document.activeElement;if(ae2&&ae2.click)ae2.click();}
+    else{var ob=document.querySelector('#ovb button');if(ob)ob.click();}
+  }
+  if(__pdEdge(p,9))pauseToggle();
+  if(__pdEdge(p,2)&&(state==='play'||state==='won'))startGame();
+}
+function loop(ts){requestAnimationFrame(loop);
+__pdPollCards();if(!G)return;if(state==='play'&&!paused){var dt=ts-lastTs;lastTs=ts;if(tsReset){dt=0;tsReset=false;}dt=Math.min(dt,100);var pend=G.pending.slice(),wasLock=G.lock;tick(G,dt);if(wasLock&&!G.lock)pend.forEach(updateCard);var tm=fmtTime(G.elapsed);if(tm!==lastTm){lastTm=tm;$('tm').textContent=tm;}}else{lastTs=ts;}}
 showMenu();hud();
 /* ===== CHECKLIST KIT (finish-the-project, 2026-11-05) — toolbar, tutorial, pause, restart, mute, fullscreen, exit guard, local high scores, loading/offline/error, local-only analytics. No balance, scoring, control or economy changes. ===== */
 var CK_SLUG='cards',CK_HS_KEY='cards_highscores_v1',CK_MUTE_KEY='cards_muted_v1',CK_TUT_KEY='cards_tutorial_seen_v1',CK_PLAYS_KEY='sw_plays_cards',CK_UNIT='MOVES',CK_LOWER=true;

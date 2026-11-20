@@ -2416,7 +2416,7 @@ function hangoutLoop(ts){
   if(hangEmoteT>0){hangEmoteT--;if(hangEmoteT===0)hangCur='';}
   if(hangMsgT>0){hangMsgT--;if(hangMsgT===0&&$('msg'))$('msg').textContent='';}
   var sp=0;
-  if(keys.left)sp-=2;if(keys.right)sp+=2;
+  if(keys.left||__pdD.l)sp-=2;if(keys.right||__pdD.r)sp+=2;
   if(sp!==0)hangX=Math.max(70,Math.min(410,hangX+sp));
   hangPetX+=(hangX-44-hangPetX)*0.08;
   for(var i=hangFx.length-1;i>=0;i--){var f=hangFx[i];f.y-=f.vy;f.t--;if(f.t<=0)hangFx.splice(i,1);}
@@ -3054,7 +3054,7 @@ function delveLoop(ts){
   var dt=ts-lastTs;lastTs=ts;if(tsReset){dt=0;tsReset=false;}acc+=Math.min(dt,100);
   var steps=0;
   while(acc>=16.67&&steps<4){
-    stepRun(S,{left:!!keys.left||keyLatch.left>0,right:!!keys.right||keyLatch.right>0,up:!!keys.up||keyLatch.up>0,down:!!keys.down||keyLatch.down>0,atk:atkEdge,skill:skillEdge,dig:digEdge,build:buildEdge,place:placeEdge,sneak:!!keys.sneak,throw:throwEdge,barricade:barricadeEdge,farm:spliceEdge});
+    stepRun(S,{left:!!keys.left||!!__pdD.l||keyLatch.left>0,right:!!keys.right||!!__pdD.r||keyLatch.right>0,up:!!keys.up||!!__pdD.u||keyLatch.up>0,down:!!keys.down||!!__pdD.d||keyLatch.down>0,atk:atkEdge,skill:skillEdge,dig:digEdge,build:buildEdge,place:placeEdge,sneak:!!keys.sneak||!!__pdD.snk,throw:throwEdge,barricade:barricadeEdge,farm:spliceEdge});
     atkEdge=false;skillEdge=false;digEdge=false;buildEdge=false;placeEdge=false;spliceEdge=false;throwEdge=false;barricadeEdge=false;if(keyLatch.left>0)keyLatch.left--;if(keyLatch.right>0)keyLatch.right--;if(keyLatch.up>0)keyLatch.up--;if(keyLatch.down>0)keyLatch.down--;acc-=16.67;steps++;
     if(S.phase==='over'||S.phase==='won')break;
   }
@@ -3072,6 +3072,7 @@ function hwLoop(ts){
 }
 function loop(ts){
   requestAnimationFrame(loop);
+  __pdPollDelve();
   if(mode==='delve')delveLoop(ts);
   else if(mode==='escape')hwLoop(ts);
   else if(mode==='hangout')hangoutLoop(ts);
@@ -3280,6 +3281,71 @@ document.addEventListener('keyup',function(e){
     else if(k==='Shift')i.sneak=false;
   }
 });
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD for Delve explore / Hangout / Hollow escape (the Fight section in
+   this file already has its own pad support via pollPad). Delve: stick/D-pad
+   move, A strike, X mine, Y skill, B barricade, LB place, RB throw, LT sneak
+   (hold), RT farm, Back craft, Start pause. Hangout: D-pad walk, face buttons
+   emote. Escape: D-pad move, A jump, X dig, Y throw, B build, LB shelter,
+   LT sneak, Back craft, Start pause. Pad directions merge into __pdD so the
+   keyboard state is never clobbered; escape writes only on press/release. */
+var __pdD={l:false,r:false,u:false,d:false,snk:false};
+var __pdHwPrev={l:false,r:false,u:false,d:false,snk:false};
+function __pdHwDir(i,k,now){if(now)i[k]=true;else if(__pdHwPrev[k])i[k]=false;__pdHwPrev[k]=now;}
+function __pdPollDelve(){
+  var p=__pdGet();
+  if(!p){
+    __pdD={l:false,r:false,u:false,d:false,snk:false};
+    if(__pdHwPrev.l||__pdHwPrev.r||__pdHwPrev.u||__pdHwPrev.d||__pdHwPrev.snk){
+      var _i=hwIn();if(_i){_i.left=false;_i.right=false;_i.up=false;_i.down=false;_i.sneak=false;}
+      __pdHwPrev={l:false,r:false,u:false,d:false,snk:false};
+    }
+    return;
+  }
+  var d=__pdDir(p);
+  __pdD.l=d.l;__pdD.r=d.r;__pdD.u=d.u;__pdD.d=d.d;
+  __pdD.snk=__pdBtn(p,6);
+  if(mode==='delve'){
+    if(__pdEdge(p,0))atkEdge=true;
+    if(__pdEdge(p,2))digEdge=true;
+    if(__pdEdge(p,3))skillEdge=true;
+    if(__pdEdge(p,1))barricadeEdge=true;
+    if(__pdEdge(p,4))placeEdge=true;
+    if(__pdEdge(p,5))throwEdge=true;
+    if(__pdEdge(p,7))spliceEdge=true;
+    if(__pdEdge(p,9))tg();
+    if(__pdEdge(p,8)){if(craftOpen){craftOpen=false;var _c=$('craft');if(_c)_c.style.display='none';}else if(playingCheck())openCraftPanel();}
+  }else if(mode==='hangout'){
+    if(__pdEdge(p,0))hangEmote('wave');
+    if(__pdEdge(p,2))hangEmote('dance');
+    if(__pdEdge(p,1))hangEmote('sit');
+    if(__pdEdge(p,3))hangEmote('laugh');
+    if(__pdEdge(p,5))hangEmote('cheer');
+  }else{
+    var i=hwIn();
+    if(i){
+      __pdHwDir(i,'left',d.l);__pdHwDir(i,'right',d.r);__pdHwDir(i,'up',d.u);__pdHwDir(i,'down',d.d);
+      __pdHwDir(i,'sneak',__pdBtn(p,6));
+      if(__pdEdge(p,0))i.jump=true;
+      if(__pdEdge(p,2))i.dig=true;
+      if(__pdEdge(p,3))i.throw=true;
+      if(__pdEdge(p,1))i.build=true;
+      if(__pdEdge(p,4))i.shelter=true;
+      if(__pdEdge(p,9))hwPauseToggle();
+      if(__pdEdge(p,8)&&hwPlaying&&hwBenchNear(hwS)){hwCraftOpen=true;hwRefreshCraft();$('craft').style.display='flex';}
+    }
+  }
+}
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){
     if(mode==='delve'){if(S&&S.phase==='run'&&!paused){paused=true;hidePaused=true;pauseGame(S,true);showPause();}}

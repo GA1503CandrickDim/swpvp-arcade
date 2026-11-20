@@ -6,7 +6,7 @@
 <title>DINO RUN — Wraith's Arcade</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:#0b0b0f;color:#f2f2f2;font-family:Arial,Helvetica,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{background:#0b0b0f;color:#f2f2f2;font-family:Arial,Helvetica,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow-x:hidden}
 .wrap{max-width:720px;margin:0 auto;padding:10px 10px 18px}
 /*UI-FIT: flex column so the stage absorbs viewport slack and the
    controls stay visible without scrolling; the canvas letterboxes via
@@ -65,6 +65,15 @@ canvas{display:block;width:100%;height:auto;touch-action:none;cursor:pointer}
 #startOverlay .pick button{padding:14px 12px;font-size:12px}
 #startOverlay .pick button small{font-size:10px}
 .controls button{font-size:14px;letter-spacing:0;padding-left:2px;padding-right:2px}
+/* MOBILE FIT (2026-11-19, 390x844 portrait): tighter HUD (2 rows max), smaller
+   retro pad, shorter preview — the column must fit without scrolling. */
+.hud{font-size:12px;gap:4px}
+.hud span{padding:5px 6px}
+.retro-pad .pad-dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}
+.retro-pad button{width:48px;height:48px;font-size:18px}
+.retro-pad .pad-acts button{width:54px;height:54px;font-size:15px}
+#trackPreview{height:90px}
+.wrap{padding:8px 8px 12px}
 #startOverlay #cameoLine:empty{display:none}
 #startOverlay button.start{position:sticky;bottom:0}
 }
@@ -113,6 +122,12 @@ h1{display:none}
 
 /* MOBILE UI SIZING (Cee 2026-11-04): pick buttons were ~37px tall. */
 .pick button{min-height:44px}
+/* TRACK PREVIEW (2026-11-19): mini behind-view of the selected track + per-button color swatches. */
+#trackPreview{width:100%;max-width:640px;height:110px;border:2px solid #ffd23f;border-radius:10px;display:block;margin:4px auto}
+.pick button .sw{display:block;height:8px;border-radius:4px;margin-bottom:6px}
+.sw-ember{background:linear-gradient(90deg,#160404,#b3241a,#ff3b30)}
+.sw-void{background:linear-gradient(90deg,#0d0620,#7a2fd6,#a86bff)}
+.sw-bone{background:linear-gradient(90deg,#0b0b10,#c9c9d1,#f2f2f2)}
 </style>
 <style>
 /*HUD-SHARED 2026-11-05: Fight-HUD language (gold #8a6d14 border, orange #ff8800 title, #ffd94d pill) + read-only molecules pill. See per-file note.*/
@@ -149,7 +164,7 @@ body{padding-top:74px}
 <div id="ckBar"><div class="ck-top"><span class="ck-title">DINO RUN</span><span class="ck-mol" id="ckMol">⚛ <b>0</b></span></div><div class="ck-row"><button id="ckPause" type="button">⏸ PAUSE</button><button id="ckRestart" type="button">↻ RESTART</button><button id="ckSound" type="button">🔊 SOUND ON</button><button id="ckFull" type="button">⛶ FULLSCREEN</button><button id="ckArcade" type="button">⌂ ARCADE</button><button id="ckHelp" type="button" aria-label="How to play">?</button></div><div id="ckBest">🏆 BEST: —</div></div>
 <div id="ckLoading" class="ck-ov on"><div class="ck-box"><div class="ck-t">LOADING…</div><div class="ck-b" style="text-align:center">Warming up the game…</div></div></div>
 <div id="ckOffline">⚠ OFFLINE — YOUR PROGRESS SAVES ON THIS DEVICE.</div>
-<div id="ckTut" class="ck-ov" role="dialog" aria-modal="true" aria-label="How to play"><div class="ck-box"><div class="ck-t">DINO RUN</div><div class="ck-b"><b>GOAL</b> — Run as far as you can down <b>THREE LANES</b> while the cave collapses behind you. Switch lanes to pick a path, jump and slide the rest.<br><b>CONTROLS</b> — ← → or A / D to switch lanes · ▲ JUMP button, Space, ↑ or W to jump · ▼ SLIDE button, ↓ or S to slide · CHOMP button, X, F or C to chomp. On touch: swipe left / right to switch lanes, swipe up / down to jump / slide, or use the retro pad.<br><b>HOW IT PLAYS</b> — JUMP clears spikes, gaps and walls. SLIDE smashes boulders and ducks under sweepers and flyers. CHOMP eats ground chasers. Grab the gold bolt for <b>RUSH</b> — smash through everything for a few seconds. Coins are +25, gems +100, eating a chaser is +250, smashing in RUSH is +150. You have 3 lives — but if the <b>COLLAPSE</b> catches you, the run ends no matter how many lives are left.<br><b>SCORING</b> — Score grows with distance + bonuses. Your <b>BEST</b> score is saved on this device.</div><div class="ck-btns"><button id="ckTutOk" type="button">GOT IT — PLAY!</button></div></div></div>
+<div id="ckTut" class="ck-ov" role="dialog" aria-modal="true" aria-label="How to play"><div class="ck-box"><div class="ck-t">DINO RUN</div><div class="ck-b"><b>GOAL</b> — Run as far as you can down <b>THREE LANES</b> while the cave collapses behind you. Switch lanes to pick a path, jump and slide the rest.<br><b>CONTROLS</b> — ← → or A / D to switch lanes · ▲ JUMP button, Space, ↑ or W to jump · ▼ SLIDE button, ↓ or S to slide · CHOMP button, X, F or C to chomp. On touch: swipe left / right to switch lanes, swipe up / down to jump / slide, or use the retro pad.<br><b>HOW IT PLAYS</b> — JUMP clears spikes, gaps and walls. SLIDE smashes boulders and ducks under sweepers and flyers. CHOMP eats ground chasers. Dodge at the last moment for a <b>CLOSE!</b> bonus (+25). Grab the gold bolt for <b>RUSH</b> — smash through everything for a few seconds. Coins are +25, gems +100, eating a chaser is +250, smashing in RUSH is +150. <b>ONE HIT ends the run</b> — a SHIELD saves you once. If the <b>COLLAPSE</b> catches you, the run ends too. Pick a track on the start screen — the preview shows the track you'll run, and each track has its own look and obstacles.<br><b>SCORING</b> — Score grows with distance + bonuses. Your <b>BEST</b> score is saved on this device.</div><div class="ck-btns"><button id="ckTutOk" type="button">GOT IT — PLAY!</button></div></div></div>
 <div id="ckPaused" class="ck-ov" role="dialog" aria-modal="true" aria-label="Paused"><div class="ck-box"><div class="ck-t">⏸ PAUSED</div><div class="ck-b" style="text-align:center">Take a breather — the game is frozen.</div><div class="ck-btns"><button id="ckResume" type="button">▶ RESUME</button><button id="ckQuit" type="button" class="ck-ghost">⌂ QUIT TO ARCADE</button></div></div></div>
 <div id="ckExit" class="ck-ov" role="dialog" aria-modal="true" aria-label="Exit game?"><div class="ck-box"><div class="ck-t">EXIT?</div><div class="ck-b" style="text-align:center">Your progress is saved.</div><div class="ck-btns"><button id="ckExitGo" type="button">EXIT</button><button id="ckExitStay" type="button" class="ck-ghost">STAY</button></div></div></div>
 <div id="ckError" class="ck-ov" role="dialog" aria-modal="true" aria-label="Something went wrong"><div class="ck-box"><div class="ck-t">SOMETHING WENT WRONG</div><div class="ck-b" style="text-align:center">The game hit a snag. Your progress is saved on this device.</div><div class="ck-btns"><button id="ckRetry" type="button">↻ RETRY</button><button id="ckKeepPlaying" type="button" class="ck-ghost">KEEP PLAYING</button></div></div></div>
@@ -162,26 +177,28 @@ body{padding-top:74px}
 <span>DIST <span id="hudDist">0</span>m</span>
 <span>MOLECULES <span class="gold" id="hudCoins">50</span></span>
 <span>GEMS <span class="gold" id="hudGems">0</span></span>
+<span id="hudNear">✦ CLOSE ×0</span>
 <span id="hudLives">❤❤❤</span>
 <span id="hudCave">🪨 CAVE SAFE</span>
-<span id="hudZone">SUNSET TRAIL</span>
+<span id="hudZone">EMBER RUN</span>
 </div>
 <div class="stage">
 <canvas id="game" width="960" height="540"></canvas>
 <div class="overlay" id="startOverlay">
 <h2>DINO <b>RUN</b></h2>
-<p>3 LANES — SWITCH LANES, JUMP, SLIDE, CHOMP. THE CAVE IS COLLAPSING BEHIND YOU — KEEP RUNNING.</p>
-<p>LEFT / RIGHT SWITCHES LANES. JUMP CLEARS SPIKES, GAPS + WALLS. SLIDE SMASHES BOULDERS AND DUCKS SWEEPERS. CHOMP EATS GROUND CHASERS. GRAB THE GOLD BOLT FOR RUSH — SMASH THROUGH EVERYTHING.</p>
+<p>3 LANES — SWITCH LANES, JUMP, SLIDE, CHOMP. ONE HIT ENDS THE RUN. THE CAVE IS COLLAPSING BEHIND YOU — KEEP RUNNING.</p>
+<p>PICK A TRACK BELOW — THE PREVIEW SHOWS THE TRACK YOU'LL RUN. LEFT / RIGHT SWITCHES LANES. JUMP CLEARS SPIKES, GAPS + WALLS. SLIDE SMASHES BOULDERS AND DUCKS SWEEPERS. CHOMP EATS GROUND CHASERS. DODGE AT THE LAST MOMENT FOR A CLOSE! BONUS. GRAB THE GOLD BOLT FOR RUSH — SMASH THROUGH EVERYTHING.</p>
+<canvas id="trackPreview" width="640" height="110" aria-label="Track preview"></canvas>
 <div class="pick" id="zonePick">
-<button id="btnZoneSunset" type="button">SUNSET TRAIL<small>pits • spikes • crates</small></button>
-<button id="btnZoneRuins" type="button">RUIN STEPS<small>platforms • boulders • critters</small></button>
-<button id="btnZoneFrost" type="button">FROST PASS<small>ice • sweepers • boulders</small></button>
+<button id="btnZoneEmber" type="button"><i class="sw sw-ember"></i>EMBER RUN<small>spikes • pits • crates</small></button>
+<button id="btnZoneVoid" type="button"><i class="sw sw-void"></i>VOID VIOLET<small>platforms • boulders • spikes</small></button>
+<button id="btnZoneBone" type="button"><i class="sw sw-bone"></i>BONE YARD<small>sweepers • boulders • pits</small></button>
 </div>
 <div class="pick" id="charPick">
 <button id="btnCharDino" type="button">🦖 DINO<small>the pet-game BUDDY</small></button>
 <button id="btnCharRunner" type="button">🏃 RUNNER<small>the ruin runner</small></button>
 </div>
-<p id="selLabel">SUNSET TRAIL • DINO</p>
+<p id="selLabel">EMBER RUN • DINO</p>
 <p id="cameoLine"></p>
 <button class="start" id="btnStart" type="button">START RUN</button>
 </div>
@@ -224,15 +241,16 @@ body{padding-top:74px}
 </div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script>
 'use strict';
-/* DINO RUN — 1-lane behind-view runner (classic Dino Run: jump + slide only).
-   Pure state + step function, kept DOM-free so the same constants can be
-   checked outside a browser. Ruin content folds in here; the old side-view
-   engine (and its ground-pinned spike flaw) is gone. */
+/* DINO RUN — Temple-Run-style 3-lane endless runner (Cee 2026-11-19).
+   Lanes + jump/slide, coins, ramping speed AND hazard density, near-miss
+   bonuses for last-moment dodges, collapsing-cave chaser, RUSH. ONE HIT
+   ends the run. Pure state + step function, kept DOM-free so the same
+   constants can be checked outside a browser. */
 var CFG={
   width:960,height:540,horizonY:150,playerY:470,
   laneSpread:190,zMax:620,
   gravity:1.15,jumpVel:21,
-  baseSpeed:5.5,maxSpeed:11,speedGain:0.00094,
+  baseSpeed:5.5,maxSpeed:12.5,speedGain:0.0011,
   spikeClear:30,crateClear:26,wallClear:60,boulderClear:70,
   chompDuration:300,magnetDuration:360,multDuration:360,invulnDuration:90,
   coinScore:25,gemScore:100,eatScore:250,smashScore:150,stepScore:150,
@@ -241,13 +259,20 @@ var CFG={
      up, you outrun it while clean, a hit lets it surge. boostDuration is
      the RUSH pickup window (smash through everything). */
   collapseStart:-320,collapseRate:0.88,collapseSurge:60,boostDuration:360,boostScore:150,
+  /* TEMPLE-RUN LOOP (2026-11-19): near-miss bonus, density ramp floor,
+     distance over which the spawn gap shrinks, distance where 2-lane
+     wall pairs (one open lane, coin trail down it) start appearing. */
+  nearScore:25,nearWindow:45,densityMin:0.62,densityDist:20000,pairStart:3000,
   gemCoins:5,bestKey:'wraith_dino_best',walletKey:'wraith_coins',petKey:'wraith_pet_v1',
   startCoins:50
 };
 var ZONES=[
-  {id:'sunset',name:'SUNSET TRAIL',skyTop:'#2b1a3a',skyBot:'#c95a2e',ground:'#4a2f1d',lane:'#5d3d24',accent:'#ffd23f',decor:'palm',hazards:['spike','pit','crate','wall'],flyerChance:0.25},
-  {id:'ruins',name:'RUIN STEPS',skyTop:'#0e2a12',skyBot:'#3f7a34',ground:'#3a2c18',lane:'#4a3a22',accent:'#7fd08a',decor:'stone',hazards:['platform','boulder','spike','wall'],flyerChance:0.35},
-  {id:'frost',name:'FROST PASS',skyTop:'#0e1a2e',skyBot:'#4a7a9e',ground:'#5a6a7a',lane:'#6d7f92',accent:'#a8e0ff',decor:'ice',hazards:['sweeper','boulder','pit','wall'],flyerChance:0.5}
+  /* SURPRISE-THEME RETINT (Cee 2026-11-19 'surprise me'): on-brand
+     red / violet / black / white. Green appears only as the dino's core
+     glow (see drawPlayer). Each track has its own look AND obstacle mix. */
+  {id:'ember',name:'EMBER RUN',skyTop:'#160404',skyBot:'#b3241a',ground:'#160a0a',lane:'#331414',accent:'#ff3b30',decor:'ember',hazards:['spike','pit','crate','wall'],flyerChance:0.25},
+  {id:'void',name:'VOID VIOLET',skyTop:'#0d0620',skyBot:'#7a2fd6',ground:'#0f0a1c',lane:'#221640',accent:'#a86bff',decor:'crystal',hazards:['platform','boulder','spike','wall'],flyerChance:0.35},
+  {id:'bone',name:'BONE YARD',skyTop:'#0b0b10',skyBot:'#c9c9d1',ground:'#0d0d10',lane:'#232329',accent:'#f2f2f2',decor:'bone',hazards:['sweeper','boulder','pit','wall'],flyerChance:0.5}
 ];
 var CAMEO_TABLE={
   buddy:{emoji:'🦖',body:'#1c1c22',belly:'#ffd23f'},
@@ -306,7 +331,7 @@ function createState(zoneId,charId,store){
   store=store||defaultStore();
   return {
     store:store,t:0,distance:0,score:0,bonus:0,
-    coinsRun:0,gems:0,eaten:0,smashed:0,lives:3,
+    coinsRun:0,gems:0,eaten:0,smashed:0,lives:1,nearMiss:0,nearFlash:0,prevLane:null,laneChangeT:-999,
     speed:CFG.baseSpeed,gameOver:false,
     zoneId:zoneById(zoneId).id,charId:(charId==='runner'?'runner':'dino'),
     lane:0,laneX:0,
@@ -321,6 +346,9 @@ function createState(zoneId,charId,store){
 }
 function rng(s){s.seed=(s.seed*1103515245+12345)&0x7fffffff;return s.seed/0x7fffffff;}
 function multOf(s){return s.mult>0?2:1;}
+function isHazardKind(k){return k==='spike'||k==='crate'||k==='wall'||k==='boulder'||k==='platform'||k==='sweeper'||k==='pit'||k==='chaser'||k==='flyer';}
+function densityF(s){var f=1-s.distance/CFG.densityDist*(1-CFG.densityMin);return f<CFG.densityMin?CFG.densityMin:f;}
+function nearMiss(s){s.nearMiss++;s.nearFlash=45;addBonus(s,CFG.nearScore);s.msg='CLOSE! +'+CFG.nearScore;}
 function addBonus(s,base){s.bonus+=base*multOf(s);}
 function hurt(s,cause){
   if(s.boost>0||s.invuln>0||s.gameOver)return false;
@@ -356,6 +384,17 @@ function chompStrike(s){
 function spawnEvent(s){
   var zone=zoneById(s.zoneId),idx=s.spawnIndex++;
   var z=CFG.zMax,r=rng(s);
+  /* TEMPLE-RUN DENSITY: past pairStart, sometimes block TWO lanes with the
+     same jumpable hazard and leave one open lane — a forced lane change —
+     with a coin trail down the open lane so the safe path pays. The open
+     lane is always clear at this z, so the pattern is never unfair. */
+  if(s.distance>=CFG.pairStart&&rng(s)<0.30){
+    var gapLane=Math.floor(rng(s)*3)-1;
+    var pk2=(rng(s)<0.5)?'spike':'wall';
+    for(var li=-1;li<=1;li++){if(li===gapLane)continue;s.entities.push({kind:pk2,lane:li,z:z});}
+    for(var ci=0;ci<4;ci++)s.entities.push({kind:'coin',lane:gapLane,z:z+40+ci*55});
+    s.lastReq='jump';return;
+  }
   if(idx%9===8){
     /* RUSH (boost) joins the powerup rotation — smash through everything
        for a few seconds. */
@@ -391,8 +430,9 @@ function spawnEvent(s){
   if(h1==='platform')ent.cleared=false;
   s.entities.push(ent);
   s.lastReq=(h1==='sweeper')?'slide':'jump';
-  /* 1 LANE: no second hazard in another lane — a same-lane double-stack
-     at z and z+30 would be unfair, so hazards spawn one at a time. */
+  /* Single hazards spawn one at a time (a same-lane double-stack at z and
+     z+30 would be unfair); the 2-lane pair above is the only multi-lane
+     pattern, and it always leaves one lane open. */
   if(r<0.55){
     var cl=Math.floor(rng(s)*3)-1,i;
     for(i=0;i<5;i++)s.entities.push({kind:'coin',lane:cl,z:z+50+i*60});
@@ -416,15 +456,15 @@ function stepGame(s,input,store){
   if(s.chompCd>0)s.chompCd--;
   if(s.chompFlash>0)s.chompFlash--;
   if(s.laneCd>0)s.laneCd--;
+  if(s.nearFlash>0)s.nearFlash--;
   /* 3 LANES: one press = one lane. Cooldown stops a held key / swipe from
      hopping two lanes at once. */
-  if(input.left&&s.laneCd<=0){s.lane=Math.max(-1,s.lane-1);s.laneCd=12;}
-  if(input.right&&s.laneCd<=0){s.lane=Math.min(1,s.lane+1);s.laneCd=12;}
+  if(input.left&&s.laneCd<=0){if(s.lane>-1){s.prevLane=s.lane;s.laneChangeT=s.t;}s.lane=Math.max(-1,s.lane-1);s.laneCd=12;}
+  if(input.right&&s.laneCd<=0){if(s.lane<1){s.prevLane=s.lane;s.laneChangeT=s.t;}s.lane=Math.min(1,s.lane+1);s.laneCd=12;}
   /* COLLAPSING CAVE: the cave front advances at a fraction of run speed,
      so a clean run pulls ahead — but it gains extra ground while you
      stumble, and every hit surges it (see hurt). Caught = game over. */
   s.collapse+=s.speed*CFG.collapseRate+0.1+(s.stumble?1:0);
-  /* 1 LANE: lane is fixed at 0 — no lane switching. */
   var grounded=s.jumpY<=0&&!s.airborne;
   if(input.jump&&grounded){s.sliding=false;s.slideTimer=0;s.vy=CFG.jumpVel;s.airborne=true;}
   if(input.slide&&grounded){s.sliding=true;s.slideTimer=24;}
@@ -464,6 +504,13 @@ function stepGame(s,input,store){
     s.stumble.z=Math.min(-40,s.stumble.z+1.5);
     if(s.stumble.t<=0)s.stumble=null;
   }
+  /* NEAR MISS (lane dodge): a hazard in the lane you JUST left, passing
+     behind you within nearWindow frames of the switch, is a last-moment
+     dodge — bonus + flash. Switching early earns nothing. */
+  for(i=0;i<s.entities.length;i++){
+    e=s.entities[i];
+    if(e.z<-60&&!e.nearCounted&&isHazardKind(e.kind)&&e.lane===s.prevLane&&s.lane!==e.lane&&(s.t-s.laneChangeT)<=CFG.nearWindow){e.nearCounted=true;nearMiss(s);}
+  }
   s.entities=s.entities.filter(function(en){
     if(en.kind==='pit')return en.z+en.zLen>-60;
     return en.z>-60;
@@ -475,9 +522,12 @@ function stepGame(s,input,store){
        inside one jump's 36-frame airtime, so a hazard right after a jump
        could not be answered. Scale the gap by speed so the TIME between
        hazards stays the same at every speed. */
-    if(s.spawnTimer<=0){spawnEvent(s);s.spawnTimer=(260+rng(s)*160)*(s.speed/CFG.baseSpeed);}
+    /* DENSITY RAMP: the time between hazards shrinks as you survive — the
+       gap is scaled by densityF so late-game runs are thick with hazards
+       (on top of the speed ramp above). */
+    if(s.spawnTimer<=0){spawnEvent(s);s.spawnTimer=(260+rng(s)*160)*(s.speed/CFG.baseSpeed)*densityF(s);}
   }
-  /* pickups + coins/gems (1 LANE: everything is in the player's lane) */
+  /* pickups + coins/gems (your lane — or an adjacent lane with MAGNET) */
   for(i=s.entities.length-1;i>=0;i--){
     e=s.entities[i];
     var nearLane=(e.lane===s.lane)||(s.magnet>0&&Math.abs(e.lane-s.lane)<=1);
@@ -513,6 +563,10 @@ function stepGame(s,input,store){
         s.entities.splice(i,1);s.smashed++;addBonus(s,CFG.boostScore);s.msg='SMASH!';continue;
       }
     }
+    /* NEAR MISS (jump): clearing a low obstacle with less than 30 units to
+       spare is a close call — bonus + flash, once per obstacle. */
+    var clearH={spike:CFG.spikeClear,crate:CFG.crateClear,wall:CFG.wallClear,boulder:CFG.boulderClear,platform:CFG.crateClear}[e.kind];
+    if(clearH!==undefined&&atPlayer(e)&&s.jumpY>=clearH&&s.jumpY<clearH+30&&!e.nearCounted){e.nearCounted=true;nearMiss(s);}
     if(e.kind==='spike'){
       if(atPlayer(e)&&s.jumpY<CFG.spikeClear)hurt(s,'SPIKES!');
     }else if(e.kind==='pit'){
@@ -553,7 +607,7 @@ function stepGame(s,input,store){
   if(s.collapse>=s.distance&&!s.gameOver){s.gameOver=true;s.collapseDeath=true;s.msg='THE CAVE COLLAPSED!';}
   return s;
 }
-globalThis.__MERGED_RUNNER__={CFG:CFG,ZONES:ZONES,CAMEO_TABLE:CAMEO_TABLE,EVO_NAMES:EVO_NAMES,createState:createState,stepGame:stepGame,zoneById:zoneById,resolveCameo:resolveCameo,getSharedCoins:getSharedCoins,setSharedCoins:setSharedCoins,addSharedCoins:addSharedCoins,defaultStore:defaultStore,chompStrike:chompStrike,hurt:hurt,spawnEvent:spawnEvent};
+globalThis.__MERGED_RUNNER__={CFG:CFG,ZONES:ZONES,CAMEO_TABLE:CAMEO_TABLE,EVO_NAMES:EVO_NAMES,createState:createState,stepGame:stepGame,zoneById:zoneById,resolveCameo:resolveCameo,getSharedCoins:getSharedCoins,setSharedCoins:setSharedCoins,addSharedCoins:addSharedCoins,defaultStore:defaultStore,chompStrike:chompStrike,hurt:hurt,spawnEvent:spawnEvent,densityF:densityF};
 
 /* ---------- browser wiring (skipped when there is no DOM) ---------- */
 if(typeof document!=='undefined'&&document.getElementById){
@@ -571,7 +625,7 @@ if(typeof document!=='undefined'&&document.getElementById){
       finalGems=el('finalGems'),finalDist=el('finalDist'),finalZone=el('finalZone');
   var store=defaultStore();
   var cameo=resolveCameo(store);
-  var selZone='sunset',selChar='dino';
+  var selZone='ember',selChar='dino';
   var best=0;
   try{best=parseInt(storeGet(store,CFG.bestKey)||'0',10)||0;}catch(e){best=0;}
   var state=createState(selZone,selChar,store);
@@ -579,7 +633,7 @@ if(typeof document!=='undefined'&&document.getElementById){
   var heldSlide=false;
   function setText(n,v){if(n)n.textContent=v;}
   function markSel(){
-    var map={btnZoneSunset:'sunset',btnZoneRuins:'ruins',btnZoneFrost:'frost',btnCharDino:'dino',btnCharRunner:'runner'};
+    var map={btnZoneEmber:'ember',btnZoneVoid:'void',btnZoneBone:'bone',btnCharDino:'dino',btnCharRunner:'runner'};
     Object.keys(map).forEach(function(id){
       var b=el(id);if(!b||!b.classList)return;
       var on=(map[id]===selZone||map[id]===selChar);
@@ -588,11 +642,35 @@ if(typeof document!=='undefined'&&document.getElementById){
     setText(selLabel,zoneById(selZone).name+' • '+(selChar==='dino'?'DINO':'RUNNER'));
     setText(hudZone,zoneById(selZone).name);
     setText(cameoLine,'COMPANION: '+cameo.emoji+' '+cameo.id.toUpperCase()+' — '+cameo.evoName+(cameo.variant?' • '+cameo.variant.toUpperCase():'')+' RIDES ALONGSIDE YOU');
+    drawTrackPreview();
+  }
+  function drawTrackPreview(){
+    /* TRACK PREVIEW (Cee 2026-11-19: the preview picks the track): a mini
+       behind-view of the SELECTED zone — sky, sun, ground, 3 lanes, decor
+       and a sample hazard — redrawn on every pick. START runs this track. */
+    var cv=el('trackPreview');if(!cv)return;
+    var c2;try{c2=cv.getContext('2d');}catch(e){return;}
+    if(!c2)return;
+    var z=zoneById(selZone),W=cv.width,H=cv.height;
+    var g=c2.createLinearGradient(0,0,0,34);
+    g.addColorStop(0,z.skyTop);g.addColorStop(1,z.skyBot);
+    c2.fillStyle=g;c2.fillRect(0,0,W,34);
+    c2.fillStyle=z.accent;c2.beginPath();c2.arc(W-52,16,10,0,Math.PI*2);c2.fill();
+    c2.fillStyle=z.ground;c2.fillRect(0,34,W,H-34);
+    c2.fillStyle=z.lane;
+    c2.beginPath();c2.moveTo(W/2-26,34);c2.lineTo(W/2+26,34);c2.lineTo(W/2+110,H);c2.lineTo(W/2-110,H);c2.closePath();c2.fill();
+    c2.strokeStyle='rgba(255,255,255,.3)';c2.lineWidth=1;
+    [-0.5,0.5].forEach(function(o){c2.beginPath();c2.moveTo(W/2+o*20,34);c2.lineTo(W/2+o*95,H);c2.stroke();});
+    c2.fillStyle=z.accent;
+    for(var i=0;i<3;i++){var sx=60+i*90;c2.beginPath();c2.moveTo(sx,86);c2.lineTo(sx+7,66);c2.lineTo(sx+14,86);c2.closePath();c2.fill();}
+    c2.fillStyle='#ffd23f';c2.beginPath();c2.arc(W/2,58,6,0,Math.PI*2);c2.fill();
+    c2.fillStyle='#fff';c2.font='bold 13px Arial';c2.textAlign='center';
+    c2.fillText(z.name+' — '+z.hazards.join(' • ').toUpperCase(),W/2,H-8);
   }
   function bindClick(id,fn){var b=el(id);if(b)b.addEventListener('click',fn);}
-  bindClick('btnZoneSunset',function(){selZone='sunset';markSel();});
-  bindClick('btnZoneRuins',function(){selZone='ruins';markSel();});
-  bindClick('btnZoneFrost',function(){selZone='frost';markSel();});
+  bindClick('btnZoneEmber',function(){selZone='ember';markSel();});
+  bindClick('btnZoneVoid',function(){selZone='void';markSel();});
+  bindClick('btnZoneBone',function(){selZone='bone';markSel();});
   bindClick('btnCharDino',function(){selChar='dino';markSel();});
   bindClick('btnCharRunner',function(){selChar='runner';markSel();});
   function showBest(){setText(hudBest,best);setText(finalBest,best);}
@@ -604,6 +682,9 @@ if(typeof document!=='undefined'&&document.getElementById){
     if(startOv)startOv.hidden=true;if(overOv)overOv.hidden=true;if(pauseOv)pauseOv.hidden=true;
     markSel();loop();
   }
+  /* Test/debug handle (harness + track-preview checks): read the selected
+     track, pick one, read the live state, start a run. Harmless in play. */
+  window.__DINO_DEBUG__={getSelZone:function(){return selZone;},getState:function(){return state;},selectZone:function(id){selZone=zoneById(id).id;markSel();},start:start};
   function toMenu(){
     running=false;paused=false;
     if(overOv)overOv.hidden=true;if(pauseOv)pauseOv.hidden=true;if(startOv)startOv.hidden=false;
@@ -663,14 +744,24 @@ T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.'
     var off=(state.distance*0.25)%150,i,x;
     for(i=-1;i<8;i++){
       x=i*150-off;
-      if(zone.decor==='palm'){
-        ctx.fillRect(x+40,CFG.horizonY-90,8,90);
-        ctx.beginPath();ctx.moveTo(x+44,CFG.horizonY-90);ctx.lineTo(x+10,CFG.horizonY-110);ctx.lineTo(x+44,CFG.horizonY-96);ctx.closePath();ctx.fill();
-        ctx.beginPath();ctx.moveTo(x+44,CFG.horizonY-90);ctx.lineTo(x+80,CFG.horizonY-110);ctx.lineTo(x+44,CFG.horizonY-96);ctx.closePath();ctx.fill();
-      }else if(zone.decor==='stone'){
-        ctx.fillRect(x,CFG.horizonY-110,90,110);ctx.fillRect(x+24,CFG.horizonY-140,42,30);
+      if(zone.decor==='ember'){
+        /* ember pillars with a red flame tip */
+        ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x+40,CFG.horizonY-90,8,90);
+        ctx.fillStyle=zone.accent;
+        ctx.beginPath();ctx.moveTo(x+44,CFG.horizonY-90);ctx.lineTo(x+22,CFG.horizonY-118);ctx.lineTo(x+44,CFG.horizonY-102);ctx.closePath();ctx.fill();
+        ctx.beginPath();ctx.moveTo(x+44,CFG.horizonY-90);ctx.lineTo(x+66,CFG.horizonY-118);ctx.lineTo(x+44,CFG.horizonY-102);ctx.closePath();ctx.fill();
+        ctx.fillStyle='#ffd23f';ctx.fillRect(x+42,CFG.horizonY-96,4,8);
+      }else if(zone.decor==='crystal'){
+        /* violet void-crystal spires */
+        ctx.fillStyle=zone.accent;
+        ctx.beginPath();ctx.moveTo(x,CFG.horizonY);ctx.lineTo(x+45,CFG.horizonY-140);ctx.lineTo(x+90,CFG.horizonY);ctx.closePath();ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.35)';
+        ctx.beginPath();ctx.moveTo(x+45,CFG.horizonY-140);ctx.lineTo(x+60,CFG.horizonY-60);ctx.lineTo(x+45,CFG.horizonY);ctx.closePath();ctx.fill();
       }else{
-        ctx.beginPath();ctx.moveTo(x,CFG.horizonY);ctx.lineTo(x+60,CFG.horizonY-130);ctx.lineTo(x+120,CFG.horizonY);ctx.closePath();ctx.fill();
+        /* bone-yard monoliths: pale slabs on black */
+        ctx.fillStyle='#e8e8ec';ctx.fillRect(x+18,CFG.horizonY-120,26,120);
+        ctx.fillStyle='#9a9aa2';ctx.fillRect(x+56,CFG.horizonY-84,18,84);
+        ctx.fillStyle='#0b0b10';ctx.fillRect(x+26,CFG.horizonY-100,4,26);
       }
     }
     ctx.fillStyle=zone.ground;ctx.fillRect(0,CFG.horizonY,CFG.width,CFG.height-CFG.horizonY);
@@ -783,6 +874,7 @@ T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.'
         ctx.fillStyle=body;ctx.fillRect(px-32,py-28,64,28);
         ctx.fillRect(px+14,py-42,26,16);
         ctx.fillStyle=belly;ctx.fillRect(px-22,py-12,34,8);
+        ctx.fillStyle='#39d353';ctx.shadowColor='#39d353';ctx.shadowBlur=10;ctx.fillRect(px-6,py-18,6,6);ctx.shadowBlur=0;
         ctx.fillStyle='#fff';ctx.fillRect(px+26,py-38,7,7);
         ctx.fillStyle='#111';ctx.fillRect(px+29,py-37,3,3);
         ctx.fillStyle=body;ctx.fillRect(px-50,py-20,20,9);
@@ -793,6 +885,8 @@ T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.'
         ctx.fillRect(px+2,py-80,32,24);
         ctx.fillRect(px+26,py-68,16,9);
         ctx.fillStyle=belly;ctx.fillRect(px-14,py-40,28,18);
+        /* CORE GLOW: green lives only here — the dino's chest core. */
+        ctx.fillStyle='#39d353';ctx.shadowColor='#39d353';ctx.shadowBlur=10;ctx.fillRect(px-3,py-36,6,6);ctx.shadowBlur=0;
         ctx.fillStyle='#fff';ctx.fillRect(px+14,py-74,8,8);
         ctx.fillStyle='#111';ctx.fillRect(px+18,py-73,3,3);
         ctx.fillStyle='#fff';ctx.fillRect(px+24,py-66,11,4);
@@ -883,12 +977,19 @@ T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.'
     sorted.forEach(drawEntity);
     drawPlayer();
     drawCollapse();
+    if(state.nearFlash>0){
+      ctx.save();ctx.globalAlpha=state.nearFlash/45*0.8;ctx.strokeStyle='#ffd23f';ctx.lineWidth=10;
+      ctx.strokeRect(5,5,CFG.width-10,CFG.height-10);ctx.restore();
+      ctx.fillStyle='#ffd23f';ctx.font='bold 26px Arial';ctx.textAlign='center';
+      ctx.fillText('CLOSE! +'+CFG.nearScore,CFG.width/2,130);
+    }
   }
   function updateHud(){
     setText(hudScore,state.score);
     setText(hudDist,Math.floor(state.distance/10));
     setText(hudCoins,Math.floor(state.shared));
     setText(hudGems,state.gems);
+    var nearEl=el('hudNear');if(nearEl)nearEl.textContent='✦ CLOSE ×'+state.nearMiss;
     setText(hudLives,'❤'.repeat(state.lives)+'♡'.repeat(Math.max(0,3-state.lives)));
     var gap=Math.max(0,Math.floor(state.distance-state.collapse));
     var caveEl=el('hudCave');
@@ -968,6 +1069,41 @@ T.spendRevive(function(ok,msg){if(!ok){rvSay(msg||'REVIVE FAILED — TRY AGAIN.'
     else if(e.code==='KeyP'){if(paused)resume();else pauseGame();}
   });
   document.addEventListener('keyup',function(e){if(e.code==='ArrowDown'||e.code==='KeyS')heldSlide=false;});
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD (Dino Run) — D-pad/stick left/right switch lanes (hold repeats),
+   A or up jump, B or down slide (hold), X chomp, Start pause/resume.
+   A also starts the run from the start screen. Own rAF poll: the game loop
+   stops while paused, so the pad must poll itself. */
+var __pdPrevD={l:false,r:false,u:false,d:false},__pdRepT=0,__pdSlPrev=false;
+function __pdPollDino(){
+  requestAnimationFrame(__pdPollDino);
+  var p=__pdGet();if(!p)return;
+  var d=__pdDir(p);
+  var now=performance.now();
+  if(d.l&&(!__pdPrevD.l||now-__pdRepT>220)){doLeft();__pdRepT=now;}
+  if(d.r&&(!__pdPrevD.r||now-__pdRepT>220)){doRight();__pdRepT=now;}
+  var aE=__pdEdge(p,0),uE=__pdEdge(p,12);
+  if(aE||uE){if(!running&&startOv&&!startOv.hidden)start();else doJump();}
+  if(__pdEdge(p,2))doChomp();
+  var slNow=__pdBtn(p,1)||d.d;
+  if(slNow&&!__pdSlPrev)doSlide();
+  if(!slNow&&__pdSlPrev)heldSlide=false;
+  __pdSlPrev=slNow;
+  if(__pdEdge(p,9)){if(paused)resume();else pauseGame();}
+  __pdPrevD={l:d.l,r:d.r,u:d.u,d:d.d};
+}
+requestAnimationFrame(__pdPollDino);
+
   document.addEventListener('visibilitychange',function(){if(document.hidden)pauseGame();});
 /* ===== CHECKLIST KIT (finish-the-project, 2026-11-05) — toolbar, tutorial, pause, restart, mute, fullscreen, exit guard, local high scores, loading/offline/error, local-only analytics. No balance, scoring, control or economy changes. ===== */
 var CK_SLUG='dino-run',CK_HS_KEY='dino-run_highscores_v1',CK_MUTE_KEY='dino-run_muted_v1',CK_TUT_KEY='dino-run_tutorial_seen_v1',CK_PLAYS_KEY='sw_plays_dino-run',CK_UNIT='PTS',CK_LOWER=false;

@@ -41,17 +41,35 @@ body{max-width:720px;margin:0 auto}#fightRoot{background:#07070d}#fightRoot #fMo
 .vf-pick{background:#14141c;border:1px solid #8a6d14;border-radius:8px;padding:3px 8px;font-size:11px;color:#f2b91e}
 .vf-pick.empty{color:#666;border-color:#333}
 .vf-hint{font-size:10px;color:#888;margin-top:2px;text-align:center}
+.vf-pick-h{font-size:10px;letter-spacing:3px;color:#b46bff;font-weight:700;margin-top:6px;text-align:center}
+.vf-lore{font-size:11px;color:#aaa;font-style:italic;text-align:center;max-width:230px;line-height:1.35;margin-top:4px;min-height:28px}
+.vf-stage-h{font-size:10px;letter-spacing:3px;color:#b46bff;font-weight:700;margin-top:8px;text-align:center}
+.vf-stage-row{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.vf-stage{flex:1;min-width:0;background:#14141c;border:1.5px solid #444;border-radius:6px;color:#ccc;font-family:monospace;font-size:8px;font-weight:700;padding:4px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.vf-stage.sel{border-color:#f2b91e;color:#ffe27a}
+.vf-stage .sw{width:100%;height:14px;border-radius:3px;display:block}
+#mobaShop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;background:#0d0d10;border:2px solid #f2b91e;border-radius:12px;padding:14px;max-width:320px;width:90%;text-align:center;display:none}
+#mobaShop h1{color:#ff8800;letter-spacing:3px;margin:0 0 4px;font-size:20px}
+#mobaShop h2{color:#f2b91e;letter-spacing:2px;margin:0 0 10px;font-size:13px}
+#mobaShop p{margin:4px 0;color:#ccc;font-size:12px}
+#mobaShop button{margin:4px;padding:10px 16px;background:#ff8800;color:#000;border:0;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:monospace}
+#mobaShop button:disabled{opacity:.4;cursor:default}
+.vf-map-row{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.vf-map{flex:1;min-width:0;background:#14141c;border:1.5px solid #444;border-radius:6px;color:#ccc;font-family:monospace;font-size:8px;font-weight:700;padding:4px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.vf-map.sel{border-color:#f2b91e;color:#ffe27a}
+.vf-map canvas{width:100%;height:auto;border-radius:3px;display:block}
 .vf-sel-right{width:288px;flex:0 1 288px;min-width:0;display:flex;flex-direction:column;gap:4px;min-height:0}
 .vf-tabs{display:flex;gap:6px}
 #fightRoot #ov .vf-tab{flex:1;background:#0d0d10;border:1px solid #3a2a5e;color:#aaa;border-radius:8px;padding:6px 0;font-size:12px;letter-spacing:2px;font-weight:700;cursor:pointer;margin:0;min-height:0;min-width:0}
 #fightRoot #ov .vf-tab.sel{background:#2a1440;border-color:#b46bff;color:#fff}
 #fightRoot #ov .vf-scroll{background:#14141c;border:1px solid #3a2a5e;color:#b46bff;border-radius:6px;padding:2px 0;font-size:12px;cursor:pointer;line-height:1;margin:0;min-height:0;min-width:0}
-.vf-grid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;padding:2px;align-content:start}
-#fightRoot #ov .vf-port{background:transparent;border:0;padding:0;margin:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:0;min-width:0;overflow:hidden}
-.vf-ava{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;border:2px solid #555;position:relative;color:#fff}
+.vf-grid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:2px;align-content:start}
+.vf-grid-h{grid-column:1/-1;font-size:10px;letter-spacing:3px;color:#b46bff;font-weight:700;text-align:left;padding:6px 2px 2px;border-top:1px solid #3a2a5e}
+.vf-grid-h:first-child{border-top:0;padding-top:2px}
+#fightRoot #ov .vf-port{background:transparent;border:0;padding:0;margin:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;height:96px;min-height:0;min-width:0;overflow:hidden}
+.vf-ava{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;border:2px solid #555;position:relative;color:#fff}
 #fightRoot #ov .vf-port.sel .vf-ava{box-shadow:0 0 0 3px #fff,0 0 14px #b46bff}
-.vf-pname{font-size:9px;line-height:1.1;color:#ccc;text-align:center;max-width:64px;word-break:break-word}
-.vf-plore{font-size:9px;line-height:1.15;color:#999;font-style:italic;text-align:center;max-width:64px;word-break:break-word}
+.vf-pname{font-size:10px;line-height:1.2;color:#ccc;text-align:center;max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vf-pnum{position:absolute;top:-4px;right:-4px;background:#ff2a6b;color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
 .vf-skins-msg{color:#ccc;font-size:12px;line-height:1.6;padding:10px;text-align:center;grid-column:1/-1}
 .vf-sel-bottom{display:flex;gap:6px;align-items:center;margin-top:6px;width:100%}
@@ -74,13 +92,14 @@ body{max-width:720px;margin:0 auto}#fightRoot{background:#07070d}#fightRoot #fMo
 .vf-picked{margin-top:6px}
 .vf-pick{font-size:13px;padding:5px 10px}
 .vf-hint{font-size:12px;margin-top:4px}
+.vf-lore{font-size:12px;max-width:90%}
 .vf-sel-right{order:2;width:100%;flex:none}
 #fightRoot #ov .vf-tab{min-height:44px;font-size:14px;padding:10px 0}
 #fightRoot #ov .vf-scroll{display:none}
-.vf-grid{overflow:visible;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px 6px;padding:4px 2px}
+.vf-grid{overflow:visible;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px 6px;padding:4px 2px}
+.vf-port{height:108px}
 .vf-ava{width:56px;height:56px;font-size:26px}
-.vf-pname{font-size:11px;max-width:76px}
-.vf-plore{font-size:10px;max-width:76px}
+.vf-pname{font-size:11px;max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vf-sel-left{order:3;width:100%;flex:none}
 .vf-card{padding:10px 12px}
 .vf-card-tag{font-size:11px}
@@ -109,10 +128,10 @@ body{max-width:720px;margin:0 auto}#fightRoot{background:#07070d}#fightRoot #fMo
 .vf-pick{font-size:10px;padding:2px 6px}
 .vf-hint{font-size:9px}
 .vf-sel-right{width:232px;flex-basis:232px}
-.vf-grid{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px 6px}
+.vf-grid{grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px 6px}
+.vf-port{height:92px}
 .vf-ava{width:48px;height:48px;font-size:22px}
-.vf-pname{font-size:10px;max-width:68px}
-.vf-plore{font-size:9px;max-width:68px}
+.vf-pname{font-size:10px;max-width:68px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vf-sel-bottom{flex-wrap:wrap;gap:6px}
 #fightRoot #ov .vf-chip{font-size:10px;padding:8px 2px;white-space:normal;line-height:1.2}
 #fightRoot #ov .vf-ok{padding:8px 12px;font-size:13px}
@@ -237,7 +256,7 @@ html.ck-on #classicGame,html.ck-on #standGame,html.ck-on #brawlGame{padding-top:
 
 </div>
 <div id="brawlGame" style="display:none">
-<div id="bhud"><span id="bhudL"></span><div id="bhpWrap"><div id="bhpFill"></div></div><span id="bhudR"></span><b id="bHPause" class="hud-btn">❚❚ PAUSE</b><b id="bHExit" class="hud-btn exit">✕ EXIT</b></div>
+<div id="bhud"><span id="bhudL"></span><div id="bhpWrap"><div id="bhpFill"></div></div><span id="bhudR"></span><b id="bHPause" class="hud-btn">❚❚ PAUSE</b><b id="bHExit" class="hud-btn exit">✕ EXIT</b><b id="bShopBtn" class="hud-btn" onclick="BRAWL.mobaShopToggle()">🛒 SHOP</b></div>
 <div id="bmsg"></div>
 <div id="bwrap"><canvas id="bcv" width="480" height="360"></canvas></div>
 <div id="bsupWrap"><div id="bsupBar"><div id="bsupFill"></div></div><span id="bsupLbl">SUPER 0%</span></div>
@@ -245,7 +264,7 @@ html.ck-on #classicGame,html.ck-on #standGame,html.ck-on #brawlGame{padding-top:
 <div id="bctl"><div class="mini-row"><button id="bBlk" class="mini">BLOCK</button><button id="bSide" class="mini">SIDE</button><button id="bGrap" class="mini">GRAPPLE</button><button id="bTag" class="mini">TAG</button><button id="bAssist" class="mini">ASSIST</button></div><div class="thumbs"><div class="pad-col"><div class="cross"><button id="bPadU" class="pad-btn p-up">▲</button><button id="bPadL" class="pad-btn p-lf">◀</button><span class="hubcap" id="bJoy"><span class="knob" id="bKnob"></span></span><button id="bPadR" class="pad-btn p-rt">▶</button><button id="bPadD" class="pad-btn p-dn">▼</button></div><div class="pad-caption">PAD — KNOB DRAGS</div></div><div class="attack-cluster"><div class="big-row"><button id="bDodge" class="dodge-tab">DODGE</button><button id="bKick" class="big-btn kick"><span class="sym">▲</span><small>KICK</small></button><button id="bSpec" class="big-btn special"><span class="sym">★</span><small>SPECIAL</small></button><button id="bPunch" class="big-btn punch"><span class="sym">●</span><small>ATTACK</small></button><button id="bBomb" class="big-btn bomb"><span class="sym">💣</span><small>BOMB</small></button></div></div><div id="fpsSkillBar" class="attack-cluster" style="display:none"><div class="big-row"><button id="fpsSpecBtn" class="big-btn special"><span class="sym">★</span><small id="fpsSpecName">SPECIAL</small><span class="fps-chg" id="fpsSpecChg">0%</span></button><button id="fpsShootBtn" class="big-btn punch"><span class="sym">●</span><small id="fpsShootLbl">SHOOT</small></button><button id="fpsDashBtn" class="big-btn dash" style="display:none"><span class="sym">➤</span><small>DASH</small></button></div></div></div><div class="fight-foot"><button id="bPause2" class="gbtn">❚❚ PAUSE</button><button id="bExit" class="gbtn exit">✕ EXIT FIGHT</button><button id="bBright" class="gbtn" onclick="sCycleBrightness()">☀ HIGH</button><button id="bGyroRe" class="gbtn" onclick="fpsGyroRecenter()" style="display:none">🎯 RECENTER</button><button id="bPovBtn" class="gbtn" onclick="BRAWL.povSwitch()" style="display:none">👁 POV: TOP-DOWN</button></div><a class="hub-link" href="index.html" onclick="goHub();return false;">← ARCADE HUB</a></div>
 <div id="bkeys">MOVE — PAD / WASD · PUNCH — J · KICK — K · SPECIAL — L · BLOCK — B · TAG — T · ASSIST — E · SIDE — C · GRAPPLE — G · BOMB — SPACE · PAUSE — P</div>
 <div id="bov"><div id="bovb"></div></div>
-<div style="text-align:center;padding:4px 0 10px"><a href="index.html" onclick="return goHub(event)" style="color:#fc3;text-decoration:none;font-size:12px">← ARCADE HUB</a></div>
+<div id="mobaShop"></div><div style="text-align:center;padding:4px 0 10px"><a href="index.html" onclick="return goHub(event)" style="color:#fc3;text-decoration:none;font-size:12px">← ARCADE HUB</a></div>
 </div>
 
 <div id="padNote">🎮 CONTROLLER CONNECTED</div>
@@ -297,7 +316,10 @@ var FTR=[
 {n:'LESTES',hood:'#ff8c1e',mask:'#2a1f18',eye:'#ffe27a',horn:0,chain:1,mark:'belt',sp:'BELT SHIFT',spc:'#ff8c1e',hp:100,spd:1,dmg:1,agg:1,guard:1},
 {n:'ASTERION VEYL',hood:'#7a1020',mask:'#f0e0d0',eye:'#3a86ff',horn:0,chain:1,mark:'crown',spr:'asterion',hp:100,spd:1.1,dmg:1,agg:1,guard:1,rng:1,sp:'ABSOLUTE DECREE',spc:'#e63946'},];
 var SPR={};
-function loadSpr(){for(var i=0;i<FTR.length;i++){var s=FTR[i].spr;if(s&&!SPR[s]){var im=new Image();var _t=document.getElementById('spr-'+s);im.src=_t&&_t.src?_t.src:'';SPR[s]=im;}}}loadSpr();
+/* ASTERION SPRITE NORMALIZE (2026-11-19, Cee: his in-game sprite pixels look different from the other fighters): his art is a 395x750 smooth webp crop from his character sheet, while the roster sprites are ~256px-tall pixel art. At load, re-render his art through a small offscreen canvas at roster sprite height (256px, smoothing OFF) so it reads as the same chunky pixel style, then swap SPR['asterion'] to the pixelated canvas — same draw scale as the others (drawF/Brawl/FPS all use SPR + naturalWidth/naturalHeight, which the canvas carries as expando props so the existing sprite guards pass unchanged). The original stays as fallback until the pixelated canvas is ready. Showcase card art (chars/asterion.jpg) untouched — in-game fighter sprite only. */
+function vfPixelateAsterion(src,map){if(!src)return;try{var M=map||SPR;var cur=null;try{cur=M['asterion'];}catch(e){}if(cur&&cur.id==='asterion-veyl-px')return;/* already pixelated — idempotent even after the Brawl script wipes SPR and re-populates it */var nw=src.naturalWidth||0,nh=src.naturalHeight||0;if(!nw||!nh)return;var H=256,W=Math.max(1,Math.round(H*nw/nh));var c=document.createElement('canvas');c.width=W;c.height=H;var g=c.getContext('2d');if(!g)return;g.imageSmoothingEnabled=false;g.drawImage(src,0,0,W,H);c.id='asterion-veyl-px';c.naturalWidth=W;c.naturalHeight=H;c.complete=true;M['asterion']=c;}catch(e){}}
+function vfHookAsterion(img,map){if(!img)return;try{if(img.complete&&(img.naturalWidth||0)>0){vfPixelateAsterion(img,map);return;}if(img.addEventListener)img.addEventListener('load',function(){vfPixelateAsterion(img,map);});}catch(e){}}
+function loadSpr(){for(var i=0;i<FTR.length;i++){var s=FTR[i].spr;if(s&&!SPR[s]){var im=new Image();var _t=document.getElementById('spr-'+s);im.src=_t&&_t.src?_t.src:'';SPR[s]=im;if(s==='asterion')vfHookAsterion(im);}}}loadSpr();vfHookAsterion(document.getElementById('spr-asterion'));
 /* DAREDEVIL SUICIDE SKIN (Cee 2026-11-05) — Hashbone's daredevil look, bought in the Tavern at the Keeper's Wares (50 atoms, id 'skin-hashbone-daredevil'). Ownership lives in the Tavern wallet (localStorage 'sw_ion_wallet', wallet.owned). Selection persists in 'vanix_fight_skin_hashbone' ('main' | 'daredevil'); daredevil only applies while owned. The swap happens in drawF, so battle and the select preview (drawSelFighter) both show it. */
 var VF_SKIN_KEY='vanix_fight_skin_hashbone';
 function vfSkinOwned(){try{var w=JSON.parse(localStorage.getItem('sw_ion_wallet')||'null');return !!(w&&w.owned&&w.owned.indexOf('skin-hashbone-daredevil')>=0);}catch(e){return false;}}
@@ -387,6 +409,27 @@ function vfPovGet(modeId){return modeId==='six'?vfPov6v6:(modeId==='trio'?vfPov3
 function vfPovSet(modeId,v){v=(v==='fps')?'fps':'top';if(modeId==='six'){vfPov6v6=v;try{localStorage.setItem(VF_POV_KEY6,v);}catch(e){}}else if(modeId==='trio'){vfPov3v3=v;try{localStorage.setItem(VF_POV_KEY3,v);}catch(e){}}}
 function vfPovToggle(modeId){vfPovSet(modeId,vfPovGet(modeId)==='fps'?'top':'fps');return vfPovGet(modeId);}
 function vfPovLabel(modeId){return vfPovGet(modeId)==='fps'?'FIRST-PERSON':'TOP-DOWN';}
+/* FIGHT STAGES (2026-11-19, Cee: more maps on Fight + 'surprise me' on themes): 4 selectable stages, picked on the select screen — the preview picks the stage you fight on. Same fight geometry (GY/RING) on every stage, so no fighter-balance change: stages are visual + backdrop-layout variants. VANIX ARENA is the current default (night city). DARK RUINS: shattered violet temple, broken pillars, red banners. JUNGLE TEMPLE: overgrown dark jungle, stepped temple, firefly core glow. CRIMSON SANCTUM: blood-moon cathedral, black arches, violet candles. Red/violet/black/white throughout; green only as core glow. Pick persists in localStorage 'vanix_fight_stage'. */
+var VF_STAGES=[{id:'arena',name:'VANIX ARENA',short:'ARENA',sw:'linear-gradient(135deg,#0b1026,#ffd94d)',sky:['#0b1026','#131a2e'],trim:'#c9a227'},{id:'ruins',name:'DARK RUINS',short:'RUINS',sw:'linear-gradient(135deg,#0d0716,#7c3aed)',sky:['#0d0716','#1a0b26'],trim:'#7c3aed'},{id:'jungle',name:'JUNGLE TEMPLE',short:'JUNGLE',sw:'linear-gradient(135deg,#04100a,#2a7a32)',sky:['#04100a','#0b2416'],trim:'#2a7a32'},{id:'sanctum',name:'CRIMSON SANCTUM',short:'SANCTUM',sw:'linear-gradient(135deg,#12060a,#dc2626)',sky:['#12060a','#2a0a12'],trim:'#dc2626'}];
+var vfStage='arena';try{vfStage=localStorage.getItem('vanix_fight_stage')||'arena';}catch(e){}
+var vfStageDrawn='arena';/* last stage drawBG actually painted (harness/debug) */
+function vfStageGet(){for(var i=0;i<VF_STAGES.length;i++)if(VF_STAGES[i].id===vfStage)return vfStage;return 'arena';}
+function vfStageSet(id){vfStage=id;try{localStorage.setItem('vanix_fight_stage',id);}catch(e){}}
+function vfPickStage(id){vfStageSet(id);renderSel();}
+function vfStageRowHtml(){var h='';for(var i=0;i<VF_STAGES.length;i++){var S=VF_STAGES[i];h+='<button class="vf-stage'+(vfStageGet()===S.id?' sel':'')+'" onclick="vfPickStage(\''+S.id+'\')" title="'+S.name+'"><span class="sw" style="background:'+S.sw+'"></span>'+S.short+'</button>';}return h;}
+function vfStageMiniBg(g,W2,H2){var st=vfStageGet(),S=VF_STAGES[0];for(var i=0;i<VF_STAGES.length;i++)if(VF_STAGES[i].id===st)S=VF_STAGES[i];try{var gr=g.createLinearGradient(0,0,0,H2);gr.addColorStop(0,S.sky[0]);gr.addColorStop(1,S.sky[1]);g.fillStyle=gr;g.fillRect(0,0,W2,H2);}catch(e){g.fillStyle=S.sky[0];g.fillRect(0,0,W2,H2);}g.fillStyle='rgba(0,0,0,.45)';if(st==='ruins'){g.fillRect(14,96,16,88);g.fillRect(40,120,12,64);g.fillRect(150,88,16,96);g.fillRect(128,128,12,56);}else if(st==='jungle'){g.beginPath();g.moveTo(60,184);g.lineTo(90,110);g.lineTo(120,184);g.closePath();g.fill();g.beginPath();g.moveTo(70,184);g.lineTo(90,140);g.lineTo(110,184);g.closePath();g.fill();g.fillStyle='#39d353';g.globalAlpha=.7;g.fillRect(88,150,4,4);g.fillRect(96,160,3,3);g.globalAlpha=1;}else if(st==='sanctum'){g.beginPath();g.moveTo(30,184);g.lineTo(30,90);g.lineTo(45,60);g.lineTo(60,90);g.lineTo(60,184);g.closePath();g.fill();g.beginPath();g.moveTo(120,184);g.lineTo(120,90);g.lineTo(135,60);g.lineTo(150,90);g.lineTo(150,184);g.closePath();g.fill();g.fillStyle='#dc2626';g.beginPath();g.arc(90,44,14,0,7);g.fill();}else{g.fillRect(10,110,26,74);g.fillRect(44,90,22,94);g.fillRect(144,100,26,84);g.fillRect(72,130,18,54);g.fillStyle='#e8e8f0';g.beginPath();g.arc(150,34,10,0,7);g.fill();}g.fillStyle=S.trim;g.fillRect(0,184,W2,2);}
+
+/* MOBA MAPS (2026-11-19, item 10 — Cee: BOTH previews change the map you play on): 3 selectable 6v6 maps. JUNGLE RIVER is the current map, verbatim (lanes 110/430, river x360, beast pit 440,380, same bushes/towers) so the default match is unchanged. TWIN CANYON: lanes closer together (130/410), wider river, towers pulled toward mid, beast pit top-side. RUINED CROSS: river + crystal shifted left (x300), towers pushed wide, beast pit top-right, violet ruin palette. Same bases/nexus/win rule on every map; only lanes, river, towers, bushes, beast pit, camps and colours move. The preview on the select screen picks the map the match loads (mobaApplyMap, called in spawnMatch). Pick persists in localStorage 'wraith_moba_map'. */
+var MOBA_MAPS=[
+{id:'river',name:'JUNGLE RIVER',short:'RIVER',lanes:[110,430],riverX:360,riverW:46,crystal:{x:360,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:200},{lane:0,team:0,inner:true,x:100},{lane:0,team:1,inner:false,x:520},{lane:0,team:1,inner:true,x:620},{lane:1,team:0,inner:false,x:200},{lane:1,team:0,inner:true,x:100},{lane:1,team:1,inner:false,x:520},{lane:1,team:1,inner:true,x:620}],bush:[{x:240,y:200,w:70,h:44},{x:480,y:200,w:70,h:44},{x:240,y:340,w:70,h:44},{x:480,y:340,w:70,h:44},{x:325,y:150,w:70,h:40},{x:325,y:390,w:70,h:40}],beastPit:{x:440,y:380},camps:[{x:300,y:200},{x:420,y:340}],laneCol:'#3a3126',jungleCol:'#0e2412'},
+{id:'canyon',name:'TWIN CANYON',short:'CANYON',lanes:[130,410],riverX:360,riverW:60,crystal:{x:360,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:240},{lane:0,team:0,inner:true,x:140},{lane:0,team:1,inner:false,x:480},{lane:0,team:1,inner:true,x:580},{lane:1,team:0,inner:false,x:240},{lane:1,team:0,inner:true,x:140},{lane:1,team:1,inner:false,x:480},{lane:1,team:1,inner:true,x:580}],bush:[{x:200,y:210,w:60,h:40},{x:460,y:210,w:60,h:40},{x:200,y:290,w:60,h:40},{x:460,y:290,w:60,h:40},{x:330,y:230,w:60,h:36}],beastPit:{x:280,y:160},camps:[{x:360,y:200},{x:360,y:340}],laneCol:'#4a3a28',jungleCol:'#241a12'},
+{id:'cross',name:'RUINED CROSS',short:'RUINS',lanes:[110,430],riverX:300,riverW:40,crystal:{x:300,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:180},{lane:0,team:0,inner:true,x:90},{lane:0,team:1,inner:false,x:540},{lane:0,team:1,inner:true,x:630},{lane:1,team:0,inner:false,x:180},{lane:1,team:0,inner:true,x:90},{lane:1,team:1,inner:false,x:540},{lane:1,team:1,inner:true,x:630}],bush:[{x:200,y:180,w:70,h:44},{x:420,y:180,w:70,h:44},{x:200,y:320,w:70,h:44},{x:420,y:320,w:70,h:44},{x:360,y:150,w:70,h:40},{x:360,y:390,w:70,h:40}],beastPit:{x:500,y:160},camps:[{x:420,y:270},{x:240,y:330}],laneCol:'#2e2a3a',jungleCol:'#1a0b26'}
+];
+var mobaMapSel=0;try{mobaMapSel=parseInt(localStorage.getItem('wraith_moba_map')||'0',10)||0;}catch(e){}if(mobaMapSel<0||mobaMapSel>=MOBA_MAPS.length)mobaMapSel=0;
+function mobaPickMap(i){if(i<0||i>=MOBA_MAPS.length)return;mobaMapSel=i;try{localStorage.setItem('wraith_moba_map',String(i));}catch(e){}renderSel();}
+function mobaMapRowHtml(){var h='';for(var i=0;i<MOBA_MAPS.length;i++){var M=MOBA_MAPS[i];h+='<button class="vf-map'+(mobaMapSel===i?' sel':'')+'" onclick="mobaPickMap('+i+')" title="'+M.name+'"><canvas id="mobaThumb'+i+'" width="96" height="72"></canvas>'+M.short+'</button>';}return h;}
+function mobaMapThumb(cv2,M){if(!cv2)return;var g=cv2.getContext('2d');if(!g)return;var W2=cv2.width,H2=cv2.height,s=W2/720;g.clearRect(0,0,W2,H2);g.fillStyle='#0b1410';g.fillRect(0,0,W2,H2);g.fillStyle=M.jungleCol||'#0e2412';g.fillRect(0,150*s,W2,240*s);g.fillStyle=M.laneCol||'#3a3126';for(var li=0;li<M.lanes.length;li++)g.fillRect(40*s,(M.lanes[li]-22)*s,(720-80)*s,44*s);g.fillStyle='#1a4a7a';g.fillRect((M.riverX-M.riverW/2)*s,0,M.riverW*s,H2);g.fillStyle='#39d353';g.beginPath();g.moveTo(M.crystal.x*s,(M.crystal.y-8)*s);g.lineTo((M.crystal.x+8)*s,M.crystal.y*s);g.lineTo(M.crystal.x*s,(M.crystal.y+8)*s);g.lineTo((M.crystal.x-8)*s,M.crystal.y*s);g.closePath();g.fill();for(var bi=0;bi<M.bush.length;bi++){var bu=M.bush[bi];g.fillStyle='#0d2b12';g.fillRect(bu.x*s,bu.y*s,bu.w*s,bu.h*s);}g.fillStyle='#4da6ff';g.fillRect((M.bases[0].x-10)*s,(M.bases[0].y-10)*s,20*s,20*s);g.fillStyle='#ff5252';g.fillRect((M.bases[1].x-10)*s,(M.bases[1].y-10)*s,20*s,20*s);g.strokeStyle='#39d353';g.lineWidth=1;g.beginPath();g.arc(M.beastPit.x*s,M.beastPit.y*s,8*s,0,7);g.stroke();g.fillStyle='#f2b91e';for(var ci=0;ci<M.camps.length;ci++){g.beginPath();g.arc(M.camps[ci].x*s,M.camps[ci].y*s,3,0,7);g.fill();}}
+function mobaDrawThumbs(){for(var i=0;i<MOBA_MAPS.length;i++){var el=document.getElementById('mobaThumb'+i);if(el)mobaMapThumb(el,MOBA_MAPS[i]);}}
 
 /* SETTINGS NAVIGATION (2026-11-15, Cee: make a navigation for all the settings):
  * one menu collecting every setting in the game, rows styled like the Graphics
@@ -439,8 +482,10 @@ function vfCycleSetting(key){
 }
 var vfTab='hero';
 var vfGridTop=0;
-function renderSel(){state='select';bossMode=false;showCtl(false);var tw=$('tmwrap');if(tw)tw.style.visibility='hidden';var g0=document.getElementById('vfGrid');if(g0)vfGridTop=g0.scrollTop;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx],role=roleOf(R.n);var pr=role+' · '+R.sp;if(!grimUnlocked)pr+=' · GRIM: BEAT THE BOSS TO UNLOCK';var h='';h+='<div class="vf-sel"><div class="vf-sel-main">';h+='<div class="vf-sel-left">';h+='<div class="vf-card"><span class="vf-card-tag">YOU</span><b>'+R.n+'</b><span class="vf-dot" style="background:'+R.spc+';color:'+R.spc+'"></span></div>';h+='<div class="vf-vs">VS</div>';h+='<div class="vf-card"><span class="vf-card-tag">CPU</span><b>???</b><span class="vf-dot" style="background:#666;color:#666"></span></div>';h+='<div class="vf-skills">';h+='<div class="vf-skill" style="border-color:'+R.spc+';color:'+R.spc+'">✦ '+R.sp+'</div>';h+='<div class="vf-skill">👊 PUNCH</div><div class="vf-skill">🦶 KICK</div><div class="vf-skill">🛡️ BLOCK</div>';h+='</div></div>';h+='<div class="vf-sel-center">';h+='<canvas id="selStage" width="180" height="200"></canvas>';h+='<div class="vf-picked">'+vfPickedHtml()+'</div>';h+='<div class="vf-hint">PICK UP TO 3 — 1V1 USES 1ST · 2V2 USES 1ST+2ND · 3V3 USES ALL 3</div>';h+='</div>';h+='<div class="vf-sel-right">';h+='<div class="vf-tabs"><button class="vf-tab'+(vfTab==='hero'?' sel':'')+'" onclick="vfTabHero()">HERO</button><button class="vf-tab'+(vfTab==='skins'?' sel':'')+'" onclick="vfTabSkins()">SKINS</button></div>';h+='<button class="vf-scroll" onclick="vfScrollGrid(-1)">▲ SCROLL</button>';if(vfTab==='skins'){h+=vfSkinsHtml(R,role);}else{h+='<div class="vf-grid" id="vfGrid">'+vfGridHtml()+'</div>';}h+='<button class="vf-scroll" onclick="vfScrollGrid(1)">▼ SCROLL</button>';h+='</div></div>';h+='<div class="vf-sel-bottom"><button class="vf-back" onclick="goFightModeSelect()">← MODES</button>'+vfModeChipsHtml()+'<button class="vf-ok" onclick="vfConfirm()">▶ OK</button></div>';h+='</div>';showOv('<span style="color:'+R.spc+'">'+R.n+'</span>',pr,h);var g1=document.getElementById('vfGrid');if(g1)g1.scrollTop=vfGridTop;drawSelFighter();}
-function vfGridHtml(){var h='';for(var i=0;i<FTR.length;i++){if(FTR[i].boss)continue;var R=FTR[i],pi=sel.indexOf(i);if(R.locked&&!grimUnlocked){h+='<button class="vf-port" onclick="grimLocked()"><span class="vf-ava" style="background:#1a1a22;border-color:#444;color:#888">🔒</span><span class="vf-pname">GRIM · LOCKED</span>'+(R.lore?'<span class="vf-plore">'+R.lore+'</span>':'')+'</button>';}else{h+='<button class="vf-port'+(pi>=0?' sel':'')+'" onclick="pickSel('+i+')"><span class="vf-ava" style="background:'+R.hood+';border-color:'+R.spc+'">'+R.n.charAt(0)+(pi>=0?'<span class="vf-pnum">'+(pi+1)+'</span>':'')+'</span><span class="vf-pname">'+R.n+'</span>'+(R.lore?'<span class="vf-plore">'+R.lore+'</span>':'')+'</button>';}}h+='<button class="vf-port'+(wavesHero==='kynth'?' sel':'')+'" onclick="pickWavesHero(\'kynth\')"><span class="vf-ava" style="background:#16233d;border-color:#7fa8d8">K</span><span class="vf-pname">KYNTH · WAVES</span></button>';h+='<button class="vf-port'+(wavesHero==='goldraven'?' sel':'')+'" onclick="pickWavesHero(\'goldraven\')"><span class="vf-ava" style="background:#3a2a10;border-color:#f2b91e">G</span><span class="vf-pname">GOLDRAVEN · WAVES</span></button>';return h;}
+function renderSel(){state='select';bossMode=false;showCtl(false);var tw=$('tmwrap');if(tw)tw.style.visibility='hidden';var g0=document.getElementById('vfGrid');if(g0)vfGridTop=g0.scrollTop;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx],role=roleOf(R.n);var pr=role+' · '+R.sp;if(!grimUnlocked)pr+=' · GRIM: BEAT THE BOSS TO UNLOCK';var h='';h+='<div class="vf-sel"><div class="vf-sel-main">';h+='<div class="vf-sel-left">';h+='<div class="vf-card"><span class="vf-card-tag">YOU</span><b>'+R.n+'</b><span class="vf-dot" style="background:'+R.spc+';color:'+R.spc+'"></span></div>';h+='<div class="vf-vs">VS</div>';h+='<div class="vf-card"><span class="vf-card-tag">CPU</span><b>???</b><span class="vf-dot" style="background:#666;color:#666"></span></div>';h+='<div class="vf-skills">';h+='<div class="vf-skill" style="border-color:'+R.spc+';color:'+R.spc+'">✦ '+R.sp+'</div>';h+='<div class="vf-skill">👊 PUNCH</div><div class="vf-skill">🦶 KICK</div><div class="vf-skill">🛡️ BLOCK</div>';h+='</div></div>';h+='<div class="vf-sel-center">';h+='<canvas id="selStage" width="180" height="200"></canvas>';h+='<div class="vf-pick-h">YOUR TEAM</div><div class="vf-picked">'+vfPickedHtml()+'</div>';h+='<div class="vf-hint">PICK UP TO 3 — 1V1 USES 1ST · 2V2 USES 1ST+2ND · 3V3 USES ALL 3</div>';h+='<div class="vf-lore">'+(R.lore?R.lore:'')+'</div>';h+=(vfSelMode==='6v6'?'<div class="vf-stage-h">MAP — PREVIEW PICKS THE MAP YOU PLAY ON</div><div class="vf-map-row">'+mobaMapRowHtml()+'</div>':'<div class="vf-stage-h">STAGE — PREVIEW PICKS YOUR ARENA</div><div class="vf-stage-row">'+vfStageRowHtml()+'</div>');h+='</div>';h+='<div class="vf-sel-right">';h+='<div class="vf-tabs"><button class="vf-tab'+(vfTab==='hero'?' sel':'')+'" onclick="vfTabHero()">HERO</button><button class="vf-tab'+(vfTab==='skins'?' sel':'')+'" onclick="vfTabSkins()">SKINS</button></div>';h+='<button class="vf-scroll" onclick="vfScrollGrid(-1)">▲ SCROLL</button>';if(vfTab==='skins'){h+=vfSkinsHtml(R,role);}else{h+='<div class="vf-grid" id="vfGrid">'+vfGridHtml()+'</div>';}h+='<button class="vf-scroll" onclick="vfScrollGrid(1)">▼ SCROLL</button>';h+='</div></div>';h+='<div class="vf-sel-bottom"><button class="vf-back" onclick="goFightModeSelect()">← MODES</button>'+vfModeChipsHtml()+'<button class="vf-ok" onclick="vfConfirm()">▶ OK</button></div>';h+='</div>';showOv('<span style="color:'+R.spc+'">'+R.n+'</span>',pr,h);var g1=document.getElementById('vfGrid');if(g1)g1.scrollTop=vfGridTop;drawSelFighter();}
+if(vfSelMode==='6v6'&&typeof mobaDrawThumbs==='function')mobaDrawThumbs();
+/* SELECT CLEANUP (2026-11-19, Cee: select screen looks messy): fixed tile size (96px rows, 52px avatars, names on one line with ellipsis), section headers (FIGHTERS / WAVES HEROES), and per-fighter lore moved OUT of the tiles — it shows once, under the stage, for the selected fighter. Same 29 roster buttons + 2 WAVES entries, same pick slots. */
+function vfGridHtml(){var h='<div class="vf-grid-h">FIGHTERS — 29</div>';for(var i=0;i<FTR.length;i++){if(FTR[i].boss)continue;var R=FTR[i],pi=sel.indexOf(i);if(R.locked&&!grimUnlocked){h+='<button class="vf-port" onclick="grimLocked()"><span class="vf-ava" style="background:#1a1a22;border-color:#444;color:#888">🔒</span><span class="vf-pname">GRIM · LOCKED</span></button>';}else{h+='<button class="vf-port'+(pi>=0?' sel':'')+'" onclick="pickSel('+i+')"><span class="vf-ava" style="background:'+R.hood+';border-color:'+R.spc+'">'+R.n.charAt(0)+(pi>=0?'<span class="vf-pnum">'+(pi+1)+'</span>':'')+'</span><span class="vf-pname">'+R.n+'</span></button>';}}h+='<div class="vf-grid-h">WAVES HEROES</div><button class="vf-port'+(wavesHero==='kynth'?' sel':'')+'" onclick="pickWavesHero(\'kynth\')"><span class="vf-ava" style="background:#16233d;border-color:#7fa8d8">K</span><span class="vf-pname">KYNTH · WAVES</span></button>';h+='<button class="vf-port'+(wavesHero==='goldraven'?' sel':'')+'" onclick="pickWavesHero(\'goldraven\')"><span class="vf-ava" style="background:#3a2a10;border-color:#f2b91e">G</span><span class="vf-pname">GOLDRAVEN · WAVES</span></button>';return h;}
 function vfModeChipsHtml(){var M=[['1v1','🥊 1V1'],['boss','★ BOSS'],['2v2','👥 2V2'+(tagUnlocked()?'':' 🔒')],['3v3','⚡ 3V3'],['6v6','⚔️ 6V6'],['fps','🎯 SHOWDOWN FPS'],['mobaFps','⚔️ MOBA FPS'],['fusion','⚡ FUSION']];var h='';for(var k=0;k<M.length;k++){var _im=(M[k][0]==='fps'||M[k][0]==='mobaFps'||M[k][0]==='fusion')?'':vfModeImgTag('mode-'+M[k][0]);var _pov='';if(M[k][0]==='3v3')_pov='<span class="vf-pov" onclick="event.stopPropagation();vfPovToggle(\'trio\');renderSel();">👁 '+vfPovLabel('trio')+'</span>';else if(M[k][0]==='6v6')_pov='<span class="vf-pov" onclick="event.stopPropagation();vfPovToggle(\'six\');renderSel();">👁 '+vfPovLabel('six')+'</span>';h+='<button class="vf-chip'+(vfSelMode===M[k][0]?' sel':'')+'" onclick="vfPickMode(\''+M[k][0]+'\')">'+_im+M[k][1]+_pov+'</button>';}return h;}
 function vfPickedHtml(){var h='';for(var k=0;k<3;k++){var fi=sel[k];if(fi!==undefined&&FTR[fi])h+='<span class="vf-pick">'+(k+1)+'. '+FTR[fi].n+'</span>';else h+='<span class="vf-pick empty">'+(k+1)+'. —</span>';}return h;}
 function vfTabHero(){vfTab='hero';renderSel();}
@@ -452,7 +497,7 @@ return h+'</div></div>';}
 function vfPickMode(id){vfSelMode=id;renderSel();}
 function vfConfirm(){if(vfSelMode==='1v1')start1v1();else if(vfSelMode==='boss')startBoss();else if(vfSelMode==='2v2')start2v2();else if(vfSelMode==='3v3'){if(vfPovGet('trio')==='fps')startTrioFps();else startBrawl3();}else if(vfSelMode==='6v6'){if(vfPovGet('six')==='fps')startMobaFps();else start6v6();}else if(vfSelMode==='fps')startShowdownFPS();else if(vfSelMode==='mobaFps')startMobaFps();else if(vfSelMode==='fusion')startFusion();else if(vfSelMode==='showdown')startShowdown();else if(vfSelMode==='waves')startWaves();else if(vfSelMode==='defense')goDefense();else start1v1();}
 function vfScrollGrid(d){var g=document.getElementById('vfGrid');if(g)g.scrollTop+=d*(g.clientHeight*.8);}
-function drawSelFighter(){var sc=document.getElementById('selStage');if(!sc)return;var g=sc.getContext('2d');if(!g)return;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx];var W2=sc.width,H2=sc.height;g.clearRect(0,0,W2,H2);try{var gr=g.createRadialGradient(W2/2,100,8,W2/2,100,100);gr.addColorStop(0,R.spc);gr.addColorStop(1,'rgba(0,0,0,0)');g.globalAlpha=.28;g.fillStyle=gr;g.fillRect(0,0,W2,H2);g.globalAlpha=1;}catch(e){}g.fillStyle='#15151d';g.strokeStyle=R.spc;g.lineWidth=2;g.beginPath();g.ellipse(W2/2,184,66,10,0,0,Math.PI*2);g.fill();g.stroke();g.fillStyle='#39d353';g.globalAlpha=.5;g.beginPath();g.ellipse(W2/2,184,24,4,0,0,Math.PI*2);g.fill();g.globalAlpha=1;var saved=ctx;try{ctx=g;drawF({ti:idx,x:W2/2,y:180,dir:1,cr:false,ko:false,side:0,hit:0,walk:0,atkT:0,blk:false,phase2:false},2.5);}catch(e){}ctx=saved;}
+function drawSelFighter(){var sc=document.getElementById('selStage');if(!sc)return;var g=sc.getContext('2d');if(!g)return;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx];var W2=sc.width,H2=sc.height;g.clearRect(0,0,W2,H2);vfStageMiniBg(g,W2,H2);try{var gr=g.createRadialGradient(W2/2,100,8,W2/2,100,100);gr.addColorStop(0,R.spc);gr.addColorStop(1,'rgba(0,0,0,0)');g.globalAlpha=.28;g.fillStyle=gr;g.fillRect(0,0,W2,H2);g.globalAlpha=1;}catch(e){}g.fillStyle='#15151d';g.strokeStyle=R.spc;g.lineWidth=2;g.beginPath();g.ellipse(W2/2,184,66,10,0,0,Math.PI*2);g.fill();g.stroke();g.fillStyle='#39d353';g.globalAlpha=.5;g.beginPath();g.ellipse(W2/2,184,24,4,0,0,Math.PI*2);g.fill();g.globalAlpha=1;var saved=ctx;try{ctx=g;drawF({ti:idx,x:W2/2,y:180,dir:1,cr:false,ko:false,side:0,hit:0,walk:0,atkT:0,blk:false,phase2:false},2.5);}catch(e){}ctx=saved;}
 function grimLocked(){$('ovp').innerHTML='GRIM IS LOCKED — BEAT THE BOSS TO UNLOCK';beep(300,.08);}
 function pickSel(i){if(FTR[i].locked&&!grimUnlocked){grimLocked();return;}var max=3;var p=sel.indexOf(i);if(p>=0)sel.splice(p,1);else{if(sel.length>=max)sel.shift();sel.push(i);}renderSel();}
 function startMatch(){var n=tagMode?2:1;if(sel.length<n){setMsg(tagMode?'PICK TWO!':'PICK ONE!');return;}showCtl(true);var tw=$('tmwrap');if(tw)tw.style.visibility='visible';bossMode=false;teams[0]=sel.slice(0,n);teams[1]=[];var pool=[];for(var k=0;k<FTR.length;k++){if(!FTR[k].boss&&!FTR[k].locked)pool.push(k);}for(var k=0;k<n;k++)teams[1].push(pool[Math.floor(Math.random()*pool.length)]);A[0]=mkF(teams[0][0],0);B[0]=n>1?mkF(teams[0][1],0):null;A[1]=mkF(teams[1][0],1);B[1]=n>1?mkF(teams[1][1],1):null;A[0].x=40;A[1].x=440;if(B[0])B[0].x=36;if(B[1])B[1].x=444;finUsed=[false,false];winPaid=false;finPrompted=[false,false];phase2=[false,false];finBanked=[false,false];finCine=0;tagCd=[0,0];astCd=[0,0];pendTag=[0,0];struggle=null;wheel=null;sumT=0;sumState=0;sumTelT=0;sumHitT=0;sumHits=0;timer=99;state='enter';enterT=1600;hideOv();beep(440,.08);}
@@ -581,7 +626,8 @@ function gDown(){if(state!=='fight'||wheel||struggle)return;var f=A[0];if(!f||bu
 function gUp(){if(!gHeld)return;gHeld=false;if(gTimer)clearTimeout(gTimer);if(wheel)return;var f=A[0];if(!f||busy(f))return;var foe=A[1];if(foe&&!foe.ko&&Math.abs(foe.x-f.x)<=40){doAtk(f,'strike');}else{f.atkK='strike';f.atkT=1;f.atkDur=200;f.atkHit=true;}}
 function finReady(team){var foe=A[1-team];return foe&&!foe.ko&&foe.hp>0&&!finUsed[team]&&(foe.hp<=20||finBanked[team]);}
 function finCheck(){for(var t=0;t<2;t++){if(finReady(t)&&!finPrompted[t]){finPrompted[t]=true;if(t===0)finBanked[0]=true;/* PLAYER banks the earned finisher — GRIM phase 2 can't take it away *//* 2ND PHASE (Wraith Verdict): the finisher comes with a second phase IF NOT USED YET — the first time a fighter's Verdict is ready and still unused, they transform / power up (visual aura only — no stat or move change). Once the Verdict is spent, no 2nd phase. */if(!finUsed[t]&&!phase2[t]){phase2[t]=true;var _pf=A[t];if(_pf)_pf.phase2=true;setMsg('★ 2ND PHASE — '+(_pf?FTR[_pf.ti].n:'')+' ★');flash=500;beep(520,.2,'square',.07);}var el=$('fprompt');el.innerHTML=vfVerdictImgTag()+'<div style="font-size:34px;color:#ffd94d;letter-spacing:4px;font-weight:700">END THE FIGHT</div><div style="font-size:14px;color:#fff;margin-top:8px">'+FTR[A[t].ti].n+' — WRAITH VERDICT READY'+(phase2[t]?' • 2ND PHASE!':'')+'</div>';el.style.display='flex';beep(520,.2,'square',.07);(function(e){setTimeout(function(){e.style.display='none';},1300);})(el);}}}
-function doFin(team){var att=A[team],foe=A[1-team];if(!att||att.ko||!foe||foe.ko||!finReady(team)||finCine>0)return;finUsed[team]=true;finBanked[team]=false;finCine=700;flash=500;att.x=foe.x-att.dir*30;foe.hp=0;foe.ko=true;var bn=B[1-team];setMsg('★ WRAITH VERDICT! ★');beep(90,.4,'sawtooth',.09);if(bossMode&&bn&&!bn.ko&&bn.hp>0){setTimeout(function(){finCine=0;pendTag[1-team]=800;},700);}else{if(bn){bn.hp=0;bn.ko=true;}setTimeout(function(){finCine=0;endMatch(team);},700);}}
+/* FINISHER REBALANCE (2026-11-19, Cee: 1v1/2v2 end too fast once the finisher lands): the Wraith Verdict no longer one-shots. It deals 60% of the foe's MAX HP, so it can never kill a full-health fighter (a banked finisher fired at a fresh tag-in leaves them at 40%), and it never touches the benched partner in 2v2 — if the capped damage does finish the active foe, the normal KO path runs (bench tags in, or the match ends only when the team is actually out). Still a 60% chunk + the full cinematic, so it feels like a finisher. 3v3/6v6/FUSION use the separate Brawl super (fireSuper/doVerdictMoba) and are untouched. */
+function doFin(team){var att=A[team],foe=A[1-team];if(!att||att.ko||!foe||foe.ko||!finReady(team)||finCine>0)return;finUsed[team]=true;finBanked[team]=false;finCine=700;flash=500;att.x=foe.x-att.dir*30;var _finDmg=Math.round((foe.max||100)*0.60);foe.hp=Math.max(0,foe.hp-_finDmg);foe.hit=300;setMsg('★ WRAITH VERDICT! ★');beep(90,.4,'sawtooth',.09);if(foe.hp<=0){foe.ko=true;var bn=B[1-team];if(bn&&!bn.ko&&bn.hp>0){setTimeout(function(){finCine=0;pendTag[1-team]=800;},700);}else{setTimeout(function(){finCine=0;endMatch(team);},700);}}else{setTimeout(function(){finCine=0;},700);}}
 function endMatch(w){state='over';showCtl(false);var h='<button onclick="renderSel()">↻ REMATCH</button><button onclick="goFightModeSelect()">← MODES</button>';var _amt=0;try{if(w===0&&!winPaid){winPaid=true;_amt=bossMode?25:10;var _mc=0;try{_mc=parseFloat(localStorage.getItem('wraith_coins'))||0;}catch(e){}try{localStorage.setItem('wraith_coins',String(_mc+_amt));}catch(e){}try{if(window.parent&&window.parent!==window)window.parent.postMessage({type:'vanix-win-molecules',amt:_amt,game:'fight'},'*');}catch(e){}}}catch(e){}if(bossMode){if(w<0)showOv('DRAW!','BOTH SIDES STILL STANDING',h);else if(w===0){var un=!grimUnlocked;if(un){grimUnlocked=true;saveUnlock();}showOv('YOU BEAT GRIM!','THE THRONE IS YOURS — GRIM FALLS'+(_amt?' • +'+_amt+' MOLECULES':'' )+(un?'<br>★ GRIM UNLOCKED — PICK HIM ON THE SELECT SCREEN ★':''),h);}else showOv('GRIM WINS!','KILL MODE CLAIMS ANOTHER',h);}else if(w<0)showOv('DRAW!','BOTH TEAMS STILL STANDING',h);else showOv('TEAM '+(w+1)+' WINS!','WINNER: '+FTR[A[w].ti].n+(B[w]?' + '+FTR[B[w].ti].n:'')+(w===0&&_amt?' • +'+_amt+' MOLECULES':'' ),h);if(w!==0){if(typeof rvShow==='function'){rvShow(true,'ov');window.__rvMode='classic';}}beep(660,.15);beep(880,.2);}
 /* REVIVE (Cee 2026-11-05): resume the fight from the KO — your fighter(s) back at full HP and stamina/mana, timer reset, foe keeps its damage. */
 window.__rvClassic=function(){if(!A||!A[0])return;var f,i;for(i=0;i<2;i++){f=i===0?A[0]:B[0];if(!f)continue;f.hp=f.max;f.ko=false;f.st=f.maxSt||100;f.mn=f.maxMn||100;f.burnT=0;f.burnTick=0;f.hit=0;f.atkT=0;f.atkK='';f.atkDur=0;f.atkHit=false;}A[0].x=40;if(A[1])A[1].x=440;if(B[0])B[0].x=36;if(B[1])B[1].x=444;timer=bossMode?120:99;struggle=null;finCine=0;pendTag=[0,0];finPend=0;state='fight';showCtl(true);hideOv();};
@@ -615,7 +661,15 @@ var _gLes=null,_gLesH=-1;
 function _mkLes(H){if(_gLes&&_gLesH===H)return _gLes;var dg=ctx.createLinearGradient(0,0,0,H);dg.addColorStop(0,'#0d0a08');dg.addColorStop(.7,'#171208');dg.addColorStop(1,'#050403');_gLes=dg;_gLesH=H;return dg;}
 var _gDef=null,_gDefH=-1;
 function _mkDef(H){if(_gDef&&_gDefH===H)return _gDef;var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0b1026');g.addColorStop(.7,'#131a2e');g.addColorStop(.7,'#0d0d12');g.addColorStop(1,'#050508');_gDef=g;_gDefH=H;return g;}
-function drawBG(){if(typeof A!=='undefined'&&A&&((A[0]&&FTR[A[0].ti]&&FTR[A[0].ti].n==='LESTES')||(A[1]&&FTR[A[1].ti]&&FTR[A[1].ti].n==='LESTES'))){var dg=_mkLes(H);ctx.fillStyle=dg;ctx.fillRect(0,0,W,H);ctx.fillStyle='#241a10';for(var di=0;di<5;di++){ctx.fillRect(di*96+8,40,84,60);ctx.strokeStyle='#3a2c18';ctx.lineWidth=1;ctx.strokeRect(di*96+8.5,40.5,84,60);ctx.beginPath();ctx.moveTo(di*96+20,40);ctx.lineTo(di*96+34,70);ctx.lineTo(di*96+28,100);ctx.stroke();}[90,390].forEach(function(tx){ctx.fillStyle='#ff8800';ctx.beginPath();ctx.arc(tx,120,6,0,7);ctx.fill();ctx.fillStyle='rgba(255,136,0,.15)';ctx.beginPath();ctx.arc(tx,120,22,0,7);ctx.fill();});ctx.fillStyle='#2a2118';for(var ds=0;ds<4;ds++)ctx.fillRect(210+ds*14,150-ds*10,14,10);ctx.fillStyle='#c9a227';ctx.fillRect(300,96,44,54);ctx.fillStyle='#0d0a08';ctx.fillRect(306,102,32,48);ctx.fillStyle='#ffcc33';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('DELVE',322,88);ctx.fillStyle='#222';ctx.fillRect(0,GY,W,H-GY);ctx.fillStyle='#333';ctx.fillRect(0,GY,W,2);ctx.fillStyle='#c9a227';for(var dd=0;dd<8;dd++)ctx.fillRect(dd*64+8,GY+26,28,3);ctx.fillStyle='#1a1420';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,GY-RING.top);ctx.fillStyle='#c9a227';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,4);ctx.fillStyle='#ffd94d';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,2);ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.strokeRect(RING.x0+.5,RING.top+.5,RING.x1-RING.x0-1,GY-RING.top-1);return;}var g=_mkDef(H);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='#e8e8f0';ctx.beginPath();ctx.arc(400,36,14,0,7);ctx.fill();for(var i=0;i<6;i++){var bx=i*82+6,bh=60+((i*37)%50);ctx.fillStyle='#0a0e1c';ctx.fillRect(bx,150-bh,70,bh);ctx.fillStyle='#ffd94d';for(var wy=0;wy<4;wy++)for(var wx=0;wx<3;wx++)if((i+wy*3+wx)%3===0)ctx.fillRect(bx+8+wx*20,150-bh+8+wy*14,9,8);}ctx.fillStyle='#1a1420';ctx.fillRect(150,150,180,68);ctx.fillStyle='#ff8800';ctx.fillRect(150,150,180,14);ctx.fillStyle='#000';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText('VANIX',240,161);ctx.fillStyle='#222';ctx.fillRect(0,GY,W,H-GY);ctx.fillStyle='#333';ctx.fillRect(0,GY,W,2);ctx.fillStyle='#c9a227';for(var d=0;d<8;d++)ctx.fillRect(d*64+8,GY+26,28,3);ctx.fillStyle='#1a1420';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,GY-RING.top);ctx.fillStyle='#c9a227';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,4);ctx.fillStyle='#ffd94d';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,2);ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.strokeRect(RING.x0+.5,RING.top+.5,RING.x1-RING.x0-1,GY-RING.top-1);[70,410].forEach(function(lx){ctx.strokeStyle='#444';ctx.beginPath();ctx.moveTo(lx,GY);ctx.lineTo(lx,96);ctx.stroke();ctx.fillStyle='#ffe95a';ctx.beginPath();ctx.arc(lx,94,5,0,7);ctx.fill();ctx.fillStyle='rgba(255,233,90,.12)';ctx.beginPath();ctx.moveTo(lx,96);ctx.lineTo(lx-30,GY);ctx.lineTo(lx+30,GY);ctx.closePath();ctx.fill();});}
+/* Cached per-stage sky gradients (same PERF pattern as _mkDef — gradients are built once per height, not every frame). */
+var _gStage={};
+function _mkStage(H,stops){var k=H+'|'+stops.join('|');if(_gStage[k])return _gStage[k];var g=ctx.createLinearGradient(0,0,0,H);for(var i=0;i<stops.length;i++)g.addColorStop(stops.length>1?i/(stops.length-1):0,stops[i]);_gStage[k]=g;return g;}
+/* Shared stage floor + ring (same geometry as the default arena: GY floor, RING box) — only the colours change per stage, so fight spacing never moves. */
+function vfDrawStageFloor(fl,trim,dash){ctx.fillStyle=fl;ctx.fillRect(0,GY,W,H-GY);ctx.fillStyle='#333';ctx.fillRect(0,GY,W,2);ctx.fillStyle=dash;for(var d=0;d<8;d++)ctx.fillRect(d*64+8,GY+26,28,3);ctx.fillStyle='#1a1420';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,GY-RING.top);ctx.fillStyle=trim;ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,4);ctx.fillStyle='#ffd94d';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,2);ctx.strokeStyle=trim;ctx.lineWidth=1;ctx.strokeRect(RING.x0+.5,RING.top+.5,RING.x1-RING.x0-1,GY-RING.top-1);}
+function vfDrawStageRuins(){var g=_mkStage(H,['#0d0716','#1a0b26','#050308']);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='#e8e8f0';ctx.beginPath();ctx.arc(400,36,12,0,7);ctx.fill();ctx.fillStyle='#241a33';ctx.fillRect(28,98,34,120);ctx.fillRect(108,128,28,90);ctx.fillRect(356,108,32,110);ctx.fillRect(428,138,26,80);ctx.fillStyle='#3a2a55';ctx.fillRect(28,98,34,8);ctx.fillRect(108,128,28,6);ctx.fillRect(356,108,32,8);ctx.fillRect(428,138,26,6);ctx.strokeStyle='#0d0716';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(36,106);ctx.lineTo(44,140);ctx.lineTo(38,170);ctx.moveTo(364,116);ctx.lineTo(372,150);ctx.stroke();ctx.fillStyle='#7a1420';ctx.fillRect(150,40,26,86);ctx.fillRect(306,40,26,86);ctx.beginPath();ctx.moveTo(150,126);ctx.lineTo(163,112);ctx.lineTo(176,126);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(306,126);ctx.lineTo(319,112);ctx.lineTo(332,126);ctx.closePath();ctx.fill();ctx.fillStyle='#17102a';ctx.beginPath();ctx.moveTo(200,218);ctx.lineTo(214,196);ctx.lineTo(228,218);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(250,218);ctx.lineTo(260,202);ctx.lineTo(272,218);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(138,43,226,.08)';ctx.fillRect(0,150,W,68);vfDrawStageFloor('#191221','#7c3aed','#8a6d14');}
+function vfDrawStageJungle(){var g=_mkStage(H,['#04100a','#0b2416','#030805']);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='#0e2a18';ctx.fillRect(170,120,140,98);ctx.fillRect(190,100,100,20);ctx.fillRect(210,82,60,18);ctx.fillStyle='#123a1a';ctx.fillRect(190,100,100,4);ctx.fillRect(210,82,60,4);ctx.fillStyle='#39d353';ctx.fillRect(232,132,16,20);ctx.fillStyle='rgba(57,211,83,.12)';ctx.fillRect(222,122,36,40);ctx.strokeStyle='#1a4d22';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(60,0);ctx.quadraticCurveTo(66,60,58,120);ctx.moveTo(420,0);ctx.quadraticCurveTo(414,70,422,130);ctx.moveTo(150,0);ctx.quadraticCurveTo(156,50,148,96);ctx.stroke();ctx.fillStyle='#0a1f10';ctx.beginPath();ctx.arc(0,120,46,0,7);ctx.fill();ctx.beginPath();ctx.arc(480,140,52,0,7);ctx.fill();ctx.fillStyle='#39d353';ctx.globalAlpha=.8;ctx.beginPath();ctx.arc(90,80,2,0,7);ctx.fill();ctx.beginPath();ctx.arc(300,60,2,0,7);ctx.fill();ctx.beginPath();ctx.arc(380,110,2,0,7);ctx.fill();ctx.beginPath();ctx.arc(180,70,2,0,7);ctx.fill();ctx.globalAlpha=1;vfDrawStageFloor('#0e1a10','#2a7a32','#8a6d14');}
+function vfDrawStageSanctum(){var g=_mkStage(H,['#12060a','#2a0a12','#050308']);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(220,38,38,.15)';ctx.beginPath();ctx.arc(240,52,42,0,7);ctx.fill();ctx.fillStyle='#dc2626';ctx.beginPath();ctx.arc(240,52,26,0,7);ctx.fill();ctx.fillStyle='#b91c1c';ctx.beginPath();ctx.arc(232,46,6,0,7);ctx.fill();ctx.beginPath();ctx.arc(250,60,4,0,7);ctx.fill();ctx.fillStyle='#0a0508';ctx.fillRect(20,60,64,158);ctx.fillRect(396,60,64,158);ctx.beginPath();ctx.moveTo(20,60);ctx.lineTo(52,20);ctx.lineTo(84,60);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(396,60);ctx.lineTo(428,20);ctx.lineTo(460,60);ctx.closePath();ctx.fill();ctx.fillStyle='#1a0a12';ctx.fillRect(120,120,40,98);ctx.fillRect(320,120,40,98);ctx.beginPath();ctx.moveTo(120,120);ctx.lineTo(140,96);ctx.lineTo(160,120);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(320,120);ctx.lineTo(340,96);ctx.lineTo(360,120);ctx.closePath();ctx.fill();ctx.fillStyle='#e8e4da';ctx.fillRect(196,196,4,14);ctx.fillRect(280,196,4,14);ctx.fillStyle='#b46bff';ctx.beginPath();ctx.arc(198,192,3,0,7);ctx.fill();ctx.beginPath();ctx.arc(282,192,3,0,7);ctx.fill();vfDrawStageFloor('#1a0a0e','#dc2626','#7c3aed');}
+function drawBG(){if(typeof A!=='undefined'&&A&&((A[0]&&FTR[A[0].ti]&&FTR[A[0].ti].n==='LESTES')||(A[1]&&FTR[A[1].ti]&&FTR[A[1].ti].n==='LESTES'))){var dg=_mkLes(H);ctx.fillStyle=dg;ctx.fillRect(0,0,W,H);ctx.fillStyle='#241a10';for(var di=0;di<5;di++){ctx.fillRect(di*96+8,40,84,60);ctx.strokeStyle='#3a2c18';ctx.lineWidth=1;ctx.strokeRect(di*96+8.5,40.5,84,60);ctx.beginPath();ctx.moveTo(di*96+20,40);ctx.lineTo(di*96+34,70);ctx.lineTo(di*96+28,100);ctx.stroke();}[90,390].forEach(function(tx){ctx.fillStyle='#ff8800';ctx.beginPath();ctx.arc(tx,120,6,0,7);ctx.fill();ctx.fillStyle='rgba(255,136,0,.15)';ctx.beginPath();ctx.arc(tx,120,22,0,7);ctx.fill();});ctx.fillStyle='#2a2118';for(var ds=0;ds<4;ds++)ctx.fillRect(210+ds*14,150-ds*10,14,10);ctx.fillStyle='#c9a227';ctx.fillRect(300,96,44,54);ctx.fillStyle='#0d0a08';ctx.fillRect(306,102,32,48);ctx.fillStyle='#ffcc33';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('DELVE',322,88);ctx.fillStyle='#222';ctx.fillRect(0,GY,W,H-GY);ctx.fillStyle='#333';ctx.fillRect(0,GY,W,2);ctx.fillStyle='#c9a227';for(var dd=0;dd<8;dd++)ctx.fillRect(dd*64+8,GY+26,28,3);ctx.fillStyle='#1a1420';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,GY-RING.top);ctx.fillStyle='#c9a227';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,4);ctx.fillStyle='#ffd94d';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,2);ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.strokeRect(RING.x0+.5,RING.top+.5,RING.x1-RING.x0-1,GY-RING.top-1);vfStageDrawn='lestes';return;}var _st=vfStageGet();vfStageDrawn=_st;if(_st==='ruins'){vfDrawStageRuins();return;}if(_st==='jungle'){vfDrawStageJungle();return;}if(_st==='sanctum'){vfDrawStageSanctum();return;}var g=_mkDef(H);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='#e8e8f0';ctx.beginPath();ctx.arc(400,36,14,0,7);ctx.fill();for(var i=0;i<6;i++){var bx=i*82+6,bh=60+((i*37)%50);ctx.fillStyle='#0a0e1c';ctx.fillRect(bx,150-bh,70,bh);ctx.fillStyle='#ffd94d';for(var wy=0;wy<4;wy++)for(var wx=0;wx<3;wx++)if((i+wy*3+wx)%3===0)ctx.fillRect(bx+8+wx*20,150-bh+8+wy*14,9,8);}ctx.fillStyle='#1a1420';ctx.fillRect(150,150,180,68);ctx.fillStyle='#ff8800';ctx.fillRect(150,150,180,14);ctx.fillStyle='#000';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText('VANIX',240,161);ctx.fillStyle='#222';ctx.fillRect(0,GY,W,H-GY);ctx.fillStyle='#333';ctx.fillRect(0,GY,W,2);ctx.fillStyle='#c9a227';for(var d=0;d<8;d++)ctx.fillRect(d*64+8,GY+26,28,3);ctx.fillStyle='#1a1420';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,GY-RING.top);ctx.fillStyle='#c9a227';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,4);ctx.fillStyle='#ffd94d';ctx.fillRect(RING.x0,RING.top,RING.x1-RING.x0,2);ctx.strokeStyle='#c9a227';ctx.lineWidth=1;ctx.strokeRect(RING.x0+.5,RING.top+.5,RING.x1-RING.x0-1,GY-RING.top-1);[70,410].forEach(function(lx){ctx.strokeStyle='#444';ctx.beginPath();ctx.moveTo(lx,GY);ctx.lineTo(lx,96);ctx.stroke();ctx.fillStyle='#ffe95a';ctx.beginPath();ctx.arc(lx,94,5,0,7);ctx.fill();ctx.fillStyle='rgba(255,233,90,.12)';ctx.beginPath();ctx.moveTo(lx,96);ctx.lineTo(lx-30,GY);ctx.lineTo(lx+30,GY);ctx.closePath();ctx.fill();});vfStageDrawn='arena';}
 function blockFx(f,sc,mode){
 var R=FTR[f.ti],n=R.n,t=performance.now()/300;ctx.save();
 if(mode){
@@ -851,6 +905,13 @@ function pollPad(){
 function unpause(){paused=false;hideOv();}
 document.addEventListener('visibilitychange',function(){if(document.hidden&&state==='fight'&&!paused){paused=true;showOv('PAUSED','TAP ▶ TO KEEP FIGHTING','<button onclick="unpause()">▶ RESUME</button><button onclick="goFightModeSelect()">✕ EXIT FIGHT</button>');}});
 renderSel();requestAnimationFrame(loop);
+/* ?mode= DEEP LINK (2026-11-19, mega-merge): Town doors + hub links land here.
+   ?mode=fight opens the fight select; ?mode=6v6 / fps / showdown / moba preselects
+   that mode. No param = normal boot. */
+function goMoba(){try{goFight();goMode('6v6');}catch(e){}}
+function goShowdown(){try{goFight();goMode('fps');}catch(e){}}
+try{var _qm=((location.search||'').match(/[?&]mode=([a-z0-9]+)/)||[])[1]||'';if(_qm){var _mm={'1v1':'1v1',boss:'boss','2v2':'2v2','3v3':'3v3','6v6':'6v6',fps:'fps',showdown:'fps',moba:'6v6',mobafps:'mobaFps',fusion:'fusion'};if(_qm==='fight'){goFight();}else if(_mm[_qm]){goFight();goMode(_mm[_qm]);}}}catch(e){}
+
 
 
 </script>
@@ -1711,8 +1772,9 @@ var hudL=document.getElementById('bhudL'),hudR=document.getElementById('bhudR'),
     skM5=document.getElementById('skM5'),skM5Name=document.getElementById('skM5Name'),skM5Chg=document.getElementById('skM5Chg');
 
 var SPR={};
-function loadSpr(){for(var i=0;i<ROSTER.length;i++){var s=ROSTER[i].spr;if(!SPR[s]&&SPRITES[s]){var im=new Image();im.src=SPRITES[s];SPR[s]=im;}else if(s&&!SPR[s]){/* No Brawl sprite data: reuse the Classic Fight <img> as-is (AETHERIS). LESTES has no image anywhere — draw() falls back to the vector fighter. */var el=document.getElementById('spr-'+s);if(el)SPR[s]=el;}}}
+function loadSpr(){for(var i=0;i<ROSTER.length;i++){var s=ROSTER[i].spr;if(!SPR[s]&&SPRITES[s]){var im=new Image();im.src=SPRITES[s];SPR[s]=im;}else if(s&&!SPR[s]){/* No Brawl sprite data: reuse the Classic Fight <img> as-is (AETHERIS). LESTES has no image anywhere — draw() falls back to the vector fighter. */var el=document.getElementById('spr-'+s);if(el){SPR[s]=el;if(s==='asterion'){var _ai=new Image();_ai.src=el.src;vfHookAsterion(_ai,SPR);vfHookAsterion(el,SPR);}}}}}
 loadSpr();
+try{mobaApplyMap(typeof mobaMapSel==='number'?mobaMapSel:0);}catch(e){}
 
 var state='select',mode='showdown',pick=0,hideModes=false,paused=false;
 var brawlActive=false;
@@ -1792,21 +1854,13 @@ function arenaDraw(){for(var r=0;r<ARENA_ROWS;r++)for(var c=0;c<ARENA_COLS;c++){
  * (2 per lane per team), jungle bushes and a beast pit. Temple/jungle look,
  * red/violet/black/white + green core glow. The 6v6 mode is playable since 2026-11-14 —
  * this map is the 6v6 arena background (the generated map art draws first when loaded). */
-var MOBA6={w:720,h:540,lanes:[110,430],riverX:360,riverW:46,crystal:{x:360,y:270},
-  bases:[{x:50,y:270},{x:670,y:270}],
-  towers:[{x:200,y:110,team:0},{x:100,y:110,team:0},{x:520,y:110,team:1},{x:620,y:110,team:1},
-    {x:200,y:430,team:0},{x:100,y:430,team:0},{x:520,y:430,team:1},{x:620,y:430,team:1}],
-  bush:[{x:240,y:200,w:70,h:44},{x:480,y:200,w:70,h:44},{x:240,y:340,w:70,h:44},{x:480,y:340,w:70,h:44},{x:325,y:150,w:70,h:40},{x:325,y:390,w:70,h:40}],
-  beastPit:{x:440,y:380}};
-function moba6DrawMap(){ctx.fillStyle='#0b1410';ctx.fillRect(0,0,MOBA6.w,MOBA6.h);/* JUNGLE MID 2026-11-15: dense jungle rows 4-7 (y150-390) so top lane y110 and bottom lane y430 read as clear distinct paths. Lanes warm stone; mid dense trees; river bright water. */ctx.fillStyle='#0e2412';ctx.fillRect(0,150,MOBA6.w,240);ctx.fillStyle='#3a3126';for(var li=0;li<MOBA6.lanes.length;li++){ctx.fillRect(40,MOBA6.lanes[li]-22,MOBA6.w-80,44);}ctx.fillStyle='#1a4a7a';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2,0,MOBA6.riverW,MOBA6.h);ctx.fillStyle='#2e7fc2';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2+14,0,18,MOBA6.h);ctx.fillStyle='#7fc4f0';for(var rs=0;rs<9;rs++){ctx.fillRect(MOBA6.riverX-8+((rs*13)%16),20+rs*58,3,3);}for(var bi=0;bi<MOBA6.bush.length;bi++){var bu=MOBA6.bush[bi];ctx.fillStyle='#0d2b12';ctx.fillRect(bu.x,bu.y,bu.w,bu.h);ctx.fillStyle='#1a4d22';for(var d=0;d<5;d++)ctx.fillRect(bu.x+6+((d*37)%(bu.w-12)),bu.y+6+((d*23)%(bu.h-12)),4,4);}for(var ti=0;ti<48;ti++){var tx=30+((ti*97)%660),ty=158+((ti*61)%220);if(Math.abs(tx-360)<42)continue;if(Math.hypot(tx-360,ty-270)<52)continue;if(Math.hypot(tx-50,ty-270)<48)continue;if(Math.hypot(tx-670,ty-270)<48)continue;if(Math.hypot(tx-440,ty-380)<40)continue;ctx.fillStyle='#123a1a';ctx.beginPath();ctx.arc(tx,ty,9+(ti%3)*2,0,7);ctx.fill();ctx.fillStyle='#2a7a32';ctx.beginPath();ctx.arc(tx-2,ty-2,5+(ti%2)*2,0,7);ctx.fill();}var cx=MOBA6.crystal.x,cy=MOBA6.crystal.y;ctx.save();ctx.translate(cx,cy);var _cs=_glowSpr('crystal',62,function(g){g.fillStyle='#39d353';g.shadowColor='#39d353';g.shadowBlur=18;g.beginPath();g.moveTo(0,-26);g.lineTo(16,-6);g.lineTo(10,18);g.lineTo(-10,18);g.lineTo(-16,-6);g.closePath();g.fill();});if(_cs){ctx.drawImage(_cs,-62,-62);}else{ctx.fillStyle='#39d353';ctx.shadowColor='#39d353';ctx.shadowBlur=18;ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(16,-6);ctx.lineTo(10,18);ctx.lineTo(-10,18);ctx.lineTo(-16,-6);ctx.closePath();ctx.fill();}ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(8,-6);ctx.lineTo(0,10);ctx.lineTo(-8,-6);ctx.closePath();ctx.fill();ctx.restore();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('CRYSTAL',cx,cy+40);for(var t=0;t<2;t++){var bs=MOBA6.bases[t];ctx.fillStyle=t===0?'#12203a':'#3a1220';ctx.fillRect(bs.x-34,bs.y-34,68,68);ctx.strokeStyle=t===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(bs.x-34,bs.y-34,68,68);ctx.fillStyle=t===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.moveTo(bs.x,bs.y-14);ctx.lineTo(bs.x+12,bs.y);ctx.lineTo(bs.x,bs.y+14);ctx.lineTo(bs.x-12,bs.y);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText(t===0?'BASE · YOU':'BASE · FOE',bs.x,bs.y+48);}for(var ti=0;ti<MOBA6.towers.length;ti++){var tw=MOBA6.towers[ti];ctx.fillStyle='#1a1a26';ctx.fillRect(tw.x-13,tw.y-16,26,32);ctx.strokeStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(tw.x-13,tw.y-16,26,32);ctx.fillStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.arc(tw.x,tw.y-20,4,0,7);ctx.fill();}ctx.strokeStyle='rgba(57,211,83,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(MOBA6.beastPit.x,MOBA6.beastPit.y,30,0,7);ctx.stroke();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('BEAST',MOBA6.beastPit.x,MOBA6.beastPit.y+44);}
+var MOBA6=MOBA_MAPS[0];/* ACTIVE MAP VARIANT (item 10): the selected preview's map — mobaApplyMap swaps this + MOBA_LANES + MOBA_BUSH. MOBA_MAPS lives in the classic script. */
+function moba6DrawMap(){ctx.fillStyle='#0b1410';ctx.fillRect(0,0,MOBA6.w,MOBA6.h);/* JUNGLE MID 2026-11-15: dense jungle rows 4-7 (y150-390) so top lane y110 and bottom lane y430 read as clear distinct paths. Lanes warm stone; mid dense trees; river bright water. */ctx.fillStyle=MOBA6.jungleCol||'#0e2412';ctx.fillRect(0,150,MOBA6.w,240);ctx.fillStyle=MOBA6.laneCol||'#3a3126';for(var li=0;li<MOBA6.lanes.length;li++){ctx.fillRect(40,MOBA6.lanes[li]-22,MOBA6.w-80,44);}ctx.fillStyle='#1a4a7a';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2,0,MOBA6.riverW,MOBA6.h);ctx.fillStyle='#2e7fc2';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2+14,0,18,MOBA6.h);ctx.fillStyle='#7fc4f0';for(var rs=0;rs<9;rs++){ctx.fillRect(MOBA6.riverX-8+((rs*13)%16),20+rs*58,3,3);}for(var bi=0;bi<MOBA6.bush.length;bi++){var bu=MOBA6.bush[bi];ctx.fillStyle='#0d2b12';ctx.fillRect(bu.x,bu.y,bu.w,bu.h);ctx.fillStyle='#1a4d22';for(var d=0;d<5;d++)ctx.fillRect(bu.x+6+((d*37)%(bu.w-12)),bu.y+6+((d*23)%(bu.h-12)),4,4);}for(var ti=0;ti<48;ti++){var tx=30+((ti*97)%660),ty=158+((ti*61)%220);if(Math.abs(tx-MOBA6.riverX)<42)continue;if(Math.hypot(tx-MOBA6.crystal.x,ty-MOBA6.crystal.y)<52)continue;if(Math.hypot(tx-MOBA6.bases[0].x,ty-MOBA6.bases[0].y)<48)continue;if(Math.hypot(tx-MOBA6.bases[1].x,ty-MOBA6.bases[1].y)<48)continue;if(Math.hypot(tx-MOBA6.beastPit.x,ty-MOBA6.beastPit.y)<40)continue;ctx.fillStyle='#123a1a';ctx.beginPath();ctx.arc(tx,ty,9+(ti%3)*2,0,7);ctx.fill();ctx.fillStyle='#2a7a32';ctx.beginPath();ctx.arc(tx-2,ty-2,5+(ti%2)*2,0,7);ctx.fill();}var cx=MOBA6.crystal.x,cy=MOBA6.crystal.y;ctx.save();ctx.translate(cx,cy);var _cs=_glowSpr('crystal',62,function(g){g.fillStyle='#39d353';g.shadowColor='#39d353';g.shadowBlur=18;g.beginPath();g.moveTo(0,-26);g.lineTo(16,-6);g.lineTo(10,18);g.lineTo(-10,18);g.lineTo(-16,-6);g.closePath();g.fill();});if(_cs){ctx.drawImage(_cs,-62,-62);}else{ctx.fillStyle='#39d353';ctx.shadowColor='#39d353';ctx.shadowBlur=18;ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(16,-6);ctx.lineTo(10,18);ctx.lineTo(-10,18);ctx.lineTo(-16,-6);ctx.closePath();ctx.fill();}ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(8,-6);ctx.lineTo(0,10);ctx.lineTo(-8,-6);ctx.closePath();ctx.fill();ctx.restore();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('CRYSTAL',cx,cy+40);for(var t=0;t<2;t++){var bs=MOBA6.bases[t];ctx.fillStyle=t===0?'#12203a':'#3a1220';ctx.fillRect(bs.x-34,bs.y-34,68,68);ctx.strokeStyle=t===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(bs.x-34,bs.y-34,68,68);ctx.fillStyle=t===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.moveTo(bs.x,bs.y-14);ctx.lineTo(bs.x+12,bs.y);ctx.lineTo(bs.x,bs.y+14);ctx.lineTo(bs.x-12,bs.y);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText(t===0?'BASE · YOU':'BASE · FOE',bs.x,bs.y+48);}for(var ti=0;ti<MOBA6.towers.length;ti++){var tw=MOBA6.towers[ti],twy=MOBA6.lanes[tw.lane];ctx.fillStyle='#1a1a26';ctx.fillRect(tw.x-13,twy-16,26,32);ctx.strokeStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(tw.x-13,twy-16,26,32);ctx.fillStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.arc(tw.x,twy-20,4,0,7);ctx.fill();}ctx.strokeStyle='rgba(57,211,83,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(MOBA6.beastPit.x,MOBA6.beastPit.y,30,0,7);ctx.stroke();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('BEAST',MOBA6.beastPit.x,MOBA6.beastPit.y+44);}
 function mobaBaseX(team){return team===0?56:664;}/* bases on the 720x540 map: yours x=50, foe x=670 */
 function mobaBuildStructures(){
   mobaTowers=[];mobaMinions=[];mobaWaveT=5000;mobaWaveN=0;
-  /* 2 lanes x 2 teams x (outer + inner) = 8 towers, at the MOBA6 map positions. */
-  for(var lane=0;lane<2;lane++)for(var t=0;t<2;t++){
-    mobaTowers.push({isTower:true,n:'TOWER',team:t,lane:lane,inner:false,x:t===0?200:520,y:MOBA_LANES[lane],hp:MOBA_TOWER_HP,maxhp:MOBA_TOWER_HP,r:13,atkCd:0,alive:true,flash:0,charge:0,kills:0});
-    mobaTowers.push({isTower:true,n:'TOWER',team:t,lane:lane,inner:true,x:t===0?100:620,y:MOBA_LANES[lane],hp:MOBA_TOWER_HP,maxhp:MOBA_TOWER_HP,r:13,atkCd:0,alive:true,flash:0,charge:0,kills:0});
-  }
+  /* 8 towers at the ACTIVE MAP's positions (lane/team/inner from MOBA6.towers). */
+  for(var i=0;i<MOBA6.towers.length;i++){var tw=MOBA6.towers[i];mobaTowers.push({isTower:true,n:'TOWER',team:tw.team,lane:tw.lane,inner:tw.inner,x:tw.x,y:MOBA_LANES[tw.lane],hp:MOBA_TOWER_HP,maxhp:MOBA_TOWER_HP,r:13,atkCd:0,alive:true,flash:0,charge:0,kills:0});}
   mobaNexus=[
     {isNexus:true,n:'NEXUS',team:0,x:50,y:270,hp:MOBA_NEXUS_HP,maxhp:MOBA_NEXUS_HP,r:20,alive:true,flash:0},
     {isNexus:true,n:'NEXUS',team:1,x:670,y:270,hp:MOBA_NEXUS_HP,maxhp:MOBA_NEXUS_HP,r:20,alive:true,flash:0}
@@ -1839,13 +1893,13 @@ function hurtMinion(m,dmg,from){
   if(!m||!m.alive||state!=='fight')return;
   m.hp-=dmg;m.flash=120;
   if(from&&from!==m&&from.charge!=null)from.charge=Math.min(100,from.charge+3);
-  if(m.hp<=0){m.hp=0;m.alive=false;if(from&&from!==m)from.kills=(from.kills||0)+1;}
+  if(m.hp<=0){m.hp=0;m.alive=false;if(from&&from!==m)from.kills=(from.kills||0)+1;if(from&&from!==m&&F.indexOf(from)>=0){mobaGainGold(from,25);mobaGainXp(from,20);for(var _ai=0;_ai<F.length;_ai++){var _af=F[_ai];if(_af!==from&&_af.alive&&_af.team===from.team&&dist(_af,m)<160)mobaGainXp(_af,8);}}}
 }
 function supMoba(f,range,dmg){
   if(!isMoba())return;
   for(var i=0;i<mobaMinions.length;i++){var m=mobaMinions[i];if(m.alive&&m.team!==f.team&&dist(f,m)<range)hurtMinion(m,dmg,f);}
   for(var j=0;j<mobaTowers.length;j++){var tw=mobaTowers[j];if(tw.alive&&tw.team!==f.team&&dist(f,tw)<range)hurtTower(tw,dmg,f);}
-  for(var k=0;k<2;k++){var nx=mobaNexus[k];if(nx&&nx.alive&&nx.team!==f.team&&dist(f,nx)<range)hurtNexus(nx,dmg,f);}
+  for(var k=0;k<2;k++){var nx=mobaNexus[k];if(nx&&nx.alive&&nx.team!==f.team&&dist(f,nx)<range)hurtNexus(nx,dmg,f);}for(var kc=0;kc<mobaCamps.length;kc++){var cpc=mobaCamps[kc];if(cpc.alive&&dist(f,cpc)<range)mobaHurtCamp(cpc,dmg,f);}
 }
 function mobaSpawnWave(){
   for(var t=0;t<2;t++){
@@ -1912,6 +1966,8 @@ function mobaPickTarget(b){
   if(best)return best;
   for(i=0;i<2;i++){var nx=mobaNexus[i];if(!nx||!nx.alive||nx.team===b.team||!mobaNexusOpen(nx.team))continue;d=dist(b,nx);if(d<170&&d<bd){bd=d;best=nx;}}
   if(best)return best;
+  for(var i2=0;i2<mobaCamps.length;i2++){var cp=mobaCamps[i2];if(!cp.alive)continue;var dc=dist(b,cp);if(dc<260&&dc<bd){bd=dc;best=cp;}}
+  if(best)return best;
   var e=nearestEnemy(b);if(e&&dist(b,e)<230)return e;
   return null;
 }
@@ -1946,7 +2002,7 @@ function mobaDrawMap(){
   /* 6V6 arena background: the generated 720x540 MOBA map art when it loaded,
    * the drawn MOBA6 vector map otherwise. Towers/nexus/minions/fighters draw
    * on top at the MOBA6 positions either way. */
-  var _mi=vfImg('map');
+  var _mi=(MOBA6.id==='river')?vfImg('map'):null;/* the generated art IS the river map — variants draw the vector map */
   if(_mi){ctx.drawImage(_mi,0,0,AW,AH);}
   else{moba6DrawMap();}
 }
@@ -1988,6 +2044,27 @@ function mobaDrawNexus(f){
   ctx.fillText(f.team===0?'YOUR NEXUS':'ENEMY NEXUS',f.x,f.y-44*BFS);
   if(!mobaNexusOpen(f.team)){ctx.fillStyle='#ffd94d';ctx.font='bold '+Math.round(8*BFS)+'px monospace';ctx.fillText('\uD83D\uDD12 NEED AN INNER TOWER DOWN',f.x,f.y+30*BFS);}
 }
+/* ================= REAL-MOBA REWORK (2026-11-19, item 8 — Cee: 'map visions + basically like a real moba game') =================
+ * FOG OF WAR: the map is dark except around your team's heroes (r120), towers (r100), minions (r50) and nexus (r120). Enemies/minions/towers/nexus/beast/camps outside vision are not drawn, and a darkness overlay with vision holes is painted over the arena. mobaCanSee() is the single vision test — draw gating and the overlay both use it.
+ * XP + LEVELS: last-hit a minion +20 XP, hero takedown +60 XP, nearby allies share +8/+20 XP. Level up: +12 max HP and a small heal. Damage scales +8% per level (in doAtk's mult).
+ * GOLD + SHOP: last-hit +25g, takedown +100g, jungle camp +60g. Shop (🛒 SHOP in the HUD): WAR BLADE +6 dmg 150g, VITAL PLATE +40 max HP + heal 40 150g, SWIFT BOOTS +12% move speed 120g, REGEN CHARM +2 HP/s 100g. Bots auto-buy blade → plate → boots when they can afford them.
+ * JUNGLE CAMPS: 2 neutral camps per map (positions in MOBA_MAPS). 80 HP, attackable by melee/ranged/super like a tower. Clearing one pays +60g +30 XP and a +15% damage buff for 30s (killer + nearby allies). Respawns after 60s. The jungle beast is untouched (its own blessing).
+ * TOWERS: already targeted minions before heroes (mobaUpdateTowers picks the nearest enemy minion in range first) — verified, not changed. Nexus win condition unchanged. Respawn unchanged (5s at base). */
+var mobaCamps=[];
+var mobaFogCv=null;
+var mobaShopT=0;
+function mobaApplyMap(i){try{if(typeof MOBA_MAPS==='undefined'||!MOBA_MAPS[i])return;var M=MOBA_MAPS[i];MOBA6=M;MOBA_LANES=M.lanes.slice();MOBA_BUSH=M.bush;}catch(e){}}
+function mobaXpNext(lvl){return 80+40*lvl;}
+function mobaGainXp(f,amt){if(!isMoba()||!f||!f.alive)return;f.xp=(f.xp||0)+amt;while((f.xp||0)>=mobaXpNext(f.lvl||1)){f.xp-=mobaXpNext(f.lvl||1);f.lvl=(f.lvl||1)+1;f.maxhp+=12;f.hp=Math.min(f.maxhp,f.hp+12);if(f===P)showMsg('★ LEVEL UP — LV '+f.lvl+' · +12 MAX HP ★');}}
+function mobaGainGold(f,amt){if(!isMoba()||!f)return;f.gold=(f.gold||0)+amt;if(f===P)renderHud();}
+var MOBA_SHOP=[{id:'blade',name:'WAR BLADE',cost:150,desc:'+6 DAMAGE'},{id:'plate',name:'VITAL PLATE',cost:150,desc:'+40 MAX HP · HEAL 40'},{id:'boots',name:'SWIFT BOOTS',cost:120,desc:'+12% MOVE SPEED'},{id:'charm',name:'REGEN CHARM',cost:100,desc:'+2 HP/S REGEN'}];
+function mobaBuy(id){if(!isMoba()||state!=='fight'||!P||!P.alive)return false;var it=null;for(var i=0;i<MOBA_SHOP.length;i++)if(MOBA_SHOP[i].id===id)it=MOBA_SHOP[i];if(!it)return false;if((P.gold||0)<it.cost){showMsg('NOT ENOUGH GOLD — '+it.name+' COSTS '+it.cost);return false;}P.gold-=it.cost;if(!P.items)P.items=[];P.items.push(id);if(id==='blade')P.dmgBonus=(P.dmgBonus||0)+6;else if(id==='plate'){P.maxhp+=40;P.hp=Math.min(P.maxhp,P.hp+40);}else if(id==='boots')P.spd=(P.spd||1)*1.12;else if(id==='charm')P.regen=(P.regen||0)+2;showMsg('BOUGHT '+it.name+' — '+it.desc);renderHud();return true;}
+function mobaShopHtml(){var h='<h1>🛒 MOBA SHOP</h1><h2>GOLD '+Math.floor(P?P.gold||0:0)+' · LV '+(P?P.lvl||1:1)+'</h2>';for(var i=0;i<MOBA_SHOP.length;i++){var it=MOBA_SHOP[i];var own=P&&P.items?P.items.filter(function(x){return x===it.id;}).length:0;h+='<p><button class="big" onclick="BRAWL.mobaBuy(\''+it.id+'\')" '+(((P?P.gold||0:0)<it.cost)?'disabled':'')+'>'+it.name+' — '+it.cost+' GOLD · '+it.desc+(own?' · OWNED x'+own:'')+'</button></p>';}h+='<p><button onclick="BRAWL.mobaShopToggle()">✕ CLOSE</button></p>';return h;}
+function mobaShopToggle(){var d=document.getElementById('mobaShop');if(!d)return;if(d.style.display==='block'){d.style.display='none';return;}if(!isMoba()||state!=='fight')return;d.innerHTML=mobaShopHtml();d.style.display='block';}
+function mobaBuildCamps(){mobaCamps=[];if(!MOBA6.camps)return;for(var i=0;i<MOBA6.camps.length;i++){var c=MOBA6.camps[i];mobaCamps.push({isCamp:true,n:'CAMP',team:-1,x:c.x,y:c.y,r:16,hp:80,maxhp:80,alive:true,flash:0,respawnT:0});}}
+function mobaHurtCamp(c,dmg,from){if(!c||!c.alive||state!=='fight')return;c.hp-=dmg;c.flash=120;if(c.hp<=0){c.hp=0;c.alive=false;c.respawnT=60000;if(from&&F.indexOf(from)>=0){mobaGainGold(from,60);mobaGainXp(from,30);from.buffDmg=1.15;from.buffT=30000;for(var i=0;i<F.length;i++){var a=F[i];if(a!==from&&a.alive&&a.team===from.team&&dist(a,c)<200){a.buffDmg=1.15;a.buffT=30000;}}showMsg((from===P?'YOU':from.n)+' CLEARED A JUNGLE CAMP — +60 GOLD · +15% DAMAGE 30s');}}}
+function mobaCanSee(x,y){if(!isMoba())return true;var i;for(i=0;i<F.length;i++){var f=F[i];if(!f.alive||f.team!==0)continue;if(Math.hypot(f.x-x,f.y-y)<120)return true;}for(i=0;i<mobaTowers.length;i++){var tw=mobaTowers[i];if(!tw.alive||tw.team!==0)continue;if(Math.hypot(tw.x-x,tw.y-y)<100)return true;}for(i=0;i<mobaMinions.length;i++){var m=mobaMinions[i];if(!m.alive||m.team!==0)continue;if(Math.hypot(m.x-x,m.y-y)<50)return true;}for(i=0;i<2;i++){var nx=mobaNexus[i];if(!nx||!nx.alive||nx.team!==0)continue;if(Math.hypot(nx.x-x,nx.y-y)<120)return true;}return false;}
+function mobaDrawFog(){if(!isMoba())return;try{if(!mobaFogCv||mobaFogCv.width!==AW||mobaFogCv.height!==AH){mobaFogCv=document.createElement('canvas');mobaFogCv.width=AW;mobaFogCv.height=AH;}var fg=mobaFogCv.getContext('2d');if(!fg)return;fg.clearRect(0,0,AW,AH);fg.fillStyle='rgba(4,4,12,0.85)';fg.fillRect(0,0,AW,AH);fg.globalCompositeOperation='destination-out';function hole(x,y,r){var g=fg.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(0.7,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');fg.fillStyle=g;fg.beginPath();fg.arc(x,y,r,0,7);fg.fill();}var i;for(i=0;i<F.length;i++){var f=F[i];if(f.alive&&f.team===0)hole(f.x,f.y,120);}for(i=0;i<mobaTowers.length;i++){var tw=mobaTowers[i];if(tw.alive&&tw.team===0)hole(tw.x,tw.y,100);}for(i=0;i<mobaMinions.length;i++){var m=mobaMinions[i];if(m.alive&&m.team===0)hole(m.x,m.y,50);}for(i=0;i<2;i++){var nx=mobaNexus[i];if(nx&&nx.alive&&nx.team===0)hole(nx.x,nx.y,120);}fg.globalCompositeOperation='source-over';ctx.drawImage(mobaFogCv,0,0);}catch(e){}}
 /* ================= end 6V6 MOBA ================= */
 
 var joy={dx:0,dy:0,id:null},keys={},padJoy={dx:0,dy:0};
@@ -2041,7 +2118,7 @@ function setTeamPicks(a){try{if(!a||!a.length){teamPicks=null;return;}var seen={
 function mkBrawlFighter(pickIdx,s){
   var R=ROSTER[pickIdx];
   return {ti:pickIdx,n:R.n,spr:R.spr,col:R.col,x:s[0],y:s[1],dir:Math.random()*6.28,
-    hp:R.hp,maxhp:R.hp,spd:R.spd,dmg:R.dmg,rng:R.rng,cd:R.cd,atkCd:0,charge:0,mn:100,maxMn:100,cubes:0,
+    hp:R.hp,maxhp:R.hp,spd:R.spd,dmg:R.dmg,rng:R.rng,cd:R.cd,atkCd:0,charge:0,mn:100,maxMn:100,cubes:0,xp:0,lvl:1,gold:0,items:[],dmgBonus:0,regen:0,buffT:0,buffDmg:1,
     team:0,bot:true,alive:true,aiT:Math.random()*250,wx:s[0],wy:s[1],mode:'wander',r:14,
     flash:0,slow:0,spinT:0,spinTick:0,swing:0,supFx:0,stick:'punch',atkCount:0,shotT:0,kills:0,place:0,
     blk:false,blkT:0,blkCd:0,sideT:0,sideCd:0,grapCd:0,bombCd:0,guardT:0,guardCd:0,phase2:false,supUsed:false,blkFx:0,respawnT:null,mobaLane:1,mobaTgt:null};
@@ -2083,11 +2160,11 @@ function spawnMatch(){
       F.push(f);if(!mem.bot)P=f;
     }
   }
-  if(isMoba())mobaBuildStructures();else if(isArena())arenaBuild();else{mobaTowers=[];mobaNexus=[null,null];mobaMinions=[];}
+  if(isMoba()){mobaApplyMap(typeof mobaMapSel==='number'?mobaMapSel:0);mobaBuildStructures();mobaBuildCamps();}else if(isArena())arenaBuild();else{mobaTowers=[];mobaNexus=[null,null];mobaMinions=[];mobaCamps=[];}
   if(!isArena())for(var c=0;c<CUBESPOTS.length;c++){var _cs=isMoba()?1.5:1;cubes.push({x:CUBESPOTS[c].x*_cs,y:CUBESPOTS[c].y*_cs,taken:false});}
   elapsed=0;sudden=false;paused=false;state='fight';
   beast.alive=false;beast.hp=beast.maxhp;beast.x=beastPitPos().x;beast.y=beastPitPos().y;beast.flash=0;beast.windup=0;beast.windTgt=null;beast.atkCd=0;beast.spawnFx=0;beast.aiT=0;beast.wx=beast.x;beast.wy=beast.y;beastNext=isArena()?1e9:20000;beastWarned=false;teamBeast=[false,false,false,false,false,false];
-  ov.style.display='none';hud.style.display='';if(typeof rvShow==='function')rvShow(false);msgEl.style.display='';supWrap.style.display='';ctl.style.display='block';keysBar.style.display='';if(mode==='six'){if(skillBar)skillBar.style.display='none';if(mobaSkillBar)mobaSkillBar.style.display='flex';}else{if(skillBar)skillBar.style.display='flex';if(mobaSkillBar)mobaSkillBar.style.display='none';}showMsg(isMoba()?'6V6 MOBA — DESTROY THE ENEMY NEXUS · 2 LANES + JUNGLE · TOWERS · MINIONS':(MODES[mode].label+(MODES[mode].teamSize>1?' — LAST TEAM STANDING':' — LAST ONE STANDING')+' · BEAST IN THE JUNGLE'));vfPovSync();
+  ov.style.display='none';hud.style.display='';var _sb=document.getElementById('bShopBtn');if(_sb)_sb.style.display=isMoba()?'inline-block':'none';if(typeof rvShow==='function')rvShow(false);msgEl.style.display='';supWrap.style.display='';ctl.style.display='block';keysBar.style.display='';if(mode==='six'){if(skillBar)skillBar.style.display='none';if(mobaSkillBar)mobaSkillBar.style.display='flex';}else{if(skillBar)skillBar.style.display='flex';if(mobaSkillBar)mobaSkillBar.style.display='none';}showMsg(isMoba()?'6V6 MOBA — DESTROY THE ENEMY NEXUS · 2 LANES + JUNGLE · TOWERS · MINIONS':(MODES[mode].label+(MODES[mode].teamSize>1?' — LAST TEAM STANDING':' — LAST ONE STANDING')+' · BEAST IN THE JUNGLE'));vfPovSync();
 }
 
 function showMsg(t){msgEl.textContent=t;msgT=2000;}
@@ -2097,7 +2174,7 @@ function killF(o,from){
   /* MOBA: no elimination — the fighter respawns at base after 5s. The nexus decides the match, not takedowns. */
   if(isMoba()){
     o.hp=0;o.alive=false;o.respawnT=5000;addFx(o.x,o.y,'boom',o.col);juiceShake(4+Math.random()*2);juiceFlash(180+Math.random()*60,o.col);bHitStop=Math.max(bHitStop,35);
-    if(from&&from!==o)from.kills++;
+    if(from&&from!==o)from.kills++;if(from&&from!==o&&F.indexOf(from)>=0){mobaGainGold(from,100);mobaGainXp(from,60);for(var _ki=0;_ki<F.length;_ki++){var _kf=F[_ki];if(_kf!==from&&_kf.alive&&_kf.team===from.team&&dist(_kf,o)<200)mobaGainXp(_kf,20);}}
     showMsg(o===P?'YOU ARE DOWN — RESPAWN IN 5s':(o.n+' IS DOWN — RESPAWN IN 5s'));
     return;
   }
@@ -2189,10 +2266,10 @@ function doAtk(f){
   var R=ROSTER[f.ti];
   /* LESTES forms (BELT SHIFT stances): BEAR heavy 14 (Symbios), WOLF fast cd 420 (Symbios), HAWK ranged shot, FIREFLY burn, MECHA suit slam 16 (Astonyx). */
   var _lf=(f.n==='LESTES')?(f.lesForm||0):-1;
-  var _dmg=_lf===0?14:(_lf===4?16:(f.dmg||R.dmg));
+  var _dmg=_lf===0?14:(_lf===4?16:(f.dmg||R.dmg));if(isMoba())_dmg+=(f.dmgBonus||0);
   f.atkCd=_lf===1?420:R.cd;
   var _rng=_lf===2?'shot':f.rng;
-  var mult=1+0.12*f.cubes+(teamBeast[f.team]?0.25:0);
+  var mult=(1+0.12*f.cubes+(teamBeast[f.team]?0.25:0))*(1+0.08*((f.lvl||1)-1))*(f.buffDmg||1);
   if(_rng==='melee'){
     f.swing=140;f.atkCount=(f.atkCount||0)+1;f.stick=(f.atkCount%2===0)?'kick':'punch';/* STICKMAN: melee swings alternate punch/kick flourish */
     for(var i=0;i<F.length;i++){
@@ -2204,7 +2281,7 @@ function doAtk(f){
     if(isMoba()){
       for(var mi=0;mi<mobaMinions.length;mi++){var mn=mobaMinions[mi];if(!mn.alive||mn.team===f.team)continue;var md=dist(f,mn);if(md<52+f.r+8){var ma=Math.atan2(mn.y-f.y,mn.x-f.x);if(Math.abs(angDiff(ma,f.dir))<0.8)hurtMinion(mn,_dmg*mult,f);}}
       for(var ti2=0;ti2<mobaTowers.length;ti2++){var tw=mobaTowers[ti2];if(!tw.alive||tw.team===f.team)continue;var td=dist(f,tw);if(td<52+f.r+14){var ta=Math.atan2(tw.y-f.y,tw.x-f.x);if(Math.abs(angDiff(ta,f.dir))<0.8)hurtTower(tw,_dmg*mult,f);}}
-      for(var ni=0;ni<2;ni++){var nx2=mobaNexus[ni];if(!nx2||!nx2.alive||nx2.team===f.team)continue;var nd=dist(f,nx2);if(nd<52+f.r+20){var na2=Math.atan2(nx2.y-f.y,nx2.x-f.x);if(Math.abs(angDiff(na2,f.dir))<0.8)hurtNexus(nx2,_dmg*mult,f);}}
+      for(var ni=0;ni<2;ni++){var nx2=mobaNexus[ni];if(!nx2||!nx2.alive||nx2.team===f.team)continue;var nd=dist(f,nx2);if(nd<52+f.r+20){var na2=Math.atan2(nx2.y-f.y,nx2.x-f.x);if(Math.abs(angDiff(na2,f.dir))<0.8)hurtNexus(nx2,_dmg*mult,f);}}for(var ci3=0;ci3<mobaCamps.length;ci3++){var cp3=mobaCamps[ci3];if(!cp3.alive)continue;var cd3=dist(f,cp3);if(cd3<52+f.r+16){var ca3=Math.atan2(cp3.y-f.y,cp3.x-f.x);if(Math.abs(angDiff(ca3,f.dir))<0.8)mobaHurtCamp(cp3,_dmg*mult,f);}}
     }
   }else{
     projs.push({x:f.x+Math.cos(f.dir)*18,y:f.y+Math.sin(f.dir)*18,vx:Math.cos(f.dir)*300,vy:Math.sin(f.dir)*300,dmg:_dmg*mult,from:f,r:5,life:850,kind:'shot',homing:false});addFx(f.x+Math.cos(f.dir)*20,f.y+Math.sin(f.dir)*20,'muzzle',f.col);f.stick='shoot';f.shotT=120;/* STICKMAN: ranged shot pose */
@@ -2406,7 +2483,7 @@ function update(dt){
     mobaRespawnTick(dt);
     mobaUpdateMinions(dt);
     mobaUpdateTowers(dt);
-    for(var mri=0;mri<F.length;mri++){var mf=F[mri];if(mf.alive)mf.mn=Math.min(mf.maxMn||100,(mf.mn||0)+4*dt/1000);}
+    for(var mri=0;mri<F.length;mri++){var mf=F[mri];if(!mf.alive)continue;mf.mn=Math.min(mf.maxMn||100,(mf.mn||0)+4*dt/1000);if(mf.regen)mf.hp=Math.min(mf.maxhp,mf.hp+mf.regen*dt/1000);if(mf.buffT>0){mf.buffT-=dt;if(mf.buffT<=0)mf.buffDmg=1;}}mobaShopT-=dt;if(mobaShopT<=0){mobaShopT=5000;for(var bi=0;bi<F.length;bi++){var bf=F[bi];if(!bf.bot||!bf.alive)continue;if(!bf.items)bf.items=[];if((bf.gold||0)>=150&&bf.items.indexOf('blade')<0){bf.gold-=150;bf.dmgBonus=(bf.dmgBonus||0)+6;bf.items.push('blade');}else if((bf.gold||0)>=150&&bf.items.indexOf('plate')<0){bf.gold-=150;bf.maxhp+=40;bf.hp=Math.min(bf.maxhp,bf.hp+40);bf.items.push('plate');}else if((bf.gold||0)>=120&&bf.items.indexOf('boots')<0){bf.gold-=120;bf.spd=(bf.spd||1)*1.12;bf.items.push('boots');}}}for(var ci=0;ci<mobaCamps.length;ci++){var cp=mobaCamps[ci];if(cp.flash>0)cp.flash-=dt;if(!cp.alive&&cp.respawnT>0){cp.respawnT-=dt;if(cp.respawnT<=0){cp.alive=true;cp.hp=cp.maxhp;showMsg('A JUNGLE CAMP HAS RETURNED');}}}
   }
   /* JUNGLE BEAST timers: first spawn 20s in (5s telegraph), respawn 45s
    * after each kill (same 5s telegraph). The beast wanders its pit on a
@@ -2524,7 +2601,7 @@ function update(dt){
       if(!dead&&isMoba()){
         for(var mi2=0;mi2<mobaMinions.length;mi2++){var mn2=mobaMinions[mi2];if(!mn2.alive||mn2.team===pr.from.team)continue;if(Math.hypot(mn2.x-pr.x,mn2.y-pr.y)<10+pr.r){hurtMinion(mn2,pr.dmg,pr.from);dead=true;break;}}
         if(!dead)for(var twi=0;twi<mobaTowers.length;twi++){var tw2=mobaTowers[twi];if(!tw2.alive||tw2.team===pr.from.team)continue;if(Math.hypot(tw2.x-pr.x,tw2.y-pr.y)<13+pr.r){hurtTower(tw2,pr.dmg,pr.from);dead=true;break;}}
-        if(!dead)for(var nxi=0;nxi<2;nxi++){var nx3=mobaNexus[nxi];if(!nx3||!nx3.alive||nx3.team===pr.from.team)continue;if(Math.hypot(nx3.x-pr.x,nx3.y-pr.y)<20+pr.r){hurtNexus(nx3,pr.dmg,pr.from);dead=true;break;}}
+        if(!dead)for(var nxi=0;nxi<2;nxi++){var nx3=mobaNexus[nxi];if(!nx3||!nx3.alive||nx3.team===pr.from.team)continue;if(Math.hypot(nx3.x-pr.x,nx3.y-pr.y)<20+pr.r){hurtNexus(nx3,pr.dmg,pr.from);dead=true;break;}}if(!dead)for(var ci4=0;ci4<mobaCamps.length;ci4++){var cp4=mobaCamps[ci4];if(!cp4.alive)continue;if(Math.hypot(cp4.x-pr.x,cp4.y-pr.y)<16+pr.r){mobaHurtCamp(cp4,pr.dmg,pr.from);dead=true;break;}}
       }
     }
     if(dead)projs.splice(p,1);
@@ -2549,7 +2626,7 @@ function renderHud(){
   if(isMoba()){
     var nx0=mobaNexus[0],nx1=mobaNexus[1],tw0=0,tw1=0;
     for(var qi=0;qi<mobaTowers.length;qi++){if(!mobaTowers[qi].alive)continue;if(mobaTowers[qi].team===0)tw0++;else tw1++;}
-    hudL.innerHTML='<b>⬡ '+(nx0?nx0.hp:0)+' vs '+(nx1?nx1.hp:0)+'</b> · '+mm+':'+ss+' · 🏰 '+tw0+'–'+tw1;
+    hudL.innerHTML='<b>⬡ '+(nx0?nx0.hp:0)+' vs '+(nx1?nx1.hp:0)+'</b> · '+mm+':'+ss+' · 🏰 '+tw0+'–'+tw1+' · LV '+(P?P.lvl||1:1)+' · 🪙 '+Math.floor(P?P.gold||0:0);
     hudR.textContent='MANA '+Math.floor(P?P.mn:0);
   }else{
     hudL.innerHTML='<b>'+aliveCount()+' LEFT</b> · '+mm+':'+ss+(sudden?' · ☠':'');
@@ -2703,6 +2780,7 @@ function draw(){
   /* projectiles */
   for(var p=0;p<projs.length;p++){
     var pr=projs[p];
+    if(isMoba()&&pr.from&&pr.from.team!==0&&!mobaCanSee(pr.x,pr.y))continue;
     ctx.fillStyle=pr.from?pr.from.col:'#fff';ctx.shadowColor=pr.from?pr.from.col:'#fff';ctx.shadowBlur=8;
     ctx.beginPath();ctx.arc(pr.x,pr.y,pr.r,0,7);ctx.fill();ctx.shadowBlur=0;
   }
@@ -2714,7 +2792,7 @@ function draw(){
   ctx.strokeStyle='rgba(57,211,83,.12)';
   ctx.beginPath();ctx.arc(beastPitPos().x,beastPitPos().y,28,0,7);ctx.stroke();
   ctx.restore();}
-  if(beast.alive){
+  if(beast.alive&&(!isMoba()||mobaCanSee(beast.x,beast.y))){
     ctx.save();
     ctx.translate(beast.x,beast.y);ctx.scale(BFS,BFS);ctx.translate(-beast.x,-beast.y);/* BUG2-SCALE: drawn glyph only, beast.r hitbox untouched */
     /* shadow + dark body */
@@ -2744,6 +2822,8 @@ function draw(){
     ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';
     ctx.fillText('JUNGLE BEAST',blx,bly);
   }
+  /* JUNGLE CAMPS (real-MOBA rework): neutral gold creatures — hidden in fog like everything else. */
+  if(isMoba()){for(var ci5=0;ci5<mobaCamps.length;ci5++){var cp5=mobaCamps[ci5];if(!cp5.alive||!mobaCanSee(cp5.x,cp5.y))continue;ctx.fillStyle=cp5.flash>0?'#fff':'#3a2a10';ctx.beginPath();ctx.arc(cp5.x,cp5.y,14,0,7);ctx.fill();ctx.strokeStyle='#f2b91e';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#f2b91e';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('CAMP',cp5.x,cp5.y-20);ctx.fillStyle='#220505';ctx.fillRect(cp5.x-14,cp5.y+18,28,4);ctx.fillStyle='#f2b91e';ctx.fillRect(cp5.x-14,cp5.y+18,28*Math.max(0,cp5.hp/cp5.maxhp),4);}}
   /* fighters, sorted by y (MOBA: towers, nexus and minions sort in too) */
   var order=F.slice();
   if(isMoba()){
@@ -2754,6 +2834,7 @@ function draw(){
   order.sort(function(a,b){return a.y-b.y;});
   for(var i=0;i<order.length;i++){
     var f=order[i];if(!f.alive)continue;
+    if(isMoba()&&f.team!==0&&!mobaCanSee(f.x,f.y))continue;/* FOG OF WAR: enemies outside vision are not drawn */
     if(f.isMinion){mobaDrawMinion(f);continue;}
     if(f.isTower){mobaDrawTower(f);continue;}
     if(f.isNexus){mobaDrawNexus(f);continue;}
@@ -2812,6 +2893,7 @@ function draw(){
   }
   drawFx();
   ctx.restore();
+  if(isMoba())mobaDrawFog();
   if(sudden){ctx.strokeStyle='rgba(255,40,40,.7)';ctx.lineWidth=6;ctx.strokeRect(3,3,AW-6,AH-6);}
   /* Wraith Verdict flash: the verdict art over the arena for 900ms after a verdict. */
   if(verdictFxUntil>0&&elapsed<verdictFxUntil){
@@ -2840,8 +2922,8 @@ function startMatch(){spawnMatch();renderHud();}
 function renderSel(){
   state='select';paused=false;ov.style.display='flex';if(typeof rvShow==='function')rvShow(false);
   msgEl.textContent='';msgT=0;
-  hud.style.display='none';msgEl.style.display='none';supWrap.style.display='none';ctl.style.display='none';keysBar.style.display='none';if(skillBar)skillBar.style.display='none';if(mobaSkillBar)mobaSkillBar.style.display='none';
-  var h='<h1>VANIX BRAWL</h1><h2>TOP-DOWN ARENA · ORIGINAL FIGHTERS</h2>';
+  hud.style.display='none';msgEl.style.display='none';supWrap.style.display='none';ctl.style.display='none';keysBar.style.display='none';if(skillBar)skillBar.style.display='none';if(mobaSkillBar)mobaSkillBar.style.display='none';var _sh=document.getElementById('mobaShop');if(_sh)_sh.style.display='none';
+  var h='<h1>'+(mode==='six'?'WRAITH MOBA':'VANIX BRAWL')+'</h1><h2>'+(mode==='six'?'6V6 MOBA · ORIGINAL FIGHTERS':'TOP-DOWN ARENA · ORIGINAL FIGHTERS')+'</h2>';
   /* No mode picker inside Brawl (2026-11-03): the mode is picked on the CHARACTER SELECTION screen (STAND / 3V3 / BRAWL) before entering. */
   h+='<p>'+MODES[mode].note+'</p><div class="grid">';
   for(var i=0;i<ROSTER.length;i++){
@@ -2850,7 +2932,7 @@ function renderSel(){
     else{h+='<button class="pick'+(pick===i?' sel':'')+'" onclick="BRAWL.pickBrawler('+i+')"><b>'+R.n+'</b><span>HP '+R.hp+' · SPD '+R.spd+'<br>'+(R.rng==='shot'?'RANGED':'MELEE')+' · '+R.sup+'<br>'+R.desc+'</span></button>';}
   }
   h+='</div><p><button class="big" onclick="BRAWL.startMatch()">START FIGHT</button></p><p><button onclick="goTopModes()">← ALL MODES</button></p>';
-  h+='<p>Hide in bushes — bots can\'t see you in there.<br>Grab gold cubes for +12% damage. Super charges as you fight.</p>';
+  h+='<p>'+(mode==='six'?'Fog of war hides enemies outside your vision.<br>Last-hit minions for gold + XP. Buy items in the SHOP. Jungle camps pay gold + a damage buff.':'Hide in bushes — bots can\'t see you in there.<br>Grab gold cubes for +12% damage. Super charges as you fight.')+'</p>';
   ovb.innerHTML=h;
 }
 
@@ -3092,16 +3174,16 @@ function fpsSkillBarShow(on){try{if(fpsSkillBar)fpsSkillBar.style.display=on?'':
 var FPS_TARGET=10, FPS_LIMIT=180000;
 var FPS_MAP=[
 '################',
-'#......#.......#',
-'#..##..#...##..#',
-'#......#.......#',
-'#..#......#....#',
-'#......##......#',
-'#..##......##..#',
-'#......#.......#',
-'#..#......#....#',
-'#......##......#',
-'#..##..#...##..#',
+'#.....####.....#',
+'#.#...####..#..#',
+'#.....####.....#',
+'#..............#',
+'#.......#...#..#',
+'#.#............#',
+'#..............#',
+'#.....####.....#',
+'#.#...####..#..#',
+'#.....####.....#',
 '################'];
 var FPS_CELL=48;
 var FPS_MOBA_TARGET=20;
@@ -3554,7 +3636,7 @@ function fpsEnd(win){
 (function(){try{document.addEventListener('mousemove',function(e){if(document.pointerLockElement!==document.getElementById('bcv'))return;if(!fpsActive||fpsPaused||!fpsPlayer||!fpsPlayer.alive)return;var dx=e.movementX||0;fpsPlayer.ang+=dx*fpsMouseSens;});}catch(e){}})();
 try{fpsGyroInit();}catch(e){}
 
-window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,startMobaFps:fpsMobaStart,startTrioFps:fpsTrioStart,startFusion:fpsFusionStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsMouseSens(){return fpsMouseSens;},get fpsAllies(){return fpsAllies;},get fpsMobaMode(){return fpsMobaMode;},get fpsTeamScore(){return fpsTeamScore;},set fpsTeamScore(v){fpsTeamScore=v;},get fpsFusionMode(){return fpsFusionMode;},get fpsCharges(){return fpsCharges;},get fpsCubes(){return fpsCubes;},get fpsTrioMode(){return fpsTrioMode;},get FPS_TRIO_TARGET(){return FPS_TRIO_TARGET;},get bCharges(){return bCharges;},get fpsTeamTarget(){return fpsTeamTarget;},povSwitch:vfPovSwitch,povSync:vfPovSync,fillPicks:vfFillPicks,vfJuiceScale:vfJuiceScale,vfFxCap:vfFxCap,bPlaceCharge:bPlaceCharge,bDetonateCharge:bDetonateCharge,get fpsCurMap(){return fpsCurMap;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
+window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,startMobaFps:fpsMobaStart,startTrioFps:fpsTrioStart,startFusion:fpsFusionStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsMouseSens(){return fpsMouseSens;},get fpsAllies(){return fpsAllies;},get fpsMobaMode(){return fpsMobaMode;},get fpsTeamScore(){return fpsTeamScore;},set fpsTeamScore(v){fpsTeamScore=v;},get fpsFusionMode(){return fpsFusionMode;},get fpsCharges(){return fpsCharges;},get fpsCubes(){return fpsCubes;},get fpsTrioMode(){return fpsTrioMode;},get FPS_TRIO_TARGET(){return FPS_TRIO_TARGET;},get bCharges(){return bCharges;},get fpsTeamTarget(){return fpsTeamTarget;},povSwitch:vfPovSwitch,povSync:vfPovSync,fillPicks:vfFillPicks,vfJuiceScale:vfJuiceScale,vfFxCap:vfFxCap,bPlaceCharge:bPlaceCharge,bDetonateCharge:bDetonateCharge,get fpsCurMap(){return fpsCurMap;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},mobaBuy:mobaBuy,mobaShopToggle:mobaShopToggle,mobaCanSee:mobaCanSee,mobaApplyMap:mobaApplyMap,get mobaMapId(){return MOBA6?MOBA6.id:null;},get mobaCamps(){return mobaCamps;},get mobaFogCv(){return mobaFogCv;},hurtMinion:hurtMinion,hurtTower:hurtTower,hurtNexus:hurtNexus,mobaHurtCamp:mobaHurtCamp,mobaGainXp:mobaGainXp,mobaGainGold:mobaGainGold,mobaUpdateTowers:mobaUpdateTowers,mobaUpdateMinions:mobaUpdateMinions,mobaSpawnWave:mobaSpawnWave,get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
 
 })();
 
@@ -3915,7 +3997,7 @@ body.arc-quality-high canvas{animation:arcAura 5s ease-in-out infinite}body.arc-
 function fxGlowDot(p){try{var ultra=current==='ultra',blur=ultra?12:6,fill=ultra?'#9fe7ff':'#8ecfff',rq=Math.max(.5,Math.round(p.r*2)/2),k=fill+'|'+blur+'|'+rq,e=_fxGlow[k];if(!e){var half=rq+blur*2,sz=Math.ceil(half)*2,s=document.createElement('canvas');s.width=sz;s.height=sz;var g=s.getContext('2d');if(!g)return false;g.fillStyle=fill;g.shadowColor='#63aaff';g.shadowBlur=blur;g.beginPath();g.arc(sz/2,sz/2,rq,0,7);g.fill();e={c:s,h:sz/2};_fxGlow[k]=e;}ctx.drawImage(e.c,p.x-e.h,p.y-e.h);return true;}catch(err){return false;}}
 function frame(t){raf=0;if(!ctx||document.hidden||current==='low'||reduced)return;if(t-last<32){raf=requestAnimationFrame(frame);return;}last=t;ctx.clearRect(0,0,w,h);
   for(const p of particles){p.x+=p.vx;p.y+=p.vy;if(p.y<-5){p.y=h+5;p.x=Math.random()*w;}p.phase+=.018;ctx.globalAlpha=p.a*(.65+.35*Math.sin(p.phase));if(!fxGlowDot(p)){ctx.fillStyle=current==='ultra'?'#9fe7ff':'#8ecfff';ctx.shadowBlur=current==='ultra'?12:6;ctx.shadowColor='#63aaff';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}}
-  ctx.shadowBlur=0;bursts=bursts.filter(p=>p.life>0);for(const p of bursts){p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=.025;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle='#b8eaff';ctx.shadowBlur=10;ctx.shadowColor='#72baff';ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.shadowBlur=0;
+  ctx.shadowBlur=0;bursts=bursts.filter(p=>p.life>0);for(const p of bursts){p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=.025;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle='#b8eaff';ctx.shadowBlur=10;ctx.shadowColor='#72baff';ctx.beginPath();ctx.arc(p.x,p.y,Math.max(0,p.r*p.life),0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.shadowBlur=0;
   raf=requestAnimationFrame(frame);
  }
  function syncFrame(){if(document.hidden||current==='low'||reduced){if(raf)cancelAnimationFrame(raf);raf=0;}else if(!raf)raf=requestAnimationFrame(frame);}

@@ -35,7 +35,7 @@ h1 b{color:#ff2d55}
 .ck-mol b{color:#fff}
 body{padding-top:102px!important}
 #ctl{flex-wrap:wrap}
-@media (orientation:landscape) and (max-height:500px){#tableWrap{width:min(100%,300px)}}
+@media (orientation:landscape) and (max-height:500px){#tableWrap{width:min(100%,300px)}}@media (orientation:portrait) and (max-width:520px){#tableWrap{width:min(100%,420px,calc((100vh - 400px)*0.625));width:min(100%,420px,calc((100dvh - 400px)*0.625))}}
 </style>
 </head>
 <body>
@@ -464,7 +464,7 @@ document.addEventListener('keyup',function(e){
 document.addEventListener('visibilitychange',function(){if(document.hidden&&state==='play')pauseGame();});
 
 /* ---------- gamepad (shoulders / D-pad = flippers, A = plunger) ---------- */
-var padPrev={l:false,r:false,a:false};
+var padPrev={l:false,r:false,a:false,s:false};
 function pollGamepad(){
   try{
     if(typeof navigator==='undefined'||typeof navigator.getGamepads!=='function')return;
@@ -478,7 +478,9 @@ function pollGamepad(){
     if(l&&!padPrev.l)pressFlipper('L');if(!l&&padPrev.l)releaseFlipper('L');
     if(r&&!padPrev.r)pressFlipper('R');if(!r&&padPrev.r)releaseFlipper('R');
     if(a&&!padPrev.a)chargeStart();if(!a&&padPrev.a)chargeRelease();
-    padPrev={l:l,r:r,a:a};
+    var s=pressed(9);
+    if(s&&!padPrev.s){if(paused)resumeGame();else pauseGame();}
+    padPrev={l:l,r:r,a:a,s:s};
   }catch(e){}
 }
 

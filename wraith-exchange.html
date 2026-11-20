@@ -90,7 +90,7 @@ h1 b{color:#ff2d55}
 .ck-mol{margin-left:auto;flex:none;border:1px solid #8a6d14;background:#171106;color:#ffd94d;border-radius:999px;padding:4px 10px;font-size:12px;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
 .ck-mol b{color:#fff}
 body{padding-top:102px!important}
-@media (orientation:landscape) and (max-height:500px){.wrap{padding:2px 10px 14px}}
+@media (orientation:landscape) and (max-height:500px){.wrap{padding:2px 10px 14px}}@media (orientation:portrait) and (max-width:520px){body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;overscroll-behavior:none}.wrap{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}#chainFeed{max-height:64px;overflow-y:auto}#exScroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}}
 </style>
 </head>
 <body>
@@ -134,6 +134,7 @@ body{padding-top:102px!important}
 <div id="chartWrap"><canvas id="chart" width="460" height="140"></canvas></div>
 <div id="selLine">CHART: <b id="selName">AETHERIS</b></div>
 <div class="mtabs" role="tablist" aria-label="Market"><button type="button" class="mtab on" id="tabCoins" role="tab" aria-selected="true">🪙 COINS<small>11 products · atoms · play</small></button><button type="button" class="mtab" id="tabStocks" role="tab" aria-selected="false">📈 STOCKS<small>3 characters · ions · real money</small></button></div>
+<div id="exScroll">
 <div id="coinList"></div>
 <div id="tradeBox">
 <div style="font-size:12px;letter-spacing:2px;color:#b79cff">TRADE <span id="tradeMkt">COINS</span> — <b id="tradeCoin" style="color:#fff">AETHERIS</b></div>
@@ -154,6 +155,7 @@ body{padding-top:102px!important}
 <div id="logLine"></div>
 <div id="hint"><b>BUY</b> — type atoms to spend &nbsp;·&nbsp; <b>SELL</b> — type coins to sell &nbsp;·&nbsp; <b>B</b> buy · <b>S</b> sell · <b>P</b> pause · <b>Esc</b> resume</div>
 <div class="sqref">💳 <a href="https://squareup.com/refer/SWVPVP0000" target="_blank" rel="noopener">Get Square — Cee's referral link</a><br>Sign up for Square through Cee's referral. It doesn't buy ions — it's just his link.</div>
+</div>
 </div>
 <script>
 /* WRAITH EXCHANGE — AETHERIS'S SHOP. A stock-market / meme-coin trading
@@ -870,6 +872,29 @@ window.__exchange={
     else if(k==='b'||k==='B'){var a=$('amtInput');if(market==='stocks')buyStock(a?a.value:'');else buyAtoms(a?a.value:'');}
     else if(k==='s'||k==='S'){var a2=$('amtInput');if(market==='stocks')sellStock(a2?a2.value:'');else sellCoins(a2?a2.value:'');}
   });
+/* GAMEPAD (Xbox) — standard controller via the Gamepad API, polled every frame.
+   No controller connected = no-op; keyboard + touch play exactly as before.
+   Stick / D-pad moves (0.25 deadzone, D-pad wins its axis), face buttons fire
+   each game's primary actions, Start pauses. Same approach as Vanix Fight. */
+var __pdPrev={};
+function __pdGet(){try{if(typeof navigator==='undefined'||!navigator.getGamepads)return null;var ps=navigator.getGamepads();if(!ps)return null;for(var i=0;i<ps.length;i++)if(ps[i])return ps[i];}catch(e){}return null;}
+function __pdBtn(p,i){return !!(p&&p.buttons&&p.buttons[i]&&p.buttons[i].pressed);}
+function __pdEdge(p,i){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;return n&&!w;}
+function __pdHeld(p,i,on,off){var n=__pdBtn(p,i),w=!!__pdPrev[i];__pdPrev[i]=n;if(n&&!w&&on)on();if(!n&&w&&off)off();}
+function __pdAx(p,i){if(!p||!p.axes||typeof p.axes[i]!=='number')return 0;var v=p.axes[i];return Math.abs(v)<0.25?0:v;}
+function __pdDir(p){var ax=__pdAx(p,0),ay=__pdAx(p,1);return{l:__pdBtn(p,14)||(!__pdBtn(p,15)&&ax<-0.3),r:__pdBtn(p,15)||(!__pdBtn(p,14)&&ax>0.3),u:__pdBtn(p,12)||(!__pdBtn(p,13)&&ay<-0.3),d:__pdBtn(p,13)||(!__pdBtn(p,12)&&ay>0.3)};}
+/* GAMEPAD (Wraith Exchange) — trading UI, not a twitch game: A buys, X sells
+   (same as the B / S keys, using the amount box), Start pauses. Own rAF poll:
+   the page has no per-frame game loop. */
+function __pdPollEx(){
+  requestAnimationFrame(__pdPollEx);
+  var p=__pdGet();if(!p)return;
+  if(__pdEdge(p,9)){if(paused)resumeGame();else pauseGame();}
+  var a=$('amtInput');
+  if(__pdEdge(p,0)){if(market==='stocks')buyStock(a?a.value:'');else buyAtoms(a?a.value:'');}
+  if(__pdEdge(p,2)){if(market==='stocks')sellStock(a?a.value:'');else sellCoins(a?a.value:'');}
+}
+requestAnimationFrame(__pdPollEx);
   document.addEventListener('visibilitychange',function(){if(document.hidden&&!locked)pauseGame();});
   try{history.pushState({ckExitGuard:1},'');}catch(e){}
   window.addEventListener('popstate',function(){if(ckRunActive()){try{history.pushState({ckExitGuard:1},'');}catch(e){}ckShowExit(true);}});

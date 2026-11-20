@@ -326,7 +326,7 @@ body:not(.tavern-view) #tavern-section{display:none}
 <section id="gamesGrid" aria-label="Arcade floor">
 <h2 class="grp">ARCADE FLOOR · 15 GAMES</h2>
 <div class="grid">
-<button type="button" class="game fight" data-mode="fight" data-search="vanix fight 1v1 2v2 3v3 showdown waves defense punch kick block special"><span class="i">💀</span><span class="t">VANIX FIGHT</span><span class="d">1V1 · 2V2 · 3V3 · Showdown · Waves · Defense. 30 fighters.</span><span class="c">CONTROLS: D-pad + buttons — punch · kick · block · special</span><span class="b" data-best="fight">🏆 BEST: —</span><span class="b" data-plays="fight">▶ PLAYS: —</span></button>
+<button type="button" class="game town" data-mode="town" data-search="wraith town gta drive missions empire open world vanix fight 1v1 2v2 3v3 showdown moba arcade"><span class="i">🏙️</span><span class="t">WRAITH TOWN</span><span class="d">GTA × Savage Wraith — drive the open town, run missions, grow your empire. Walk into Vanix Fight (1V1 · 2V2 · 3V3 · Showdown · MOBA · 30 fighters) + the arcade machines.</span><span class="c">CONTROLS: Drive + missions — park on a glowing door mat to enter a game</span><span class="b" data-best="town">🏆 BEST: —</span><span class="b" data-plays="town">▶ PLAYS: —</span></button>
 <button type="button" class="game delve" data-mode="delve" data-search="delve dungeon crawl dig loot survive"><span class="i">⛏️</span><span class="t">DELVE</span><span class="d">Dig down deep. Fight, loot, and climb back out.</span><span class="c">CONTROLS: D-pad + buttons — dig · fight · loot</span><span class="b" data-best="delve">🏆 BEST: —</span><span class="b" data-plays="delve">▶ PLAYS: —</span></button>
 <button type="button" class="game" data-mode="sav" data-search="sav arcade classic original"><span class="i">💾</span><span class="t">SAV</span><span class="d">The original SAV arcade game. Old school, fast, and mean.</span><span class="c">CONTROLS: D-pad + buttons</span><span class="b" data-best="sav">🏆 BEST: —</span><span class="b" data-plays="sav">▶ PLAYS: —</span></button>
 <button type="button" class="game pet" data-mode="pet" data-search="wraith pet buddy raise feed grow"><span class="i">🐾</span><span class="t">WRAITH PET</span><span class="d">Your buddy lives in your house. Feed it, play, watch it grow.</span><span class="c">CONTROLS: Tap + buttons — feed · play · grow</span></button>
@@ -433,6 +433,9 @@ try{if(window.self!==window.top && new URLSearchParams(window.location.search).g
 var CARDMAP = {
   "delve": {"file": "wraith-dungeon.html", "go": "goDelve"},
   "fight": {"file": "wraith-survival.html", "go": "goFight"},
+  "town": {"file": "wraith-town.html", "go": null},
+  "moba": {"file": "wraith-survival.html?mode=6v6", "go": "goMoba"},
+  "showdown": {"file": "wraith-survival.html?mode=fps", "go": "goShowdown"},
   "waves": {"file": "wraith-survival.html", "go": "goStand"},
   "survival": {"file": "wraith-survival.html", "go": null},
   "dino": {"file": "dino-run.html", "go": null},
@@ -451,7 +454,7 @@ var CARDMAP = {
   "worldpet": {"page": "wraith-pet.html"},
   "worlddefense": {"page": "wraith-defense.html"}
 };
-var MODE_TITLES = {"pet":"YOUR HOUSE — WAKE UP AT HOME","delve":"DIG DOWN — DELVE","worldpet":"PET — AT HOME","worlddefense":"DEFENSE GATE","fight":"VANIX FIGHT","survival":"VANIX FIGHT","dino":"DINO RUN","pinball":"PINBALL","flap":"WRAITH WINGS","serpent":"WRAITH SERPENT","cards":"WRAITH CARDS","sav":"SAV","slimeball":"SLIMEBALL","slice":"WRAITH SLICE","tetris":"TETRIS","invader":"STAR INVADER","defense":"WRAITH DEFENSE","waves":"WAVES — HOLD THE ARENA","tavern":"THE TAVERN"};
+var MODE_TITLES = {"pet":"YOUR HOUSE — WAKE UP AT HOME","delve":"DIG DOWN — DELVE","worldpet":"PET — AT HOME","worlddefense":"DEFENSE GATE","fight":"VANIX FIGHT","survival":"VANIX FIGHT","town":"WRAITH TOWN — GTA × SAVAGE WRAITH","moba":"WRAITH MOBA — 6V6","showdown":"SHOWDOWN FPS","dino":"DINO RUN","pinball":"PINBALL","flap":"WRAITH WINGS","serpent":"WRAITH SERPENT","cards":"WRAITH CARDS","sav":"SAV","slimeball":"SLIMEBALL","slice":"WRAITH SLICE","tetris":"TETRIS","invader":"STAR INVADER","defense":"WRAITH DEFENSE","waves":"WAVES — HOLD THE ARENA","tavern":"THE TAVERN"};
 /* ===== PER-GAME ORIENTATION LOCK (Cee 2026-11-04) — BEGIN ==============================================
    Insert after the MODE_TITLES line (line 133), before walletText (line 134).
    Hook 1: in playMode, insert `orientLock(id);` between
