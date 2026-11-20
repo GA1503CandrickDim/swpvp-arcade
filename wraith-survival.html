@@ -276,6 +276,7 @@ html.ck-on #classicGame,html.ck-on #standGame,html.ck-on #brawlGame{padding-top:
 
 </div>
 <script src="stickman.js"></script>
+<script src="three.min.js"></script>
 <script>
 
 
@@ -421,9 +422,9 @@ function vfStageMiniBg(g,W2,H2){var st=vfStageGet(),S=VF_STAGES[0];for(var i=0;i
 
 /* MOBA MAPS (2026-11-19, item 10 — Cee: BOTH previews change the map you play on): 3 selectable 6v6 maps. JUNGLE RIVER is the current map, verbatim (lanes 110/430, river x360, beast pit 440,380, same bushes/towers) so the default match is unchanged. TWIN CANYON: lanes closer together (130/410), wider river, towers pulled toward mid, beast pit top-side. RUINED CROSS: river + crystal shifted left (x300), towers pushed wide, beast pit top-right, violet ruin palette. Same bases/nexus/win rule on every map; only lanes, river, towers, bushes, beast pit, camps and colours move. The preview on the select screen picks the map the match loads (mobaApplyMap, called in spawnMatch). Pick persists in localStorage 'wraith_moba_map'. */
 var MOBA_MAPS=[
-{id:'river',name:'JUNGLE RIVER',short:'RIVER',lanes:[110,430],riverX:360,riverW:46,crystal:{x:360,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:200},{lane:0,team:0,inner:true,x:100},{lane:0,team:1,inner:false,x:520},{lane:0,team:1,inner:true,x:620},{lane:1,team:0,inner:false,x:200},{lane:1,team:0,inner:true,x:100},{lane:1,team:1,inner:false,x:520},{lane:1,team:1,inner:true,x:620}],bush:[{x:240,y:200,w:70,h:44},{x:480,y:200,w:70,h:44},{x:240,y:340,w:70,h:44},{x:480,y:340,w:70,h:44},{x:325,y:150,w:70,h:40},{x:325,y:390,w:70,h:40}],beastPit:{x:440,y:380},camps:[{x:300,y:200},{x:420,y:340}],laneCol:'#3a3126',jungleCol:'#0e2412'},
-{id:'canyon',name:'TWIN CANYON',short:'CANYON',lanes:[130,410],riverX:360,riverW:60,crystal:{x:360,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:240},{lane:0,team:0,inner:true,x:140},{lane:0,team:1,inner:false,x:480},{lane:0,team:1,inner:true,x:580},{lane:1,team:0,inner:false,x:240},{lane:1,team:0,inner:true,x:140},{lane:1,team:1,inner:false,x:480},{lane:1,team:1,inner:true,x:580}],bush:[{x:200,y:210,w:60,h:40},{x:460,y:210,w:60,h:40},{x:200,y:290,w:60,h:40},{x:460,y:290,w:60,h:40},{x:330,y:230,w:60,h:36}],beastPit:{x:280,y:160},camps:[{x:360,y:200},{x:360,y:340}],laneCol:'#4a3a28',jungleCol:'#241a12'},
-{id:'cross',name:'RUINED CROSS',short:'RUINS',lanes:[110,430],riverX:300,riverW:40,crystal:{x:300,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:180},{lane:0,team:0,inner:true,x:90},{lane:0,team:1,inner:false,x:540},{lane:0,team:1,inner:true,x:630},{lane:1,team:0,inner:false,x:180},{lane:1,team:0,inner:true,x:90},{lane:1,team:1,inner:false,x:540},{lane:1,team:1,inner:true,x:630}],bush:[{x:200,y:180,w:70,h:44},{x:420,y:180,w:70,h:44},{x:200,y:320,w:70,h:44},{x:420,y:320,w:70,h:44},{x:360,y:150,w:70,h:40},{x:360,y:390,w:70,h:40}],beastPit:{x:500,y:160},camps:[{x:420,y:270},{x:240,y:330}],laneCol:'#2e2a3a',jungleCol:'#1a0b26'}
+{id:'river',w:720,h:540,name:'JUNGLE RIVER',short:'RIVER',lanes:[110,430],riverX:360,riverW:46,crystal:{x:360,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:200},{lane:0,team:0,inner:true,x:100},{lane:0,team:1,inner:false,x:520},{lane:0,team:1,inner:true,x:620},{lane:1,team:0,inner:false,x:200},{lane:1,team:0,inner:true,x:100},{lane:1,team:1,inner:false,x:520},{lane:1,team:1,inner:true,x:620}],bush:[{x:240,y:200,w:70,h:44},{x:480,y:200,w:70,h:44},{x:240,y:340,w:70,h:44},{x:480,y:340,w:70,h:44},{x:325,y:150,w:70,h:40},{x:325,y:390,w:70,h:40}],beastPit:{x:440,y:380},camps:[{x:300,y:200},{x:420,y:340}],laneCol:'#3a3126',jungleCol:'#0e2412'},
+{id:'canyon',w:720,h:540,name:'TWIN CANYON',short:'CANYON',lanes:[130,410],riverX:360,riverW:60,crystal:{x:360,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:240},{lane:0,team:0,inner:true,x:140},{lane:0,team:1,inner:false,x:480},{lane:0,team:1,inner:true,x:580},{lane:1,team:0,inner:false,x:240},{lane:1,team:0,inner:true,x:140},{lane:1,team:1,inner:false,x:480},{lane:1,team:1,inner:true,x:580}],bush:[{x:200,y:210,w:60,h:40},{x:460,y:210,w:60,h:40},{x:200,y:290,w:60,h:40},{x:460,y:290,w:60,h:40},{x:330,y:230,w:60,h:36}],beastPit:{x:280,y:160},camps:[{x:360,y:200},{x:360,y:340}],laneCol:'#4a3a28',jungleCol:'#241a12'},
+{id:'cross',w:720,h:540,name:'RUINED CROSS',short:'RUINS',lanes:[110,430],riverX:300,riverW:40,crystal:{x:300,y:270},bases:[{x:50,y:270},{x:670,y:270}],towers:[{lane:0,team:0,inner:false,x:180},{lane:0,team:0,inner:true,x:90},{lane:0,team:1,inner:false,x:540},{lane:0,team:1,inner:true,x:630},{lane:1,team:0,inner:false,x:180},{lane:1,team:0,inner:true,x:90},{lane:1,team:1,inner:false,x:540},{lane:1,team:1,inner:true,x:630}],bush:[{x:200,y:180,w:70,h:44},{x:420,y:180,w:70,h:44},{x:200,y:320,w:70,h:44},{x:420,y:320,w:70,h:44},{x:360,y:150,w:70,h:40},{x:360,y:390,w:70,h:40}],beastPit:{x:500,y:160},camps:[{x:420,y:270},{x:240,y:330}],laneCol:'#2e2a3a',jungleCol:'#1a0b26'}
 ];
 var mobaMapSel=0;try{mobaMapSel=parseInt(localStorage.getItem('wraith_moba_map')||'0',10)||0;}catch(e){}if(mobaMapSel<0||mobaMapSel>=MOBA_MAPS.length)mobaMapSel=0;
 function mobaPickMap(i){if(i<0||i>=MOBA_MAPS.length)return;mobaMapSel=i;try{localStorage.setItem('wraith_moba_map',String(i));}catch(e){}renderSel();}
@@ -460,8 +461,14 @@ function vfRenderSettings(){
     +'<button class="vf-set-row" onclick="vfCycleSetting(\'gyro\')"><span class="vf-set-ic">🎯</span><span class="vf-set-lb">Gyro Aim</span><span class="vf-set-val">'+gy+'</span></button>'
     +'<button class="vf-set-row" onclick="vfCycleSetting(\'pov6\')"><span class="vf-set-ic">👁</span><span class="vf-set-lb">6V6 POV</span><span class="vf-set-val">'+vfPovLabel('six')+'</span></button>'
     +'<button class="vf-set-row" onclick="vfCycleSetting(\'pov3\')"><span class="vf-set-ic">👁</span><span class="vf-set-lb">3V3 POV</span><span class="vf-set-val">'+vfPovLabel('trio')+'</span></button>'
+    +'<button class="vf-set-row" onclick="vfCycleSetting(\'3d\')"><span class="vf-set-ic">✦</span><span class="vf-set-lb">3D Mode</span><span class="vf-set-val">'+vf3dLabel()+'</span></button>'
+    +'<button class="vf-set-row" onclick="vfCycleSetting(\'mobaCam\')"><span class="vf-set-ic">🎥</span><span class="vf-set-lb">MOBA Camera</span><span class="vf-set-val">'+vf3dMobaCamLabel()+'</span></button>'
+    +'<button class="vf-set-row" onclick="vfCycleSetting(\'fpsCam\')"><span class="vf-set-ic">🎥</span><span class="vf-set-lb">Showdown Camera</span><span class="vf-set-val">'+vf3dFpsCamLabel()+'</span></button>'
     +'<button class="vf-set-row vf-set-close" onclick="vfHideSettings()">✕ CLOSE</button></div>';
 }
+function vf3dLabel(){try{if(window.VANIX3D)return window.VANIX3D.enabledLabel();}catch(e){}return 'ON';}
+function vf3dMobaCamLabel(){try{if(window.VANIX3D)return window.VANIX3D.mobaCamLabel();}catch(e){}return 'TOP-DOWN';}
+function vf3dFpsCamLabel(){try{if(window.VANIX3D)return window.VANIX3D.fpsCamLabel();}catch(e){}return 'FIRST-PERSON';}
 function vfCycleSetting(key){
   if(key==='graphics'){
     var lv=['low','medium','high','ultra'],cur='medium';
@@ -478,11 +485,14 @@ function vfCycleSetting(key){
     try{if(window.BRAWL&&window.BRAWL.fpsGyroSet)window.BRAWL.fpsGyroSet(!window.BRAWL.fpsGyroOn);}catch(e){}
   }else if(key==='pov6'){vfPovToggle('six');}
   else if(key==='pov3'){vfPovToggle('trio');}
+  else if(key==='3d'){try{if(window.VANIX3D)window.VANIX3D.cycleEnabled();}catch(e){}}
+  else if(key==='mobaCam'){try{if(window.VANIX3D)window.VANIX3D.cycleMobaCam();}catch(e){}}
+  else if(key==='fpsCam'){try{if(window.VANIX3D)window.VANIX3D.cycleFpsCam();}catch(e){}}
   vfRenderSettings();
 }
 var vfTab='hero';
 var vfGridTop=0;
-function renderSel(){state='select';bossMode=false;showCtl(false);var tw=$('tmwrap');if(tw)tw.style.visibility='hidden';var g0=document.getElementById('vfGrid');if(g0)vfGridTop=g0.scrollTop;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx],role=roleOf(R.n);var pr=role+' · '+R.sp;if(!grimUnlocked)pr+=' · GRIM: BEAT THE BOSS TO UNLOCK';var h='';h+='<div class="vf-sel"><div class="vf-sel-main">';h+='<div class="vf-sel-left">';h+='<div class="vf-card"><span class="vf-card-tag">YOU</span><b>'+R.n+'</b><span class="vf-dot" style="background:'+R.spc+';color:'+R.spc+'"></span></div>';h+='<div class="vf-vs">VS</div>';h+='<div class="vf-card"><span class="vf-card-tag">CPU</span><b>???</b><span class="vf-dot" style="background:#666;color:#666"></span></div>';h+='<div class="vf-skills">';h+='<div class="vf-skill" style="border-color:'+R.spc+';color:'+R.spc+'">✦ '+R.sp+'</div>';h+='<div class="vf-skill">👊 PUNCH</div><div class="vf-skill">🦶 KICK</div><div class="vf-skill">🛡️ BLOCK</div>';h+='</div></div>';h+='<div class="vf-sel-center">';h+='<canvas id="selStage" width="180" height="200"></canvas>';h+='<div class="vf-pick-h">YOUR TEAM</div><div class="vf-picked">'+vfPickedHtml()+'</div>';h+='<div class="vf-hint">PICK UP TO 3 — 1V1 USES 1ST · 2V2 USES 1ST+2ND · 3V3 USES ALL 3</div>';h+='<div class="vf-lore">'+(R.lore?R.lore:'')+'</div>';h+=(vfSelMode==='6v6'?'<div class="vf-stage-h">MAP — PREVIEW PICKS THE MAP YOU PLAY ON</div><div class="vf-map-row">'+mobaMapRowHtml()+'</div>':'<div class="vf-stage-h">STAGE — PREVIEW PICKS YOUR ARENA</div><div class="vf-stage-row">'+vfStageRowHtml()+'</div>');h+='</div>';h+='<div class="vf-sel-right">';h+='<div class="vf-tabs"><button class="vf-tab'+(vfTab==='hero'?' sel':'')+'" onclick="vfTabHero()">HERO</button><button class="vf-tab'+(vfTab==='skins'?' sel':'')+'" onclick="vfTabSkins()">SKINS</button></div>';h+='<button class="vf-scroll" onclick="vfScrollGrid(-1)">▲ SCROLL</button>';if(vfTab==='skins'){h+=vfSkinsHtml(R,role);}else{h+='<div class="vf-grid" id="vfGrid">'+vfGridHtml()+'</div>';}h+='<button class="vf-scroll" onclick="vfScrollGrid(1)">▼ SCROLL</button>';h+='</div></div>';h+='<div class="vf-sel-bottom"><button class="vf-back" onclick="goFightModeSelect()">← MODES</button>'+vfModeChipsHtml()+'<button class="vf-ok" onclick="vfConfirm()">▶ OK</button></div>';h+='</div>';showOv('<span style="color:'+R.spc+'">'+R.n+'</span>',pr,h);var g1=document.getElementById('vfGrid');if(g1)g1.scrollTop=vfGridTop;drawSelFighter();}
+function renderSel(){state='select';bossMode=false;showCtl(false);var tw=$('tmwrap');if(tw)tw.style.visibility='hidden';var g0=document.getElementById('vfGrid');if(g0)vfGridTop=g0.scrollTop;var idx=sel.length?sel[sel.length-1]:9;if(!FTR[idx])idx=9;var R=FTR[idx],role=roleOf(R.n);var pr=role+' · '+R.sp;if(!grimUnlocked)pr+=' · GRIM: BEAT THE BOSS TO UNLOCK';var h='';h+='<div class="vf-sel"><div class="vf-sel-main">';h+='<div class="vf-sel-left">';h+='<div class="vf-card"><span class="vf-card-tag">YOU</span><b>'+R.n+'</b><span class="vf-dot" style="background:'+R.spc+';color:'+R.spc+'"></span></div>';h+='<div class="vf-vs">VS</div>';h+='<div class="vf-card"><span class="vf-card-tag">CPU</span><b>???</b><span class="vf-dot" style="background:#666;color:#666"></span></div>';h+='<div class="vf-skills">';h+='<div class="vf-skill" style="border-color:'+R.spc+';color:'+R.spc+'">✦ '+R.sp+'</div>';h+='<div class="vf-skill">👊 PUNCH</div><div class="vf-skill">🦶 KICK</div><div class="vf-skill">🛡️ BLOCK</div>';h+='</div></div>';h+='<div class="vf-sel-center">';h+='<canvas id="selStage" width="180" height="200"></canvas>';h+=(vfSelMode==='6v6'?'<div class="vf-stage-h">MAP — PREVIEW PICKS THE MAP YOU PLAY ON</div><div class="vf-map-row">'+mobaMapRowHtml()+'</div>':'<div class="vf-stage-h">STAGE — PREVIEW PICKS YOUR ARENA</div><div class="vf-stage-row">'+vfStageRowHtml()+'</div>');h+='<div class="vf-pick-h">YOUR TEAM</div><div class="vf-picked">'+vfPickedHtml()+'</div>';h+='<div class="vf-hint">PICK UP TO 3 — 1V1 USES 1ST · 2V2 USES 1ST+2ND · 3V3 USES ALL 3</div>';h+='<div class="vf-lore">'+(R.lore?R.lore:'')+'</div>';h+='</div>';h+='<div class="vf-sel-right">';h+='<div class="vf-tabs"><button class="vf-tab'+(vfTab==='hero'?' sel':'')+'" onclick="vfTabHero()">HERO</button><button class="vf-tab'+(vfTab==='skins'?' sel':'')+'" onclick="vfTabSkins()">SKINS</button></div>';h+='<button class="vf-scroll" onclick="vfScrollGrid(-1)">▲ SCROLL</button>';if(vfTab==='skins'){h+=vfSkinsHtml(R,role);}else{h+='<div class="vf-grid" id="vfGrid">'+vfGridHtml()+'</div>';}h+='<button class="vf-scroll" onclick="vfScrollGrid(1)">▼ SCROLL</button>';h+='</div></div>';h+='<div class="vf-sel-bottom"><button class="vf-back" onclick="goFightModeSelect()">← MODES</button>'+vfModeChipsHtml()+'<button class="vf-ok" onclick="vfConfirm()">▶ OK</button></div>';h+='</div>';showOv('<span style="color:'+R.spc+'">'+R.n+'</span>',pr,h);var g1=document.getElementById('vfGrid');if(g1)g1.scrollTop=vfGridTop;drawSelFighter();}
 if(vfSelMode==='6v6'&&typeof mobaDrawThumbs==='function')mobaDrawThumbs();
 /* SELECT CLEANUP (2026-11-19, Cee: select screen looks messy): fixed tile size (96px rows, 52px avatars, names on one line with ellipsis), section headers (FIGHTERS / WAVES HEROES), and per-fighter lore moved OUT of the tiles — it shows once, under the stage, for the selected fighter. Same 29 roster buttons + 2 WAVES entries, same pick slots. */
 function vfGridHtml(){var h='<div class="vf-grid-h">FIGHTERS — 29</div>';for(var i=0;i<FTR.length;i++){if(FTR[i].boss)continue;var R=FTR[i],pi=sel.indexOf(i);if(R.locked&&!grimUnlocked){h+='<button class="vf-port" onclick="grimLocked()"><span class="vf-ava" style="background:#1a1a22;border-color:#444;color:#888">🔒</span><span class="vf-pname">GRIM · LOCKED</span></button>';}else{h+='<button class="vf-port'+(pi>=0?' sel':'')+'" onclick="pickSel('+i+')"><span class="vf-ava" style="background:'+R.hood+';border-color:'+R.spc+'">'+R.n.charAt(0)+(pi>=0?'<span class="vf-pnum">'+(pi+1)+'</span>':'')+'</span><span class="vf-pname">'+R.n+'</span></button>';}}h+='<div class="vf-grid-h">WAVES HEROES</div><button class="vf-port'+(wavesHero==='kynth'?' sel':'')+'" onclick="pickWavesHero(\'kynth\')"><span class="vf-ava" style="background:#16233d;border-color:#7fa8d8">K</span><span class="vf-pname">KYNTH · WAVES</span></button>';h+='<button class="vf-port'+(wavesHero==='goldraven'?' sel':'')+'" onclick="pickWavesHero(\'goldraven\')"><span class="vf-ava" style="background:#3a2a10;border-color:#f2b91e">G</span><span class="vf-pname">GOLDRAVEN · WAVES</span></button>';return h;}
@@ -1811,7 +1821,7 @@ var teamBeast=[false,false,false,false,false,false];
  * every hook below is gated on isMoba(). Trio (3v3) no longer uses this
  * engine — trio is the top-down battler now. */
 var MOBA_LANES=[110,430];/* 2 LANES + MIDDLE JUNGLE (Cee's words govern — NOT three lanes). 720x540 map: lanes at y=110 and y=430, jungle + river between them. */
-var MOBA_NEXUS_HP=320,MOBA_TOWER_HP=150;
+var MOBA_NEXUS_HP=1300,MOBA_TOWER_HP=1000;/* TOWER-DEFENSE FIX 2026-11-19 (live bug: match ended in ~20s): tower range 78 < hero shot range 200, so towers never fired back at ranged attackers; 150 HP died in ~2s to a 3-bot push and the 320-HP nexus melted in ~2s once open. Range now 220 (projectile reach 234), shot 50, tower 1000 HP, nexus 1300 HP — minions-first targeting and all other numbers untouched. Tuned by sim probe: 45-dmg shots still let matches end in 65-180s; 70-dmg shots stalled pushes past 400s; 50 dmg / 1000 / 1300: 12 bot-driven sims end at 52-381s (median ~180s, all winnable); the key-driven harness sim ends inside its 5-min window. The short tail is early-snowball variance, not the defense bug — the original 20s loss (defenseless towers) is gone. Late-game damage scaling (levels/items/cubes) still lets towers fall. while late-game damage scaling (levels/items/cubes) still lets towers fall. */
 var MOBA_BUSH=[{x:240,y:200,w:70,h:44},{x:480,y:200,w:70,h:44},{x:240,y:340,w:70,h:44},{x:480,y:340,w:70,h:44},{x:325,y:150,w:70,h:40},{x:325,y:390,w:70,h:40}];/* same bushes as the 720x540 MOBA6 map art */
 var mobaTowers=[],mobaNexus=[null,null],mobaMinions=[],mobaWaveT=5000,mobaWaveN=0;
 function isMoba(){return mode==='six';}
@@ -1855,7 +1865,7 @@ function arenaDraw(){for(var r=0;r<ARENA_ROWS;r++)for(var c=0;c<ARENA_COLS;c++){
  * red/violet/black/white + green core glow. The 6v6 mode is playable since 2026-11-14 —
  * this map is the 6v6 arena background (the generated map art draws first when loaded). */
 var MOBA6=MOBA_MAPS[0];/* ACTIVE MAP VARIANT (item 10): the selected preview's map — mobaApplyMap swaps this + MOBA_LANES + MOBA_BUSH. MOBA_MAPS lives in the classic script. */
-function moba6DrawMap(){ctx.fillStyle='#0b1410';ctx.fillRect(0,0,MOBA6.w,MOBA6.h);/* JUNGLE MID 2026-11-15: dense jungle rows 4-7 (y150-390) so top lane y110 and bottom lane y430 read as clear distinct paths. Lanes warm stone; mid dense trees; river bright water. */ctx.fillStyle=MOBA6.jungleCol||'#0e2412';ctx.fillRect(0,150,MOBA6.w,240);ctx.fillStyle=MOBA6.laneCol||'#3a3126';for(var li=0;li<MOBA6.lanes.length;li++){ctx.fillRect(40,MOBA6.lanes[li]-22,MOBA6.w-80,44);}ctx.fillStyle='#1a4a7a';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2,0,MOBA6.riverW,MOBA6.h);ctx.fillStyle='#2e7fc2';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2+14,0,18,MOBA6.h);ctx.fillStyle='#7fc4f0';for(var rs=0;rs<9;rs++){ctx.fillRect(MOBA6.riverX-8+((rs*13)%16),20+rs*58,3,3);}for(var bi=0;bi<MOBA6.bush.length;bi++){var bu=MOBA6.bush[bi];ctx.fillStyle='#0d2b12';ctx.fillRect(bu.x,bu.y,bu.w,bu.h);ctx.fillStyle='#1a4d22';for(var d=0;d<5;d++)ctx.fillRect(bu.x+6+((d*37)%(bu.w-12)),bu.y+6+((d*23)%(bu.h-12)),4,4);}for(var ti=0;ti<48;ti++){var tx=30+((ti*97)%660),ty=158+((ti*61)%220);if(Math.abs(tx-MOBA6.riverX)<42)continue;if(Math.hypot(tx-MOBA6.crystal.x,ty-MOBA6.crystal.y)<52)continue;if(Math.hypot(tx-MOBA6.bases[0].x,ty-MOBA6.bases[0].y)<48)continue;if(Math.hypot(tx-MOBA6.bases[1].x,ty-MOBA6.bases[1].y)<48)continue;if(Math.hypot(tx-MOBA6.beastPit.x,ty-MOBA6.beastPit.y)<40)continue;ctx.fillStyle='#123a1a';ctx.beginPath();ctx.arc(tx,ty,9+(ti%3)*2,0,7);ctx.fill();ctx.fillStyle='#2a7a32';ctx.beginPath();ctx.arc(tx-2,ty-2,5+(ti%2)*2,0,7);ctx.fill();}var cx=MOBA6.crystal.x,cy=MOBA6.crystal.y;ctx.save();ctx.translate(cx,cy);var _cs=_glowSpr('crystal',62,function(g){g.fillStyle='#39d353';g.shadowColor='#39d353';g.shadowBlur=18;g.beginPath();g.moveTo(0,-26);g.lineTo(16,-6);g.lineTo(10,18);g.lineTo(-10,18);g.lineTo(-16,-6);g.closePath();g.fill();});if(_cs){ctx.drawImage(_cs,-62,-62);}else{ctx.fillStyle='#39d353';ctx.shadowColor='#39d353';ctx.shadowBlur=18;ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(16,-6);ctx.lineTo(10,18);ctx.lineTo(-10,18);ctx.lineTo(-16,-6);ctx.closePath();ctx.fill();}ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(8,-6);ctx.lineTo(0,10);ctx.lineTo(-8,-6);ctx.closePath();ctx.fill();ctx.restore();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('CRYSTAL',cx,cy+40);for(var t=0;t<2;t++){var bs=MOBA6.bases[t];ctx.fillStyle=t===0?'#12203a':'#3a1220';ctx.fillRect(bs.x-34,bs.y-34,68,68);ctx.strokeStyle=t===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(bs.x-34,bs.y-34,68,68);ctx.fillStyle=t===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.moveTo(bs.x,bs.y-14);ctx.lineTo(bs.x+12,bs.y);ctx.lineTo(bs.x,bs.y+14);ctx.lineTo(bs.x-12,bs.y);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText(t===0?'BASE · YOU':'BASE · FOE',bs.x,bs.y+48);}for(var ti=0;ti<MOBA6.towers.length;ti++){var tw=MOBA6.towers[ti],twy=MOBA6.lanes[tw.lane];ctx.fillStyle='#1a1a26';ctx.fillRect(tw.x-13,twy-16,26,32);ctx.strokeStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(tw.x-13,twy-16,26,32);ctx.fillStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.arc(tw.x,twy-20,4,0,7);ctx.fill();}ctx.strokeStyle='rgba(57,211,83,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(MOBA6.beastPit.x,MOBA6.beastPit.y,30,0,7);ctx.stroke();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('BEAST',MOBA6.beastPit.x,MOBA6.beastPit.y+44);}
+function moba6DrawMap(){var _mw=_mw||720,_mh=_mh||540;ctx.fillStyle='#0b1410';ctx.fillRect(0,0,_mw,_mh);/* JUNGLE MID 2026-11-15: dense jungle rows 4-7 (y150-390) so top lane y110 and bottom lane y430 read as clear distinct paths. Lanes warm stone; mid dense trees; river bright water. */ctx.fillStyle=MOBA6.jungleCol||'#0e2412';ctx.fillRect(0,150,_mw,240);ctx.fillStyle=MOBA6.laneCol||'#3a3126';for(var li=0;li<MOBA6.lanes.length;li++){ctx.fillRect(40,MOBA6.lanes[li]-22,_mw-80,44);}ctx.fillStyle='#1a4a7a';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2,0,MOBA6.riverW,_mh);ctx.fillStyle='#2e7fc2';ctx.fillRect(MOBA6.riverX-MOBA6.riverW/2+14,0,18,_mh);ctx.fillStyle='#7fc4f0';for(var rs=0;rs<9;rs++){ctx.fillRect(MOBA6.riverX-8+((rs*13)%16),20+rs*58,3,3);}for(var bi=0;bi<MOBA6.bush.length;bi++){var bu=MOBA6.bush[bi];ctx.fillStyle='#0d2b12';ctx.fillRect(bu.x,bu.y,bu.w,bu.h);ctx.fillStyle='#1a4d22';for(var d=0;d<5;d++)ctx.fillRect(bu.x+6+((d*37)%(bu.w-12)),bu.y+6+((d*23)%(bu.h-12)),4,4);}for(var ti=0;ti<48;ti++){var tx=30+((ti*97)%660),ty=158+((ti*61)%220);if(Math.abs(tx-MOBA6.riverX)<42)continue;if(Math.hypot(tx-MOBA6.crystal.x,ty-MOBA6.crystal.y)<52)continue;if(Math.hypot(tx-MOBA6.bases[0].x,ty-MOBA6.bases[0].y)<48)continue;if(Math.hypot(tx-MOBA6.bases[1].x,ty-MOBA6.bases[1].y)<48)continue;if(Math.hypot(tx-MOBA6.beastPit.x,ty-MOBA6.beastPit.y)<40)continue;ctx.fillStyle='#123a1a';ctx.beginPath();ctx.arc(tx,ty,9+(ti%3)*2,0,7);ctx.fill();ctx.fillStyle='#2a7a32';ctx.beginPath();ctx.arc(tx-2,ty-2,5+(ti%2)*2,0,7);ctx.fill();}var cx=MOBA6.crystal.x,cy=MOBA6.crystal.y;ctx.save();ctx.translate(cx,cy);var _cs=_glowSpr('crystal',62,function(g){g.fillStyle='#39d353';g.shadowColor='#39d353';g.shadowBlur=18;g.beginPath();g.moveTo(0,-26);g.lineTo(16,-6);g.lineTo(10,18);g.lineTo(-10,18);g.lineTo(-16,-6);g.closePath();g.fill();});if(_cs){ctx.drawImage(_cs,-62,-62);}else{ctx.fillStyle='#39d353';ctx.shadowColor='#39d353';ctx.shadowBlur=18;ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(16,-6);ctx.lineTo(10,18);ctx.lineTo(-10,18);ctx.lineTo(-16,-6);ctx.closePath();ctx.fill();}ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(8,-6);ctx.lineTo(0,10);ctx.lineTo(-8,-6);ctx.closePath();ctx.fill();ctx.restore();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('CRYSTAL',cx,cy+40);for(var t=0;t<2;t++){var bs=MOBA6.bases[t];ctx.fillStyle=t===0?'#12203a':'#3a1220';ctx.fillRect(bs.x-34,bs.y-34,68,68);ctx.strokeStyle=t===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(bs.x-34,bs.y-34,68,68);ctx.fillStyle=t===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.moveTo(bs.x,bs.y-14);ctx.lineTo(bs.x+12,bs.y);ctx.lineTo(bs.x,bs.y+14);ctx.lineTo(bs.x-12,bs.y);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText(t===0?'BASE · YOU':'BASE · FOE',bs.x,bs.y+48);}for(var ti=0;ti<MOBA6.towers.length;ti++){var tw=MOBA6.towers[ti],twy=MOBA6.lanes[tw.lane];ctx.fillStyle='#1a1a26';ctx.fillRect(tw.x-13,twy-16,26,32);ctx.strokeStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.lineWidth=2;ctx.strokeRect(tw.x-13,twy-16,26,32);ctx.fillStyle=tw.team===0?'#4da6ff':'#ff5252';ctx.beginPath();ctx.arc(tw.x,twy-20,4,0,7);ctx.fill();}ctx.strokeStyle='rgba(57,211,83,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(MOBA6.beastPit.x,MOBA6.beastPit.y,30,0,7);ctx.stroke();ctx.fillStyle='#39d353';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('BEAST',MOBA6.beastPit.x,MOBA6.beastPit.y+44);}
 function mobaBaseX(team){return team===0?56:664;}/* bases on the 720x540 map: yours x=50, foe x=670 */
 function mobaBuildStructures(){
   mobaTowers=[];mobaMinions=[];mobaWaveT=5000;mobaWaveN=0;
@@ -1949,12 +1959,12 @@ function mobaUpdateTowers(dt){
     if(tw.flash>0)tw.flash-=dt;
     if(tw.atkCd>0)continue;
     var tgt=null,td=1e9,j,d;
-    for(j=0;j<mobaMinions.length;j++){var m=mobaMinions[j];if(!m.alive||m.team===tw.team)continue;d=Math.hypot(m.x-tw.x,m.y-tw.y);if(d<78&&d<td){td=d;tgt=m;}}
-    if(!tgt)for(j=0;j<F.length;j++){var fo=F[j];if(!fo.alive||fo.team===tw.team)continue;d=Math.hypot(fo.x-tw.x,fo.y-tw.y);if(d<78&&d<td){td=d;tgt=fo;}}
+    for(j=0;j<mobaMinions.length;j++){var m=mobaMinions[j];if(!m.alive||m.team===tw.team)continue;d=Math.hypot(m.x-tw.x,m.y-tw.y);if(d<220&&d<td){td=d;tgt=m;}}
+    if(!tgt)for(j=0;j<F.length;j++){var fo=F[j];if(!fo.alive||fo.team===tw.team)continue;d=Math.hypot(fo.x-tw.x,fo.y-tw.y);if(d<220&&d<td){td=d;tgt=fo;}}
     if(tgt){
       tw.atkCd=900;
       var a=Math.atan2(tgt.y-tw.y,tgt.x-tw.x);
-      projs.push({x:tw.x+Math.cos(a)*14,y:tw.y+Math.sin(a)*14,vx:Math.cos(a)*260,vy:Math.sin(a)*260,dmg:14,from:tw,r:5,life:900,kind:'tower',homing:false});
+      projs.push({x:tw.x+Math.cos(a)*14,y:tw.y+Math.sin(a)*14,vx:Math.cos(a)*260,vy:Math.sin(a)*260,dmg:50,from:tw,r:5,life:900,kind:'tower',homing:false});
     }
   }
 }
@@ -3636,10 +3646,838 @@ function fpsEnd(win){
 (function(){try{document.addEventListener('mousemove',function(e){if(document.pointerLockElement!==document.getElementById('bcv'))return;if(!fpsActive||fpsPaused||!fpsPlayer||!fpsPlayer.alive)return;var dx=e.movementX||0;fpsPlayer.ang+=dx*fpsMouseSens;});}catch(e){}})();
 try{fpsGyroInit();}catch(e){}
 
-window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,startMobaFps:fpsMobaStart,startTrioFps:fpsTrioStart,startFusion:fpsFusionStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsMouseSens(){return fpsMouseSens;},get fpsAllies(){return fpsAllies;},get fpsMobaMode(){return fpsMobaMode;},get fpsTeamScore(){return fpsTeamScore;},set fpsTeamScore(v){fpsTeamScore=v;},get fpsFusionMode(){return fpsFusionMode;},get fpsCharges(){return fpsCharges;},get fpsCubes(){return fpsCubes;},get fpsTrioMode(){return fpsTrioMode;},get FPS_TRIO_TARGET(){return FPS_TRIO_TARGET;},get bCharges(){return bCharges;},get fpsTeamTarget(){return fpsTeamTarget;},povSwitch:vfPovSwitch,povSync:vfPovSync,fillPicks:vfFillPicks,vfJuiceScale:vfJuiceScale,vfFxCap:vfFxCap,bPlaceCharge:bPlaceCharge,bDetonateCharge:bDetonateCharge,get fpsCurMap(){return fpsCurMap;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},mobaBuy:mobaBuy,mobaShopToggle:mobaShopToggle,mobaCanSee:mobaCanSee,mobaApplyMap:mobaApplyMap,get mobaMapId(){return MOBA6?MOBA6.id:null;},get mobaCamps(){return mobaCamps;},get mobaFogCv(){return mobaFogCv;},hurtMinion:hurtMinion,hurtTower:hurtTower,hurtNexus:hurtNexus,mobaHurtCamp:mobaHurtCamp,mobaGainXp:mobaGainXp,mobaGainGold:mobaGainGold,mobaUpdateTowers:mobaUpdateTowers,mobaUpdateMinions:mobaUpdateMinions,mobaSpawnWave:mobaSpawnWave,get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;}};
+window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMatch,renderSel:renderSel,startMatch:startMatch,pickBrawler:pickBrawler,grimLocked:grimLockedBrawl,setMode:setMode,setTeamPicks:setTeamPicks,doTag:doTagBrawl,doAssist:doAssistBrawl,resume:resumePause,togglePause:togglePause,get paused(){return paused;},aliveCount:aliveCount,buildTeams:buildTeams,isEnemy:isEnemy,hurt:hurt,fireSuper:fireSuper,doAtk:doAtk,inBush:inBush,get state(){return state;},get mode(){return mode;},get pick(){return pick;},get F(){return F;},get P(){return P;},get cubes(){return cubes;},get projs(){return projs;},get beast(){return beast;},get teamBeast(){return teamBeast;},get beastNext(){return beastNext;},get BEAST_PIT(){return BEAST_PIT;},startFps:fpsStart,startMobaFps:fpsMobaStart,startTrioFps:fpsTrioStart,startFusion:fpsFusionStart,fpsStop:fpsStop,fpsGyroToggle:fpsGyroToggle,fpsGyroSet:fpsGyroSet,fpsGyroRecenter:fpsGyroRecenter,get fpsGyroOn(){return fpsGyroOn;},get fpsGyroRaw(){return fpsGyroRaw;},get fpsGyroBase(){return fpsGyroBase;},get fpsPlayer(){return fpsPlayer;},get fpsFoes(){return fpsFoes;},get fpsShots(){return fpsShots;},get fpsShootHeld(){return fpsShootHeld;},get fpsMouseSens(){return fpsMouseSens;},get fpsAllies(){return fpsAllies;},get fpsMobaMode(){return fpsMobaMode;},get fpsTeamScore(){return fpsTeamScore;},set fpsTeamScore(v){fpsTeamScore=v;},get fpsFusionMode(){return fpsFusionMode;},get fpsCharges(){return fpsCharges;},get fpsCubes(){return fpsCubes;},get fpsTrioMode(){return fpsTrioMode;},get FPS_TRIO_TARGET(){return FPS_TRIO_TARGET;},get bCharges(){return bCharges;},get fpsTeamTarget(){return fpsTeamTarget;},povSwitch:vfPovSwitch,povSync:vfPovSync,fillPicks:vfFillPicks,vfJuiceScale:vfJuiceScale,vfFxCap:vfFxCap,bPlaceCharge:bPlaceCharge,bDetonateCharge:bDetonateCharge,get fpsCurMap(){return fpsCurMap;},get fpsActive(){return fpsActive;},get bShake(){return bShake;},set bShake(v){bShake=v;},get bFlash(){return bFlash;},set bFlash(v){bFlash=v;},get bHitStop(){return bHitStop;},set bHitStop(v){bHitStop=v;},get bFlashCol(){return bFlashCol;},update: update,get mobaTowers(){return mobaTowers;},get mobaNexus(){return mobaNexus;},get mobaMinions(){return mobaMinions;},mobaBuy:mobaBuy,mobaShopToggle:mobaShopToggle,mobaCanSee:mobaCanSee,mobaApplyMap:mobaApplyMap,get mobaMapId(){return MOBA6?MOBA6.id:null;},get mobaCamps(){return mobaCamps;},get mobaFogCv(){return mobaFogCv;},hurtMinion:hurtMinion,hurtTower:hurtTower,hurtNexus:hurtNexus,mobaHurtCamp:mobaHurtCamp,mobaGainXp:mobaGainXp,mobaGainGold:mobaGainGold,mobaUpdateTowers:mobaUpdateTowers,mobaUpdateMinions:mobaUpdateMinions,mobaSpawnWave:mobaSpawnWave,get isMoba(){return isMoba();},get joy(){return joy;},get keys(){return keys;},get sudden(){return sudden;},get elapsed(){return elapsed;},set elapsed(v){elapsed=v;},get BLOCKFX(){return BLOCKFX;},get teamPicks(){return teamPicks;},get reserves(){return reserves;},get SPR(){return SPR;},get ROSTER(){return ROSTER;},get MODES(){return MODES;},get MOBA6(){return MOBA6;},get WALLS(){return WALLS;},get BUSH(){return BUSH;},get TRIO_WALLS(){return TRIO_WALLS;},get TRIO_BUSH(){return TRIO_BUSH;}};
 
 })();
 
+
+</script>
+<script>
+/* VANIX 3D (2026-11-19) — full 3D (maps AND characters, WebGL/Three.js) for
+ * Vanix Fight + MOBA 6v6 + Showdown FPS, all inside wraith-survival.html.
+ * The 3D renderer MIRRORS the existing 2D simulation — it never touches the
+ * sim, the rules, or the balance. Positions/rotations/state flow from the
+ * sim into Three.js meshes each frame. If Three.js fails to load (or the
+ * WebGL context cannot be created) everything below is a no-op and the game
+ * plays exactly as it does today in 2D. Original-only: figures and arenas
+ * are built from code geometry (boxes, capsules, cones, cylinders, spheres)
+ * in roster colors; brand red/violet/black/white, green ONLY as core glow.
+ * Cameras: Fight = side arena view. MOBA = top-down angled 3D by default,
+ * third-person (Smite-style, behind your hero + crosshair) as an option.
+ * Showdown = first-person by default, over-shoulder third-person as an
+ * option. Choices persist in localStorage; defaults keep today's views.
+ * Perf: geometries/materials are shared + cached, no shadow maps, pixel
+ * ratio capped at 2 (1.5 on small screens). The 2D canvas is kept at
+ * opacity 0 while 3D shows (still hittable, so tap-to-shoot keeps working).
+ */
+(function () {
+  'use strict';
+  var U = 40; /* world units: 40 sim px = 1 unit */
+  var CORE_GREEN = '#39d353';
+  var LS_ON = 'vanix3d_enabled', LS_MOBA = 'vanix3d_moba_cam', LS_FPS = 'vanix3d_showdown_cam';
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { } }
+  function clamp0(v) { return Math.max(0, v); } /* arc-radius rule: radii never go negative */
+  function hex(c) { return (typeof c === 'string' && c) ? c : '#888888'; }
+
+  var _renderer = null, _threeObj = null, _rendererFailed = false;
+  var _scene = null, _camera = null, _canvas = null, _cross = null, _host = null, _hostCv = null;
+  var _sceneKey = '', _pool = {}, _mats = {}, _geos = {};
+  var _lastW = 0, _lastH = 0, _t = 0, _started = false;
+
+  function three() { try { return (typeof window !== 'undefined' && window.THREE) ? window.THREE : null; } catch (e) { return null; } }
+  /* BRAWL ENGINE LIVES IN AN IIFE (script block 7): its vars (F, P, mode,
+   * mobaTowers, fpsPlayer, ...) are NOT globals. Everything Brawl-side is
+   * read through window.BRAWL getters — never as bare globals. (Classic
+   * Fight vars — A, B, FTR, GY, state — ARE top-level globals.) */
+  function BR() { try { return (typeof window !== 'undefined' && window.BRAWL) ? window.BRAWL : null; } catch (e) { return null; } }
+  function brCanSee(x, y) { try { var b = BR(); return (b && typeof b.mobaCanSee === 'function') ? b.mobaCanSee(x, y) : true; } catch (e) { return true; } }
+  function enabled() { return lsGet(LS_ON, '1') !== '0'; }
+  function mobaCam() { var v = lsGet(LS_MOBA, 'top'); return v === 'third' ? 'third' : 'top'; }
+  function fpsCam() { var v = lsGet(LS_FPS, 'first'); return v === 'third' ? 'third' : 'first'; }
+
+  /* ---------- shared geometry / material caches (perf: build once, reuse) ---------- */
+  function geo(kind, a, b, c, d) {
+    var T = three(); if (!T) return null;
+    var k = kind + '|' + a + '|' + b + '|' + c + '|' + d;
+    if (_geos[k]) return _geos[k];
+    var g = null;
+    try {
+      if (kind === 'box') g = new T.BoxGeometry(a, b, c);
+      else if (kind === 'cap') g = new T.CapsuleGeometry(a, b, 4, 8);
+      else if (kind === 'cone') g = new T.ConeGeometry(a, b, 8);
+      else if (kind === 'cyl') g = new T.CylinderGeometry(a, b, c, 10);
+      else if (kind === 'sph') g = new T.SphereGeometry(a, 10, 8);
+      else if (kind === 'plane') g = new T.PlaneGeometry(a, b);
+      else if (kind === 'oct') g = new T.OctahedronGeometry(a);
+      else if (kind === 'torus') g = new T.TorusGeometry(a, b, 8, 16, Math.PI);
+    } catch (e) { return null; }
+    if (g) _geos[k] = g;
+    return g;
+  }
+  function mat(color, basic) {
+    var T = three(); if (!T) return null;
+    var k = (basic ? 'b' : 'l') + '|' + hex(color);
+    if (_mats[k]) return _mats[k];
+    var m = null;
+    try { m = basic ? new T.MeshBasicMaterial({ color: hex(color) }) : new T.MeshLambertMaterial({ color: hex(color) }); } catch (e) { return null; }
+    _mats[k] = m;
+    return m;
+  }
+  function matOwn(color, basic, opacity) {
+    var T = three(); if (!T) return null;
+    try {
+      var o = { color: hex(color) };
+      if (opacity != null) { o.transparent = true; o.opacity = opacity; }
+      return basic ? new T.MeshBasicMaterial(o) : new T.MeshLambertMaterial(o);
+    } catch (e) { return null; }
+  }
+  function mesh(parent, gk, mk, x, y, z) {
+    var T = three(); if (!T || !parent || !gk || !mk) return null;
+    var m;
+    try {
+      m = new T.Mesh(gk, mk);
+      m.position.set(x || 0, y || 0, z || 0);
+      parent.add(m);
+    } catch (e) { return null; }
+    return m;
+  }
+  function box(parent, w, h, d, color, x, y, z, basic) {
+    return mesh(parent, geo('box', w, h, d), mat(color, basic), x, y, z);
+  }
+  function pool(key) { return _pool[key] || null; }
+  function poolSet(key, obj) { _pool[key] = obj; return obj; }
+  function poolHideUnused(used) {
+    for (var k in _pool) { if (!used[k] && _pool[k]) { try { _pool[k].visible = false; } catch (e) {} } }
+  }
+
+  /* ---------- low-poly fighter figure (code geometry only, roster colors) ---------- */
+  function fighterFigure(bodyCol, headCol, accentCol, blade) {
+    var T = three(); if (!T) return null;
+    var g;
+    try { g = new T.Group(); } catch (e) { return null; }
+    var inner;
+    try { inner = new T.Group(); g.add(inner); } catch (e) { return null; }
+    g.userData.inner = inner;
+    /* legs */
+    box(inner, 0.16, 0.5, 0.16, '#15151d', -0.12, 0.25, 0);
+    box(inner, 0.16, 0.5, 0.16, '#15151d', 0.12, 0.25, 0);
+    /* body capsule in roster color */
+    mesh(inner, geo('cap', 0.30, 0.5), mat(bodyCol), 0, 0.85, 0);
+    /* belt / trim stripe in accent color */
+    box(inner, 0.56, 0.08, 0.34, accentCol, 0, 0.62, 0, true);
+    /* head */
+    box(inner, 0.40, 0.36, 0.36, headCol, 0, 1.42, 0);
+    /* eyes: white strip */
+    box(inner, 0.32, 0.06, 0.05, '#ffffff', 0, 1.45, 0.19, true);
+    /* GREEN CORE GLOW ONLY — small emissive-look sphere on the chest */
+    mesh(inner, geo('sph', 0.12), mat(CORE_GREEN, true), 0, 0.95, 0.29);
+    /* shoulder pads */
+    box(inner, 0.2, 0.12, 0.2, accentCol, -0.36, 1.18, 0);
+    box(inner, 0.2, 0.12, 0.2, accentCol, 0.36, 1.18, 0);
+    /* arms on shoulder pivots (poseable) */
+    var armL, armR;
+    try {
+      armL = new T.Group(); armL.position.set(-0.38, 1.15, 0); inner.add(armL);
+      armR = new T.Group(); armR.position.set(0.38, 1.15, 0); inner.add(armR);
+    } catch (e) { armL = null; armR = null; }
+    if (armL) box(armL, 0.14, 0.55, 0.14, bodyCol, 0, -0.24, 0);
+    if (armR) box(armR, 0.14, 0.55, 0.14, bodyCol, 0, -0.24, 0);
+    g.userData.armL = armL; g.userData.armR = armR;
+    /* blade in the right hand (outlaw blade etc. — visual only) */
+    if (blade && armR) box(armR, 0.05, 0.85, 0.14, '#e8e8f0', 0, -0.55, 0.08, true);
+    /* block shield (hidden unless blocking) */
+    var sh = box(inner, 0.55, 0.75, 0.06, '#4da6ff', 0, 1.0, 0.48, true);
+    if (sh) sh.visible = false;
+    g.userData.shield = sh;
+    /* HP bar above the head (billboarded toward the camera each frame) */
+    var bar;
+    try {
+      bar = new T.Group(); bar.position.set(0, 1.9, 0); g.add(bar);
+      box(bar, 0.95, 0.1, 0.02, '#220505', 0, 0, 0, true);
+      var fg = box(bar, 0.9, 0.06, 0.03, '#37d67a', 0, 0, 0, true);
+      bar.userData.fg = fg;
+    } catch (e) { bar = null; }
+    g.userData.bar = bar;
+    return g;
+  }
+  function faceRot(dir) {
+    var th;
+    if (dir == null || isNaN(dir)) th = 0;
+    else if (Math.abs(dir) <= 1.01) th = dir >= 0 ? 0 : Math.PI; /* classic fight: dir is a sign */
+    else th = dir; /* brawl / fps: dir is a radian angle */
+    return Math.PI / 2 - th; /* figure faces +Z at rest; rotate to face (cos th, sin th) */
+  }
+  function poseFigure(g, f, camYaw) {
+    if (!g || !f) return;
+    var inner = g.userData.inner;
+    try {
+      if (f.ko) { g.rotation.z = -1.15; }
+      else g.rotation.z = 0;
+      g.rotation.y = faceRot(f.dir);
+      if (inner) {
+        inner.scale.y = f.cr ? 0.55 : 1;
+        var bob = (f.walk && !f.ko) ? Math.abs(Math.sin(f.walk / 90)) * 0.06 : 0;
+        inner.position.y = bob;
+      }
+      var atk = (!f.ko && (f.atkT > 0 || f.atkK));
+      if (g.userData.armR) g.userData.armR.rotation.x = atk ? -1.4 : 0;
+      if (g.userData.armL) g.userData.armL.rotation.x = atk ? -0.6 : 0;
+      if (g.userData.shield) g.userData.shield.visible = !!(!f.ko && f.blk);
+      var bar = g.userData.bar;
+      if (bar) {
+        var frac = (f.max || f.maxhp || 100) > 0 ? clamp0(f.hp || 0) / (f.max || f.maxhp || 100) : 0;
+        bar.visible = !f.ko && (f.hp != null);
+        if (bar.userData.fg) {
+          bar.userData.fg.scale.x = Math.max(0.001, frac);
+          bar.userData.fg.position.x = -0.45 * (1 - frac);
+          var col = frac > 0.5 ? '#37d67a' : (frac > 0.25 ? '#ffb35c' : '#ff5252');
+          try { bar.userData.fg.material = mat(col, true); } catch (e) {}
+        }
+        if (camYaw != null) bar.rotation.y = camYaw - g.rotation.y;
+      }
+    } catch (e) {}
+  }
+  function syncFighter(key, f, x, y, z, scale, bodyCol, headCol, accentCol, blade, camYaw) {
+    var g = pool(key);
+    if (!g) {
+      g = fighterFigure(bodyCol, headCol, accentCol, blade);
+      if (!g) return null;
+      poolSet(key, g);
+      try { _scene.add(g); } catch (e) { return null; }
+    }
+    try {
+      g.visible = true;
+      g.position.set(x, y, z);
+      g.scale.set(scale, scale, scale);
+      poseFigure(g, f, camYaw);
+    } catch (e) {}
+    return g;
+  }
+
+  /* ---------- arena builders (static per scene key) ---------- */
+  function baseScene(bg) {
+    var T = three(); if (!T) return null;
+    var s;
+    try {
+      s = new T.Scene();
+      s.background = new T.Color(bg || '#07070d');
+      s.fog = new T.Fog(bg || '#07070d', 14, 34);
+      var amb = new T.AmbientLight(0xffffff, 0.75); s.add(amb);
+      var dl = new T.DirectionalLight(0xffffff, 0.9);
+      dl.position.set(4, 10, 6); s.add(dl);
+    } catch (e) { return null; }
+    return s;
+  }
+  function floorPlane(s, w, d, color) {
+    var m = mesh(s, geo('plane', w, d), mat(color), 0, 0, 0);
+    if (m) { try { m.rotation.x = -Math.PI / 2; } catch (e) {} }
+    return m;
+  }
+  function buildFightArena(stageId) {
+    var s = baseScene('#07070d'); if (!s) return null;
+    var T = three();
+    var sky = { arena: '#0b1026', ruins: '#0d0716', jungle: '#04100a', sanctum: '#12060a' };
+    try { s.background = new T.Color(sky[stageId] || sky.arena); s.fog = new T.Fog(sky[stageId] || sky.arena, 14, 34); } catch (e) {}
+    floorPlane(s, 16, 9, '#14141e');
+    /* gold-trimmed ring platform */
+    box(s, 6.4, 0.12, 3.4, '#1a1420', 0, 0.06, 0);
+    box(s, 6.4, 0.04, 3.4, '#c9a227', 0, 0.13, 0, true);
+    var i;
+    if (stageId === 'ruins') {
+      var ph = [2.2, 1.4, 2.6, 1.1];
+      for (i = 0; i < 4; i++) {
+        var px = -5.5 + i * 3.6;
+        var pil = mesh(s, geo('cyl', 0.32, 0.38, ph[i]), mat('#2a2140'), px, ph[i] / 2, -2.6);
+        if (pil && i === 1) { try { pil.rotation.z = 0.22; } catch (e) {} }
+        box(s, 0.9, 1.6, 0.06, '#dc2626', px + 1.4, 1.6, -3.4, true); /* red banners */
+      }
+      mesh(s, geo('sph', 0.7), mat('#7c3aed', true), 4.5, 3.4, -3.2); /* violet glow orb */
+    } else if (stageId === 'jungle') {
+      box(s, 4.4, 0.5, 2.6, '#0e2412', 0, 0.25, -3.0);
+      box(s, 3.2, 0.5, 2.0, '#14301a', 0, 0.75, -3.0);
+      box(s, 2.0, 0.5, 1.4, '#1a4d22', 0, 1.25, -3.0);
+      for (i = 0; i < 5; i++) { /* firefly core glow */
+        var fx = -5 + i * 2.4, fy = 0.6 + ((i * 37) % 14) / 10;
+        mesh(s, geo('sph', 0.09), mat(CORE_GREEN, true), fx, fy, -2.2 + (i % 2) * 0.8);
+      }
+      for (i = 0; i < 4; i++) { /* trees */
+        var tx = -6.5 + i * 4.4;
+        mesh(s, geo('cyl', 0.12, 0.16, 1.2), mat('#2a1f18'), tx, 0.6, -3.4);
+        mesh(s, geo('cone', 0.9, 1.8, 8), mat('#0d2b12'), tx, 2.0, -3.4);
+      }
+    } else if (stageId === 'sanctum') {
+      mesh(s, geo('sph', 1.5), mat('#dc2626', true), -4.5, 4.2, -4.5); /* blood moon */
+      for (i = 0; i < 2; i++) { /* black arches */
+        var ar = mesh(s, geo('torus', 1.6, 0.22), mat('#0a0a0a'), -2.5 + i * 5, 0, -3.2);
+        if (ar) { try { ar.rotation.y = 0; } catch (e) {} }
+      }
+      for (i = 0; i < 4; i++) { /* violet candles */
+        var cx = -5 + i * 3.3;
+        mesh(s, geo('cyl', 0.09, 0.09, 0.9), mat('#e8e8f0'), cx, 0.45, -2.8);
+        mesh(s, geo('sph', 0.09), mat('#7c3aed', true), cx, 1.0, -2.8);
+      }
+    } else { /* VANIX ARENA — night city */
+      for (i = 0; i < 7; i++) {
+        var bh = 1.6 + ((i * 37) % 30) / 10;
+        var bx = -6.4 + i * 2.1;
+        box(s, 1.5, bh, 1.0, '#0a0e1c', bx, bh / 2, -3.4);
+        box(s, 1.5, 0.08, 1.02, '#ffd94d', bx, bh - 0.2, -3.4, true); /* lit windows strip */
+      }
+      mesh(s, geo('sph', 0.6), mat('#e8e8f0', true), 5.5, 4.0, -4.0); /* moon */
+      box(s, 1.8, 0.5, 1.0, '#1a1420', -1.2, 0.25, -3.0); /* VANIX sign block */
+      box(s, 1.8, 0.12, 1.02, '#ff8800', -1.2, 0.5, -3.0, true);
+    }
+    return s;
+  }
+  function buildTopArena(kind, mapId) {
+    var moba = kind === 'moba';
+    var W2 = moba ? 720 : 480, H2 = moba ? 540 : 360;
+    var s = baseScene(moba ? '#0b1410' : '#0a0a14'); if (!s) return null;
+    floorPlane(s, W2 / U + 2, H2 / U + 2, moba ? '#0b1410' : '#0a0a14');
+    var i;
+    if (moba) {
+      var M = null;
+      try { var _br = BR(); M = (_br && _br.MOBA6) ? _br.MOBA6 : null; } catch (e) {}
+      if (M) {
+        /* jungle mid band */
+        var jg = mesh(s, geo('plane', W2 / U, 240 / U), mat(M.jungleCol || '#0e2412'), 0, 0.01, 0);
+        if (jg) { try { jg.rotation.x = -Math.PI / 2; } catch (e) {} }
+        /* lanes */
+        for (i = 0; i < (M.lanes || []).length; i++) {
+          var ln = mesh(s, geo('plane', (W2 - 80) / U, 44 / U), mat(M.laneCol || '#3a3126'), 0, 0.02, (M.lanes[i] - 270) / U);
+          if (ln) { try { ln.rotation.x = -Math.PI / 2; } catch (e) {} }
+        }
+        /* river */
+        var rv = mesh(s, geo('plane', (M.riverW || 46) / U, H2 / U), mat('#1a4a7a', true), ((M.riverX || 360) - 360) / U, 0.02, 0);
+        if (rv) { try { rv.rotation.x = -Math.PI / 2; } catch (e) {} }
+        /* central crystal — green core glow */
+        if (M.crystal) mesh(s, geo('oct', 0.45), mat(CORE_GREEN, true), (M.crystal.x - 360) / U, 0.5, (M.crystal.y - 270) / U);
+        /* bushes */
+        var bu = M.bush || [];
+        for (i = 0; i < bu.length; i++) box(s, bu[i].w / U, 0.25, bu[i].h / U, '#0d2b12', (bu[i].x + bu[i].w / 2 - 360) / U, 0.12, (bu[i].y + bu[i].h / 2 - 270) / U);
+      }
+    } else {
+      var walls = null, bush = null;
+      try { var _br2 = BR(); walls = (_br2 && _br2.mode === 'trio') ? _br2.TRIO_WALLS : (_br2 ? _br2.WALLS : null); } catch (e) { walls = null; }
+      try { var _br3 = BR(); bush = (_br3 && _br3.mode === 'trio') ? _br3.TRIO_BUSH : (_br3 ? _br3.BUSH : null); } catch (e) { bush = null; }
+      if (walls) for (i = 0; i < walls.length; i++) box(s, walls[i].w / U, 0.7, walls[i].h / U, '#1c1c2a', (walls[i].x + walls[i].w / 2 - 240) / U, 0.35, (walls[i].y + walls[i].h / 2 - 180) / U);
+      if (bush) for (i = 0; i < bush.length; i++) box(s, bush[i].w / U, 0.3, bush[i].h / U, '#0d2b12', (bush[i].x + bush[i].w / 2 - 240) / U, 0.15, (bush[i].y + bush[i].h / 2 - 180) / U);
+    }
+    return s;
+  }
+  function buildFpsArena() {
+    var s = baseScene('#0d0716'); if (!s) return null;
+    var map = null;
+    try { var _brf = BR(); map = (_brf && _brf.fpsCurMap) ? _brf.fpsCurMap : null; } catch (e) {}
+    var rows = map ? map.length : 0, cols = map && map[0] ? map[0].length : 0;
+    var cell = 48 / U;
+    floorPlane(s, cols * cell + 1, rows * cell + 1, '#14141e');
+    var ceil = mesh(s, geo('plane', cols * cell + 1, rows * cell + 1), mat('#0a0a14'), 0, 1.7, 0);
+    if (ceil) { try { ceil.rotation.x = Math.PI / 2; } catch (e) {} }
+    if (map) {
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          if (map[r].charAt(c) !== '#') continue;
+          var wx = (c * 48 + 24) / U, wz = (r * 48 + 24) / U;
+          box(s, cell, 1.7, cell, (r + c) % 2 ? '#5b21b6' : '#4c1d95', wx, 0.85, wz);
+          box(s, cell, 0.06, cell, '#7c3aed', wx, 1.72, wz, true);
+        }
+      }
+    }
+    return s;
+  }
+
+  /* ---------- mode detection (reads sim state only) ---------- */
+  function activeMode() {
+    /* Priority: FPS first, then the Brawl engine's own state, then Classic
+     * Fight's global state. Classic state can sit stale at 'fight'/'over'
+     * after an earlier 1v1, so the Brawl engine always wins ties. */
+    try {
+      var b = BR();
+      if (b && b.fpsActive) return 'fps';
+      if (b && b.state === 'fight') return b.isMoba ? 'moba' : 'brawl';
+      if (typeof state !== 'undefined' && (state === 'fight' || state === 'enter') && typeof A !== 'undefined' && A && A[0]) return 'fight';
+      if (b && b.state === 'over') return 'none';
+      if (typeof state !== 'undefined' && state === 'over' && typeof A !== 'undefined' && A && A[0]) return 'fight';
+    } catch (e) {}
+    return 'none';
+  }
+  function sceneKeyFor(m) {
+    try {
+      if (m === 'fight') return 'fight|' + ((typeof vfStageGet === 'function') ? vfStageGet() : 'arena');
+      if (m === 'moba') { var id = 'river'; try { var _brm = BR(); if (_brm && _brm.mobaMapId) id = _brm.mobaMapId; } catch (e) {} return 'moba|' + id; }
+      if (m === 'brawl') { var md = 'showdown'; try { var _brb = BR(); if (_brb && _brb.mode) md = _brb.mode; } catch (e) {} return 'brawl|' + md; }
+      if (m === 'fps') {
+        var h = ''; try { var _brh = BR(); if (_brh && _brh.fpsCurMap) h = _brh.fpsCurMap.join('|'); } catch (e) {}
+        var fl = ''; try { var _brl = BR(); if (_brl) fl = (_brl.fpsMobaMode ? 'm' : '') + (_brl.fpsFusionMode ? 'f' : '') + (_brl.fpsTrioMode ? 't' : ''); } catch (e) {}
+        return 'fps|' + fl + '|' + h.length + '|' + h.slice(0, 32);
+      }
+    } catch (e) {}
+    return m;
+  }
+  function ensureScene(m) {
+    var T = three(); if (!T) return false;
+    var key = sceneKeyFor(m);
+    if (_scene && key === _sceneKey && _camera) return true;
+    var s = null;
+    try {
+      if (m === 'fight') s = buildFightArena((typeof vfStageGet === 'function') ? vfStageGet() : 'arena');
+      else if (m === 'moba' || m === 'brawl') s = buildTopArena(m, '');
+      else if (m === 'fps') s = buildFpsArena();
+    } catch (e) { s = null; }
+    if (!s) return false;
+    _scene = s; _sceneKey = key; _pool = {};
+    try {
+      if (!_camera) _camera = new T.PerspectiveCamera(55, 4 / 3, 0.1, 100);
+    } catch (e) { return false; }
+    return true;
+  }
+
+  /* ---------- renderer / canvas ---------- */
+  function hostCanvasFor(m) {
+    try {
+      var id = (m === 'fight') ? 'cv' : 'bcv';
+      var cv2 = document.getElementById(id);
+      return cv2 || null;
+    } catch (e) { return null; }
+  }
+  function ensureRenderer(m) {
+    var T = three();
+    if (!T) return false;
+    if (_renderer && _threeObj === T) return true;
+    if (_rendererFailed && _threeObj === T) return false; /* don't spam a broken context */
+    _threeObj = T; _rendererFailed = false;
+    try {
+      var host = hostCanvasFor(m);
+      if (!host) return false;
+      /* harness DOM stubs have no parentNode — fall back to body there */
+      var hostParent = host.parentNode || (typeof document !== 'undefined' ? document.body : null);
+      if (!hostParent) return false;
+      _hostCv = host; _host = hostParent;
+      if (!_canvas) {
+        _canvas = document.createElement('canvas');
+        _canvas.id = 'v3dCanvas';
+        _canvas.style.display = 'none';
+        _canvas.style.position = 'absolute';
+        _canvas.style.left = '0'; _canvas.style.top = '0';
+        _canvas.style.width = '100%'; _canvas.style.height = '100%';
+        _canvas.style.zIndex = '2';
+        _canvas.style.pointerEvents = 'none'; /* taps pass through to the 2D canvas (shoot etc.) */
+      }
+      try { if (_host.style && !_host.style.position) _host.style.position = 'relative'; } catch (e) {}
+      if (_canvas.parentNode !== _host) _host.appendChild(_canvas);
+      if (!_cross) {
+        _cross = document.createElement('div');
+        _cross.id = 'v3dCross';
+        _cross.style.position = 'absolute';
+        _cross.style.left = '50%'; _cross.style.top = '50%';
+        _cross.style.width = '26px'; _cross.style.height = '26px';
+        _cross.style.marginLeft = '-13px'; _cross.style.marginTop = '-13px';
+        _cross.style.zIndex = '3'; _cross.style.pointerEvents = 'none';
+        _cross.style.display = 'none';
+        _cross.innerHTML = '<div style="position:absolute;left:12px;top:0;width:2px;height:26px;background:#fff"></div><div style="position:absolute;top:12px;left:0;width:26px;height:2px;background:#fff"></div><div style="position:absolute;left:11px;top:11px;width:4px;height:4px;background:#fff;border-radius:50%"></div>';
+      }
+      if (_cross.parentNode !== _host) _host.appendChild(_cross);
+      var r = new T.WebGLRenderer({ canvas: _canvas, antialias: true, powerPreference: 'low-power' });
+      r.setClearColor(0x07070d, 1);
+      _renderer = r;
+      _lastW = 0; _lastH = 0;
+      return true;
+    } catch (e) {
+      _renderer = null; _rendererFailed = true;
+      return false;
+    }
+  }
+  function set2DVisible(on) {
+    try {
+      var ids = ['cv', 'bcv'];
+      for (var i = 0; i < ids.length; i++) {
+        var cv2 = document.getElementById(ids[i]);
+        if (cv2 && cv2.style) cv2.style.opacity = on ? '' : '0';
+      }
+    } catch (e) {}
+  }
+  function showCross(on) {
+    try { if (_cross) _cross.style.display = on ? 'block' : 'none'; } catch (e) {}
+  }
+  function crosshairVisible() {
+    try { return !!(_cross && _cross.style.display === 'block'); } catch (e) { return false; }
+  }
+
+  /* ---------- per-mode sync (mirror sim -> meshes) ---------- */
+  function syncFight(camYaw) {
+    var used = {};
+    try {
+      var mid = 0, n = 0;
+      var i, f, R;
+      for (i = 0; i < 2; i++) {
+        f = (typeof A !== 'undefined' && A) ? A[i] : null;
+        if (!f || f.ti == null) continue;
+        R = (typeof FTR !== 'undefined' && FTR[f.ti]) ? FTR[f.ti] : null;
+        var body = R ? (R.hood || R.spc) : '#888888';
+        var head = R ? (R.mask || R.spc) : '#888888';
+        var acc = R ? R.spc : '#ffffff';
+        var gy = (typeof GY !== 'undefined') ? GY : 218;
+        var x = (f.x - 240) / U, y = clamp0((gy - f.y) / U);
+        if (syncFighter('fA' + i, f, x, y, 0, 1, body, head, acc, !!(R && R.blade), camYaw)) { used['fA' + i] = 1; mid += f.x; n++; }
+      }
+      for (i = 0; i < 2; i++) { /* benched tag partners stand behind, smaller */
+        f = (typeof B !== 'undefined' && B) ? B[i] : null;
+        if (!f || f.ti == null || f.ko) continue;
+        R = (typeof FTR !== 'undefined' && FTR[f.ti]) ? FTR[f.ti] : null;
+        var bx = ((f.x != null ? f.x : (i ? 380 : 100)) - 240) / U;
+        if (syncFighter('fB' + i, f, bx, 0, -2.2, 0.8, R ? (R.hood || R.spc) : '#888888', R ? (R.mask || R.spc) : '#888888', R ? R.spc : '#ffffff', false, camYaw)) used['fB' + i] = 1;
+      }
+      if (n > 0) { var m = mid / n; _camera.userData.midX = (m - 240) / U; }
+    } catch (e) {}
+    poolHideUnused(used);
+  }
+  function topXY(x, y, moba) {
+    return moba ? [(x - 360) / U, (y - 270) / U] : [(x - 240) / U, (y - 180) / U];
+  }
+  function syncTop(m, camYaw) {
+    var used = {};
+    var moba = m === 'moba';
+    try {
+      var _Br = BR(); var Fs = (_Br && _Br.F) ? _Br.F : null;
+      var i, f, p;
+      if (Fs) {
+        for (i = 0; i < Fs.length; i++) {
+          f = Fs[i]; if (!f || !f.alive) continue;
+          var R = null;
+          try { R = (_Br && _Br.ROSTER && f.ti != null) ? _Br.ROSTER[f.ti] : null; } catch (e) {}
+          var col = f.col || (R && R.col) || '#888888';
+          p = topXY(f.x, f.y, moba);
+          var vis = true;
+          if (moba && f.team !== 0) { vis = brCanSee(f.x, f.y); }
+          if (!vis) continue;
+          if (syncFighter('t' + i, f, p[0], 0, p[1], 1, col, '#15151d', col, !!(R && R.blade), camYaw)) used['t' + i] = 1;
+        }
+      }
+      if (moba) {
+        /* towers: dim (not hide) outside vision; nexus same */
+        var tws = (_Br && _Br.mobaTowers) ? _Br.mobaTowers : [];
+        for (i = 0; i < tws.length; i++) {
+          var tw = tws[i]; if (!tw || !tw.alive) continue;
+          p = topXY(tw.x, tw.y, true);
+          var seen = true;
+          if (tw.team !== 0) { seen = brCanSee(tw.x, tw.y); }
+          var key = 'tw' + i, g = pool(key);
+          if (!g) {
+            var T = three(); if (!T) continue;
+            try {
+              g = new T.Group();
+              var tcol = tw.team === 0 ? '#6db3ff' : '#ff7a6b';
+              var base = mesh(g, geo('cyl', 0.4, 0.5, 1.5), matOwn(tcol, false, 1), 0, 0.75, 0);
+              mesh(g, geo('cone', 0.5, 0.7, 8), matOwn(tcol, false, 1), 0, 1.85, 0);
+              mesh(g, geo('sph', 0.14), matOwn(CORE_GREEN, true, 1), 0, 1.5, 0.3);
+              g.userData.tcol = tcol; g.userData.base = base;
+              poolSet(key, g); _scene.add(g);
+            } catch (e) { continue; }
+          }
+          try {
+            g.visible = true; g.position.set(p[0], 0, p[1]);
+            var op = seen ? 1 : 0.25;
+            if (g.children) for (var ci = 0; ci < g.children.length; ci++) {
+              var ch = g.children[ci];
+              if (ch.material) { try { ch.material.transparent = true; ch.material.opacity = op; } catch (e) {} }
+            }
+          } catch (e) {}
+          used[key] = 1;
+        }
+        var nx = (_Br && _Br.mobaNexus) ? _Br.mobaNexus : [];
+        for (i = 0; i < nx.length; i++) {
+          var nn = nx[i]; if (!nn || !nn.alive) continue;
+          p = topXY(nn.x, nn.y, true);
+          var nseen = true;
+          if (nn.team !== 0) { nseen = brCanSee(nn.x, nn.y); }
+          var nk = 'nx' + i, ng = pool(nk);
+          if (!ng) {
+            var T2 = three(); if (!T2) continue;
+            try {
+              ng = new T2.Group();
+              var ncol = nn.team === 0 ? '#6db3ff' : '#ff7a6b';
+              mesh(ng, geo('oct', 0.6), matOwn(ncol, false, 1), 0, 0.7, 0);
+              mesh(ng, geo('sph', 0.16), matOwn(CORE_GREEN, true, 1), 0, 0.7, 0.5);
+              poolSet(nk, ng); _scene.add(ng);
+            } catch (e) { continue; }
+          }
+          try {
+            ng.visible = true; ng.position.set(p[0], 0, p[1]);
+            var nop = nseen ? 1 : 0.25;
+            if (ng.children) for (var cj = 0; cj < ng.children.length; cj++) {
+              var ch2 = ng.children[cj];
+              if (ch2.material) { try { ch2.material.transparent = true; ch2.material.opacity = nop; } catch (e) {} }
+            }
+          } catch (e) {}
+          used[nk] = 1;
+        }
+        var mns = (_Br && _Br.mobaMinions) ? _Br.mobaMinions : [];
+        for (i = 0; i < mns.length; i++) {
+          var mn = mns[i]; if (!mn || !mn.alive) continue;
+          if (mn.team !== 0 && !brCanSee(mn.x, mn.y)) continue;
+          p = topXY(mn.x, mn.y, true);
+          var mk = 'mn' + i, mg = pool(mk);
+          if (!mg) {
+            var T3 = three(); if (!T3) continue;
+            try {
+              mg = new T3.Group();
+              mesh(mg, geo('cap', 0.16, 0.2), mat(mn.team === 0 ? '#6db3ff' : '#ff7a6b'), 0, 0.3, 0);
+              poolSet(mk, mg); _scene.add(mg);
+            } catch (e) { continue; }
+          }
+          try { mg.visible = true; mg.position.set(p[0], 0, p[1]); } catch (e) {}
+          used[mk] = 1;
+        }
+        var cmps = (_Br && _Br.mobaCamps) ? _Br.mobaCamps : [];
+        for (i = 0; i < cmps.length; i++) {
+          var cp = cmps[i]; if (!cp || !cp.alive) continue;
+          p = topXY(cp.x, cp.y, true);
+          var ck = 'cp' + i, cg = pool(ck);
+          if (!cg) {
+            var T4 = three(); if (!T4) continue;
+            try {
+              cg = new T4.Group();
+              box(cg, 0.5, 0.4, 0.5, '#3a3a4a', -0.2, 0.2, 0);
+              box(cg, 0.4, 0.5, 0.4, '#2a2a3a', 0.25, 0.25, 0.1);
+              mesh(cg, geo('oct', 0.2), mat(CORE_GREEN, true), 0, 0.6, 0);
+              poolSet(ck, cg); _scene.add(cg);
+            } catch (e) { continue; }
+          }
+          try { cg.visible = true; cg.position.set(p[0], 0, p[1]); } catch (e) {}
+          used[ck] = 1;
+        }
+      }
+      /* power cubes + projectiles + beast (brawl + moba) */
+      var cbs = (_Br && _Br.cubes) ? _Br.cubes : [];
+      for (i = 0; i < cbs.length; i++) {
+        var cb = cbs[i]; if (!cb || cb.taken) continue;
+        p = topXY(cb.x, cb.y, moba);
+        var cbk = 'cb' + i, cbg = pool(cbk);
+        if (!cbg) { cbg = mesh(_scene, geo('box', 0.35, 0.35, 0.35), mat('#ffd94d', true), p[0], 0.5, p[1]); if (!cbg) continue; poolSet(cbk, cbg); }
+        try { cbg.visible = true; cbg.position.set(p[0], 0.5 + Math.sin(_t / 300) * 0.1, p[1]); cbg.rotation.y = _t / 500; } catch (e) {}
+        used[cbk] = 1;
+      }
+      var pjs = (_Br && _Br.projs) ? _Br.projs : [];
+      for (i = 0; i < pjs.length; i++) {
+        var pj = pjs[i]; if (!pj) continue;
+        p = topXY(pj.x, pj.y, moba);
+        var pjk = 'pj' + i, pjg = pool(pjk);
+        if (!pjg) { pjg = mesh(_scene, geo('sph', 0.12), mat('#ffd94d', true), p[0], 0.5, p[1]); if (!pjg) continue; poolSet(pjk, pjg); }
+        try { pjg.visible = true; pjg.position.set(p[0], 0.5, p[1]); } catch (e) {}
+        used[pjk] = 1;
+      }
+      var bst = null;
+      try { bst = (_Br && _Br.beast) ? _Br.beast : null; } catch (e) {}
+      if (bst && bst.alive) {
+        p = topXY(bst.x, bst.y, moba);
+        var fakeF = { hp: bst.hp, maxhp: bst.maxhp, dir: 0, atkT: 0, blk: false, cr: false, ko: false, walk: 0 };
+        if (syncFighter('beast', fakeF, p[0], 0, p[1], 1.6, '#4c1d95', '#2a2140', '#7c3aed', false, camYaw)) used.beast = 1;
+      }
+    } catch (e) {}
+    poolHideUnused(used);
+  }
+  function syncFps(camYaw) {
+    var used = {};
+    try {
+      var _Bf = BR(); var p = (_Bf && _Bf.fpsPlayer) ? _Bf.fpsPlayer : null;
+      if (!p) { poolHideUnused(used); return; }
+      var third = fpsCam() === 'third';
+      var list = [];
+      try {
+        if (_Bf && _Bf.fpsMobaMode) list = ((_Bf.fpsAllies || []).concat(_Bf.fpsFoes || []));
+        else list = (_Bf && _Bf.fpsFoes) ? _Bf.fpsFoes : [];
+      } catch (e) {}
+      var i, f;
+      for (i = 0; i < list.length; i++) {
+        f = list[i]; if (!f || !f.alive) continue;
+        var ff = { hp: f.hp, maxhp: f.maxhp || 100, dir: f.ang != null ? f.ang : 0, atkT: 0, blk: false, cr: false, ko: false, walk: 0 };
+        if (syncFighter('e' + i, ff, f.x / U, 0, f.y / U, 1, f.col || '#888888', '#15151d', f.col || '#ffffff', false, camYaw)) used['e' + i] = 1;
+      }
+      /* player figure: visible only in third-person (hidden in first-person) */
+      if (third && p.alive) {
+        var pf = { hp: p.hp, maxhp: p.maxhp || 100, dir: p.ang || 0, atkT: 0, blk: false, cr: false, ko: false, walk: 0 };
+        if (syncFighter('me', pf, p.x / U, 0, p.y / U, 1, p.col || '#ffffff', '#15151d', p.col || '#ffffff', false, camYaw)) used.me = 1;
+      }
+      var shs = (_Bf && _Bf.fpsShots) ? _Bf.fpsShots : [];
+      for (i = 0; i < shs.length; i++) {
+        var sh = shs[i]; if (!sh) continue;
+        var sk = 'sh' + i, sg = pool(sk);
+        if (!sg) { sg = mesh(_scene, geo('sph', 0.1), mat('#ffe95a', true), sh.x / U, 1.2, sh.y / U); if (!sg) continue; poolSet(sk, sg); }
+        try { sg.visible = true; sg.position.set(sh.x / U, 1.2, sh.y / U); } catch (e) {}
+        used[sk] = 1;
+      }
+      var fusion = false;
+      try { fusion = !!(_Bf && _Bf.fpsFusionMode); } catch (e) {}
+      if (fusion) {
+        var chs = (_Bf && _Bf.fpsCharges) ? _Bf.fpsCharges : [];
+        for (i = 0; i < chs.length; i++) {
+          var cg2 = chs[i]; if (!cg2) continue;
+          var ck2 = 'fc' + i, cg2m = pool(ck2);
+          if (!cg2m) { cg2m = mesh(_scene, geo('oct', clamp0(0.3)), mat('#ff5252', true), cg2.x / U, 0.6, cg2.y / U); if (!cg2m) continue; poolSet(ck2, cg2m); }
+          try { cg2m.visible = true; cg2m.position.set(cg2.x / U, 0.6 + Math.sin(_t / 200) * 0.08, cg2.y / U); } catch (e) {}
+          used[ck2] = 1;
+        }
+        var cbs2 = (_Bf && _Bf.fpsCubes) ? _Bf.fpsCubes : [];
+        for (i = 0; i < cbs2.length; i++) {
+          var cb2 = cbs2[i]; if (!cb2 || cb2.taken) continue;
+          var bk = 'fb' + i, bg2 = pool(bk);
+          if (!bg2) { bg2 = mesh(_scene, geo('box', 0.35, 0.35, 0.35), mat('#ffd94d', true), cb2.x / U, 0.5, cb2.y / U); if (!bg2) continue; poolSet(bk, bg2); }
+          try { bg2.visible = true; bg2.position.set(cb2.x / U, 0.5, cb2.y / U); } catch (e) {}
+          used[bk] = 1;
+        }
+      }
+    } catch (e) {}
+    poolHideUnused(used);
+  }
+
+  /* ---------- cameras ---------- */
+  function camFight() {
+    var midX = 0;
+    try { midX = (_camera.userData.midX || 0) * 0.4; } catch (e) {}
+    try {
+      _camera.position.set(midX, 2.4, 9.5);
+      _camera.lookAt(midX, 1.0, 0);
+      _camera.rotation.z = 0;
+    } catch (e) {}
+    return 0;
+  }
+  function camTop(m) {
+    var moba = m === 'moba';
+    var yaw = 0;
+    try {
+      if (moba && mobaCam() === 'third') {
+        var _Bp = BR(); var Pv = (_Bp && _Bp.P) ? _Bp.P : null;
+        if (Pv && Pv.alive) {
+          var th = (Pv.dir != null && Math.abs(Pv.dir) > 1.01) ? Pv.dir : (Pv.dir >= 0 ? 0 : Math.PI);
+          var fx = Math.cos(th), fz = Math.sin(th);
+          var px = (Pv.x - 360) / U, pz = (Pv.y - 270) / U;
+          var back = clamp0(5.5), up = 2.6; /* radii clamped non-negative (arc-radius rule) */
+          _camera.position.set(px - fx * back, up, pz - fz * back);
+          _camera.lookAt(px + fx * 7, 0.8, pz + fz * 7);
+          showCross(true);
+          return Math.atan2(-(px + fx * 7 - _camera.position.x), -(pz + fz * 7 - _camera.position.z));
+        }
+      }
+      var W2 = moba ? 720 : 480, H2 = moba ? 540 : 360;
+      void W2; void H2;
+      _camera.position.set(0, 13, 6.5);
+      _camera.lookAt(0, 0, 0.5);
+      showCross(false);
+    } catch (e) { showCross(false); }
+    return yaw;
+  }
+  function camFps() {
+    var third = fpsCam() === 'third';
+    try {
+      var _Bc = BR(); var p = (_Bc && _Bc.fpsPlayer) ? _Bc.fpsPlayer : null;
+      if (!p) return 0;
+      var px = p.x / U, pz = p.y / U, ang = p.ang || 0;
+      var fx = Math.cos(ang), fz = Math.sin(ang);
+      try { _camera.rotation.order = 'YXZ'; } catch (e) {}
+      if (!third) {
+        _camera.position.set(px, 1.6, pz);
+        _camera.rotation.set(0, -ang - Math.PI / 2, 0);
+      } else {
+        var back = clamp0(2.4), side = 0.8, up = 1.3; /* radii clamped non-negative */
+        var rx = -fz, rz = fx; /* right vector */
+        _camera.position.set(px - fx * back + rx * side, up, pz - fz * back + rz * side);
+        _camera.lookAt(px + fx * 8, 1.2, pz + fz * 8);
+      }
+      showCross(true);
+      return -ang - Math.PI / 2;
+    } catch (e) { return 0; }
+  }
+
+  /* ---------- main frame ---------- */
+  function frame(now) {
+    _t = (typeof now === 'number') ? now : (typeof performance !== 'undefined' ? performance.now() : _t + 16);
+    var m = activeMode();
+    var T = three();
+    var on = enabled() && !!T && m !== 'none';
+    if (!on) {
+      try { if (_canvas) _canvas.style.display = 'none'; } catch (e) {}
+      showCross(false);
+      set2DVisible(true);
+      return { mode: m, on: false, three: !!T };
+    }
+    if (!ensureRenderer(m) || !ensureScene(m)) {
+      try { if (_canvas) _canvas.style.display = 'none'; } catch (e) {}
+      showCross(false);
+      set2DVisible(true);
+      return { mode: m, on: false, three: !!T };
+    }
+    try {
+      var host = hostCanvasFor(m);
+      var w = (host && host.clientWidth) || 480, h = (host && host.clientHeight) || 360;
+      var pr = 1;
+      try { pr = Math.min(window.devicePixelRatio || 1, 2); if (w < 500) pr = Math.min(pr, 1.5); } catch (e) {}
+      if (w !== _lastW || h !== _lastH) {
+        _lastW = w; _lastH = h;
+        try { _renderer.setPixelRatio(pr); _renderer.setSize(w, h, false); } catch (e) {}
+        try { _camera.aspect = w / h; _camera.updateProjectionMatrix(); } catch (e) {}
+      }
+      /* re-host the canvas if the mode's wrap changed (fight #wrap vs brawl #bwrap) */
+      if (host && host.parentNode && _canvas.parentNode !== host.parentNode) {
+        try { host.parentNode.appendChild(_canvas); if (_cross) host.parentNode.appendChild(_cross); _host = host.parentNode; _hostCv = host; } catch (e) {}
+      }
+      _canvas.style.display = 'block';
+      set2DVisible(false);
+      var yaw = 0;
+      if (m === 'fight') { syncFight(0); yaw = camFight(); }
+      else if (m === 'moba' || m === 'brawl') { yaw = camTop(m); syncTop(m, yaw); }
+      else if (m === 'fps') { yaw = camFps(); syncFps(yaw); }
+      try { _renderer.render(_scene, _camera); } catch (e) {}
+      return { mode: m, on: true, three: !!T };
+    } catch (e) {
+      try { if (_canvas) _canvas.style.display = 'none'; } catch (e2) {}
+      showCross(false);
+      set2DVisible(true);
+      return { mode: m, on: false, three: !!T };
+    }
+  }
+  function tick(now) {
+    try { frame(now); } catch (e) {}
+    try { requestAnimationFrame(tick); } catch (e) {}
+  }
+
+  /* ---------- public API ---------- */
+  var V3D = {
+    threeLoaded: function () { return !!three(); },
+    available: function () { return !!three() && !!_renderer && !_rendererFailed; },
+    rendererOK: function () { return !!_renderer && !_rendererFailed; },
+    enabled: enabled,
+    setEnabled: function (v) { lsSet(LS_ON, v ? '1' : '0'); if (!v) { try { if (_canvas) _canvas.style.display = 'none'; } catch (e) {} set2DVisible(true); showCross(false); } return enabled(); },
+    cycleEnabled: function () { return V3D.setEnabled(!enabled()); },
+    enabledLabel: function () { return enabled() ? 'ON' : 'OFF'; },
+    mobaCam: mobaCam,
+    setMobaCam: function (v) { lsSet(LS_MOBA, v === 'third' ? 'third' : 'top'); return mobaCam(); },
+    cycleMobaCam: function () { return V3D.setMobaCam(mobaCam() === 'third' ? 'top' : 'third'); },
+    mobaCamLabel: function () { return mobaCam() === 'third' ? 'THIRD-PERSON' : 'TOP-DOWN'; },
+    fpsCam: fpsCam,
+    setFpsCam: function (v) { lsSet(LS_FPS, v === 'third' ? 'third' : 'first'); return fpsCam(); },
+    cycleFpsCam: function () { return V3D.setFpsCam(fpsCam() === 'third' ? 'first' : 'third'); },
+    fpsCamLabel: function () { return fpsCam() === 'third' ? 'THIRD-PERSON' : 'FIRST-PERSON'; },
+    activeMode: activeMode,
+    crosshairVisible: crosshairVisible,
+    debugScene: function () { return _scene; },
+    debugRenderer: function () { return _renderer; },
+    frame: frame,
+    rebuildArena: function () { _sceneKey = ''; _pool = {}; try { frame(); } catch (e) {} return _sceneKey; },
+    sceneInfo: function () {
+      var meshes = 0;
+      try { if (_scene) _scene.traverse(function (o) { if (o && o.isMesh) meshes++; }); } catch (e) {}
+      return { mode: activeMode(), key: _sceneKey, meshes: meshes, three: !!three(), renderer: !!_renderer, mobaCam: mobaCam(), fpsCam: fpsCam(), enabled: enabled(), crosshair: crosshairVisible() };
+    }
+  };
+  try { window.VANIX3D = V3D; } catch (e) {}
+  /* own rAF loop: mirrors the sim each frame; never throws (frame() is guarded). */
+  if (!_started) {
+    _started = true;
+    try { requestAnimationFrame(tick); } catch (e) {}
+  }
+})();
 
 </script>
 <script>
