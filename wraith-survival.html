@@ -3752,7 +3752,25 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
   }
 
   /* ---------- low-poly fighter figure (code geometry only, roster colors) ---------- */
-  function fighterFigure(bodyCol, headCol, accentCol, blade) {
+  /* ---------- per-fighter signature traits (Cee-given looks only) ----------
+   * traitFor(name) maps a fighter name to a trait key (null = default figure).
+   * Names come from the FTR table (classic Fight) or the ROSTER table (brawl /
+   * FPS), both keyed by `n`. KYNTH is a Waves-only hero so no Fight/Brawl/FPS
+   * mode reaches him today — the key is defined so the trait works the moment
+   * a mode does. Unknown names return null: the default figure is unchanged. */
+  var TRAITS = {
+    'KAVIO': 'kavio', 'KYNTH': 'kynth', 'GRIM': 'grim', 'HASHBONE': 'hashbone',
+    'BALLOON GUY': 'balloon', 'ASTERION VEYL': 'asterion', 'SYMBIOS': 'symbios',
+    'AETHERIS': 'aetheris', 'SIGILOS': 'sigilos', 'GOLD DEMON': 'golddemon',
+    'GRINNOIR': 'grinnoir', 'HIPPOTHANATOS': 'hippo', 'PHARMAKON': 'pharmakon',
+    'KILL MODE': 'killmode', 'WHITE MASK': 'whitemask', 'ICARON': 'icaron'
+  };
+  function traitFor(name) {
+    if (!name) return null;
+    var k = String(name).toUpperCase().replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+    return TRAITS[k] || null;
+  }
+  function fighterFigure(bodyCol, headCol, accentCol, blade, trait) {
     var T = three(); if (!T) return null;
     var g;
     try { g = new T.Group(); } catch (e) { return null; }
@@ -3762,8 +3780,13 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
     /* legs */
     box(inner, 0.16, 0.5, 0.16, '#15151d', -0.12, 0.25, 0);
     box(inner, 0.16, 0.5, 0.16, '#15151d', 0.12, 0.25, 0);
-    /* body capsule in roster color */
-    mesh(inner, geo('cap', 0.30, 0.5), mat(bodyCol), 0, 0.85, 0);
+    /* body capsule in roster color (BALLOON GUY: round inflatable sphere instead) */
+    if (trait === 'balloon') {
+      var bl = mesh(inner, geo('sph', 0.42), mat(bodyCol), 0, 0.85, 0);
+      if (bl) { try { bl.userData.traitPart = 'spherebody'; } catch (e) {} }
+    } else {
+      mesh(inner, geo('cap', 0.30, 0.5), mat(bodyCol), 0, 0.85, 0);
+    }
     /* belt / trim stripe in accent color */
     box(inner, 0.56, 0.08, 0.34, accentCol, 0, 0.62, 0, true);
     /* head */
@@ -3785,7 +3808,116 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
     if (armR) box(armR, 0.14, 0.55, 0.14, bodyCol, 0, -0.24, 0);
     g.userData.armL = armL; g.userData.armR = armR;
     /* blade in the right hand (outlaw blade etc. — visual only) */
-    if (blade && armR) box(armR, 0.05, 0.85, 0.14, '#e8e8f0', 0, -0.55, 0.08, true);
+    if (blade && armR && trait !== 'hippo') box(armR, 0.05, 0.85, 0.14, '#e8e8f0', 0, -0.55, 0.08, true);
+    /* per-fighter signature traits (few cheap meshes, code geometry only).
+     * Every trait mesh is tagged userData.traitPart so the harness can find
+     * it; the group carries userData.trait (null = default figure). Traits
+     * live on `inner` so they follow the pose (crouch/bob/attack) with the
+     * rest of the body. */
+    g.userData.trait = trait || null;
+    if (trait) {
+      var tag = function (m, part) { if (m) { try { m.userData.traitPart = part; } catch (e) {} } return m; };
+      if (trait === 'kavio') {
+        /* wide-brim hat: flat disc + small dome; red bandana band on the face */
+        tag(mesh(inner, geo('cyl', 0.42, 0.42, 0.05), mat('#8a5a2a'), 0, 1.63, 0), 'hat');
+        tag(mesh(inner, geo('sph', 0.2), mat('#8a5a2a'), 0, 1.66, 0), 'hat');
+        tag(box(inner, 0.42, 0.10, 0.40, '#dc2626', 0, 1.38, 0), 'bandana');
+      } else if (trait === 'kynth') {
+        /* lightning jester (main guy): two-point jester hat, gold bells */
+        var ky1 = tag(mesh(inner, geo('cone', 0.09, 0.35), mat('#7c3aed'), -0.14, 1.78, 0), 'jesterhat');
+        var ky2 = tag(mesh(inner, geo('cone', 0.09, 0.35), mat('#dc2626'), 0.14, 1.78, 0), 'jesterhat');
+        if (ky1) { try { ky1.rotation.z = 0.35; } catch (e) {} }
+        if (ky2) { try { ky2.rotation.z = -0.35; } catch (e) {} }
+        tag(mesh(inner, geo('sph', 0.05), mat('#c9a227', true), -0.22, 1.93, 0), 'bell');
+        tag(mesh(inner, geo('sph', 0.05), mat('#c9a227', true), 0.22, 1.93, 0), 'bell');
+      } else if (trait === 'grinnoir') {
+        /* other jester: same two-point hat, white/black points, red bells */
+        var gr1 = tag(mesh(inner, geo('cone', 0.09, 0.35), mat('#e8e8f0'), -0.14, 1.78, 0), 'jesterhat');
+        var gr2 = tag(mesh(inner, geo('cone', 0.09, 0.35), mat('#15151d'), 0.14, 1.78, 0), 'jesterhat');
+        if (gr1) { try { gr1.rotation.z = 0.35; } catch (e) {} }
+        if (gr2) { try { gr2.rotation.z = -0.35; } catch (e) {} }
+        tag(mesh(inner, geo('sph', 0.05), mat('#dc2626', true), -0.22, 1.93, 0), 'bell');
+        tag(mesh(inner, geo('sph', 0.05), mat('#dc2626', true), 0.22, 1.93, 0), 'bell');
+      } else if (trait === 'grim') {
+        /* mask guy: two dark horns + gold eyes */
+        var gm1 = tag(mesh(inner, geo('cone', 0.08, 0.4), mat('#1a1a22'), -0.2, 1.75, 0), 'horn');
+        var gm2 = tag(mesh(inner, geo('cone', 0.08, 0.4), mat('#1a1a22'), 0.2, 1.75, 0), 'horn');
+        if (gm1) { try { gm1.rotation.z = 0.3; } catch (e) {} }
+        if (gm2) { try { gm2.rotation.z = -0.3; } catch (e) {} }
+        tag(box(inner, 0.08, 0.05, 0.02, '#d4af37', -0.09, 1.47, 0.20, true), 'eye');
+        tag(box(inner, 0.08, 0.05, 0.02, '#d4af37', 0.09, 1.47, 0.20, true), 'eye');
+      } else if (trait === 'hashbone') {
+        /* white skull head + dark eye sockets */
+        tag(box(inner, 0.42, 0.38, 0.38, '#f7f4ec', 0, 1.42, 0), 'skull');
+        tag(box(inner, 0.09, 0.08, 0.02, '#111111', -0.09, 1.46, 0.20, true), 'socket');
+        tag(box(inner, 0.09, 0.08, 0.02, '#111111', 0.09, 1.46, 0.20, true), 'socket');
+      } else if (trait === 'whitemask') {
+        /* plain white head */
+        tag(box(inner, 0.42, 0.38, 0.38, '#f7f4ec', 0, 1.42, 0), 'whitemask');
+      } else if (trait === 'asterion') {
+        /* crimson hair cap + small gold crown + crimson coat skirt */
+        tag(box(inner, 0.42, 0.12, 0.38, '#7a1020', 0, 1.58, 0), 'hair');
+        tag(mesh(inner, geo('cyl', 0.17, 0.17, 0.06), mat('#c9a227', true), 0, 1.66, 0), 'crown');
+        tag(mesh(inner, geo('cone', 0.03, 0.09), mat('#c9a227', true), -0.10, 1.72, 0), 'crown');
+        tag(mesh(inner, geo('cone', 0.03, 0.09), mat('#c9a227', true), 0, 1.72, 0), 'crown');
+        tag(mesh(inner, geo('cone', 0.03, 0.09), mat('#c9a227', true), 0.10, 1.72, 0), 'crown');
+        tag(box(inner, 0.62, 0.35, 0.42, '#7a1020', 0, 0.32, 0), 'skirt');
+      } else if (trait === 'symbios') {
+        /* white ribcage bars + bigger white heart core + white crown tentacles */
+        tag(box(inner, 0.5, 0.05, 0.04, '#f7f4ec', 0, 0.70, 0.31), 'rib');
+        tag(box(inner, 0.5, 0.05, 0.04, '#f7f4ec', 0, 0.85, 0.31), 'rib');
+        tag(box(inner, 0.5, 0.05, 0.04, '#f7f4ec', 0, 1.15, 0.31), 'rib');
+        tag(mesh(inner, geo('sph', 0.15), mat('#f7f4ec', true), 0, 0.97, 0.27), 'heart');
+        var sy1 = tag(mesh(inner, geo('cone', 0.03, 0.25), mat('#f7f4ec'), -0.12, 1.75, 0), 'tentacle');
+        tag(mesh(inner, geo('cone', 0.03, 0.25), mat('#f7f4ec'), 0, 1.78, 0), 'tentacle');
+        var sy3 = tag(mesh(inner, geo('cone', 0.03, 0.25), mat('#f7f4ec'), 0.12, 1.75, 0), 'tentacle');
+        if (sy1) { try { sy1.rotation.z = 0.25; } catch (e) {} }
+        if (sy3) { try { sy3.rotation.z = -0.25; } catch (e) {} }
+      } else if (trait === 'aetheris') {
+        /* hood over the head + green eyes */
+        tag(mesh(inner, geo('cone', 0.30, 0.5), mat('#1e1b2e'), 0, 1.80, 0), 'hood');
+        tag(box(inner, 0.07, 0.05, 0.02, CORE_GREEN, -0.09, 1.47, 0.20, true), 'eye');
+        tag(box(inner, 0.07, 0.05, 0.02, CORE_GREEN, 0.09, 1.47, 0.20, true), 'eye');
+      } else if (trait === 'icaron') {
+        /* sorceress hood */
+        tag(mesh(inner, geo('cone', 0.30, 0.5), mat('#5b21b6'), 0, 1.80, 0), 'hood');
+      } else if (trait === 'sigilos') {
+        /* half white mask + small gold crown + spiked shoulder pads */
+        tag(box(inner, 0.21, 0.36, 0.38, '#f7f4ec', -0.10, 1.42, 0), 'mask');
+        tag(mesh(inner, geo('cyl', 0.17, 0.17, 0.05), mat('#c9a227', true), 0, 1.64, 0), 'crown');
+        tag(mesh(inner, geo('cone', 0.025, 0.07), mat('#c9a227', true), -0.10, 1.70, 0), 'crown');
+        tag(mesh(inner, geo('cone', 0.025, 0.07), mat('#c9a227', true), 0, 1.70, 0), 'crown');
+        tag(mesh(inner, geo('cone', 0.025, 0.07), mat('#c9a227', true), 0.10, 1.70, 0), 'crown');
+        tag(mesh(inner, geo('cone', 0.09, 0.28), mat(accentCol), -0.36, 1.38, 0), 'spike');
+        tag(mesh(inner, geo('cone', 0.09, 0.28), mat(accentCol), 0.36, 1.38, 0), 'spike');
+      } else if (trait === 'golddemon') {
+        /* gold horns + gold trim */
+        var gd1 = tag(mesh(inner, geo('cone', 0.08, 0.35), mat('#c8a83a'), -0.2, 1.75, 0), 'horn');
+        var gd2 = tag(mesh(inner, geo('cone', 0.08, 0.35), mat('#c8a83a'), 0.2, 1.75, 0), 'horn');
+        if (gd1) { try { gd1.rotation.z = 0.3; } catch (e) {} }
+        if (gd2) { try { gd2.rotation.z = -0.3; } catch (e) {} }
+        tag(box(inner, 0.22, 0.04, 0.22, '#c8a83a', -0.36, 1.26, 0, true), 'trim');
+        tag(box(inner, 0.22, 0.04, 0.22, '#c8a83a', 0.36, 1.26, 0, true), 'trim');
+        tag(box(inner, 0.5, 0.04, 0.03, '#c8a83a', 0, 1.10, 0.30, true), 'trim');
+      } else if (trait === 'hippo') {
+        /* long gun barrel in the hands instead of a blade */
+        if (armR) {
+          tag(box(armR, 0.10, 0.14, 0.30, '#2a2a35', 0, -0.5, 0.05), 'gun');
+          tag(box(armR, 0.08, 0.08, 0.95, '#1a1a22', 0, -0.5, 0.40), 'gun');
+        } else {
+          tag(box(inner, 0.08, 0.08, 0.95, '#1a1a22', 0.38, 0.7, 0.35), 'gun');
+        }
+      } else if (trait === 'pharmakon') {
+        /* larger green heart core */
+        tag(mesh(inner, geo('sph', 0.2), mat(CORE_GREEN, true), 0, 0.95, 0.27), 'bigcore');
+      } else if (trait === 'killmode') {
+        /* dark red tint over the body + red eyes (scale handled by the boss rule) */
+        tag(mesh(inner, geo('cap', 0.31, 0.5), matOwn('#7f1d1d', false, 0.35), 0, 0.85, 0), 'tint');
+        tag(box(inner, 0.08, 0.05, 0.02, '#ff2070', -0.09, 1.47, 0.20, true), 'eye');
+        tag(box(inner, 0.08, 0.05, 0.02, '#ff2070', 0.09, 1.47, 0.20, true), 'eye');
+      }
+    }
+
     /* block shield (hidden unless blocking) */
     var sh = box(inner, 0.55, 0.75, 0.06, '#4da6ff', 0, 1.0, 0.48, true);
     if (sh) sh.visible = false;
@@ -3838,10 +3970,13 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
       }
     } catch (e) {}
   }
-  function syncFighter(key, f, x, y, z, scale, bodyCol, headCol, accentCol, blade, camYaw) {
+  function syncFighter(key, f, x, y, z, scale, bodyCol, headCol, accentCol, blade, camYaw, trait) {
     var g = pool(key);
-    if (!g) {
-      g = fighterFigure(bodyCol, headCol, accentCol, blade);
+    if (!g || g.userData.trait !== (trait || null)) {
+      /* first build, or the slot changed fighter: rebuild so the trait (and
+       * colours) match the fighter now in the slot */
+      if (g) { try { _scene.remove(g); } catch (e) {} }
+      g = fighterFigure(bodyCol, headCol, accentCol, blade, trait);
       if (!g) return null;
       poolSet(key, g);
       try { _scene.add(g); } catch (e) { return null; }
@@ -3956,6 +4091,35 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
         /* bushes */
         var bu = M.bush || [];
         for (i = 0; i < bu.length; i++) box(s, bu[i].w / U, 0.25, bu[i].h / U, '#0d2b12', (bu[i].x + bu[i].w / 2 - 360) / U, 0.12, (bu[i].y + bu[i].h / 2 - 270) / U);
+        /* variant dressing (MOBA 3D finish) — all positions derived from the
+         * variant's own MOBA6 data, never hardcoded per-variant numbers. */
+        if (M.id === 'canyon') {
+          /* TWIN CANYON: tall dark wall segments flanking the mid (the river
+           * band), running the jungle band between the two lanes. */
+          var wz0 = (M.lanes[0] + 22 - 270) / U, wz1 = (M.lanes[1] - 22 - 270) / U;
+          var wx = ((M.riverX || 360) - 360) / U, wOff = (((M.riverW || 60) / 2) + 24) / U;
+          var segN = 5, segLen = (wz1 - wz0) / segN;
+          for (var wi = 0; wi < segN; wi++) {
+            var wz = wz0 + segLen * (wi + 0.5);
+            var wh = 1.8 + (wi % 3) * 0.35;
+            box(s, 0.8, wh, segLen * 0.85, '#20180f', wx - wOff, wh / 2, wz);
+            box(s, 0.8, wh * 0.9, segLen * 0.85, '#20180f', wx + wOff, wh * 0.45, wz);
+          }
+        } else if (M.id === 'cross') {
+          /* RUINED CROSS: broken pillars + a fallen arch at the crossing
+           * (riverX x mid-lane). Pillars flank the river band; the lintel
+           * lies diagonally across it. */
+          var midY = (M.lanes[0] + M.lanes[1]) / 2;
+          var cx2 = ((M.riverX || 300) - 360) / U, cy2 = (midY - 270) / U;
+          var px = (((M.riverW || 40) / 2) + 50) / U;
+          var ph = [0.9, 1.4, 0.7, 1.1];
+          var pxy = [[-px, -1.75], [px, -1.75], [-px, 1.75], [px, 1.75]];
+          for (var pi = 0; pi < 4; pi++) box(s, 0.5, ph[pi], 0.5, '#39364a', cx2 + pxy[pi][0], ph[pi] / 2, cy2 + pxy[pi][1]);
+          var arch = box(s, ((M.riverW || 40) + 80) / U, 0.3, 0.3, '#39364a', cx2, 0.15, cy2);
+          if (arch) { try { arch.rotation.y = 0.45; } catch (e) {} }
+        }
+        /* JUNGLE RIVER: no extra dressing — jungle band + river + bushes
+         * already read. */
       }
     } else {
       var walls = null, bush = null;
@@ -3983,6 +4147,45 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
           box(s, cell, 1.7, cell, (r + c) % 2 ? '#5b21b6' : '#4c1d95', wx, 0.85, wz);
           box(s, cell, 0.06, cell, '#7c3aed', wx, 1.72, wz, true);
         }
+      }
+    }
+    /* ---- FPS arena dressing: corner beacons + centre marker ----
+     * Derived from the map itself, so it survives a map swap. */
+    if (map) {
+      var _corners = [[1, 1], [cols - 2, 1], [1, rows - 2], [cols - 2, rows - 2]];
+      var _bcol = ['#7c3aed', '#dc2626', '#dc2626', '#7c3aed'];
+      for (var _bi = 0; _bi < 4; _bi++) {
+        var _bx0 = _corners[_bi][0], _by0 = _corners[_bi][1];
+        var _bdx = _bx0 < cols / 2 ? 1 : -1, _bdy = _by0 < rows / 2 ? 1 : -1;
+        var _bf = null;
+        for (var _br = 0; _br <= 5 && !_bf; _br++) {
+          for (var _bc = 0; _bc <= _br && !_bf; _bc++) {
+            var _gx = _bx0 + _bdx * _bc, _gy = _by0 + _bdy * (_br - _bc);
+            if (_gx >= 0 && _gy >= 0 && _gx < cols && _gy < rows && map[_gy].charAt(_gx) !== '#') _bf = [_gx, _gy];
+          }
+        }
+        if (_bf) {
+          var _bx = (_bf[0] * 48 + 24) / U, _bz = (_bf[1] * 48 + 24) / U;
+          mesh(s, geo('cyl', 0.1, 0.14, 0.5, 10), mat('#15151d'), _bx, 0.25, _bz); /* short pillar */
+          var _bo = mesh(s, geo('oct', 0.22), mat(_bcol[_bi], true), _bx, 0.75, _bz); /* glowing beacon */
+          if (_bo) { try { _bo.userData.beacon = true; } catch (e) {} }
+        }
+      }
+      var _ccx = Math.floor(cols / 2), _ccy = Math.floor(rows / 2), _cf = null;
+      for (var _cr = 0; _cr <= 4 && !_cf; _cr++) {
+        for (var _cy = -_cr; _cy <= _cr && !_cf; _cy++) {
+          for (var _cx = -_cr; _cx <= _cr && !_cf; _cx++) {
+            var _mx2 = _ccx + _cx, _mz2 = _ccy + _cy;
+            if (_mx2 >= 0 && _mz2 >= 0 && _mx2 < cols && _mz2 < rows && map[_mz2].charAt(_mx2) !== '#') _cf = [_mx2, _mz2];
+          }
+        }
+      }
+      if (_cf) {
+        var _mx = (_cf[0] * 48 + 24) / U, _mz = (_cf[1] * 48 + 24) / U;
+        var _dm = mesh(s, geo('cyl', 0.55, 0.55, 0.04, 10), mat('#7c3aed', true), _mx, 0.03, _mz); /* flat violet disc */
+        if (_dm) { try { _dm.userData.centerMarker = true; } catch (e) {} }
+        var _dc = mesh(s, geo('oct', 0.16), mat(CORE_GREEN, true), _mx, 0.45, _mz); /* green core glow */
+        if (_dc) { try { _dc.userData.centerMarker = true; } catch (e) {} }
       }
     }
     return s;
@@ -4031,6 +4234,9 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
     try {
       if (!_camera) _camera = new T.PerspectiveCamera(55, 4 / 3, 0.1, 100);
     } catch (e) { return false; }
+    /* camera belongs to the scene graph (camera-parented pieces only
+     * render then; also keeps camera transforms scene-consistent) */
+    try { if (_camera) s.add(_camera); } catch (e) {}
     return true;
   }
 
@@ -4120,18 +4326,51 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
         var acc = R ? R.spc : '#ffffff';
         var gy = (typeof GY !== 'undefined') ? GY : 218;
         var x = (f.x - 240) / U, y = clamp0((gy - f.y) / U);
-        if (syncFighter('fA' + i, f, x, y, 0, 1, body, head, acc, !!(R && R.blade), camYaw)) { used['fA' + i] = 1; mid += f.x; n++; }
+        var bScale = (R && R.boss) ? 1.25 : 1; /* boss fighters render bigger */
+        if (syncFighter('fA' + i, f, x, y, 0, bScale, body, head, acc, !!(R && R.blade), camYaw, traitFor(R ? R.n : null))) { used['fA' + i] = 1; mid += f.x; n++; }
       }
       for (i = 0; i < 2; i++) { /* benched tag partners stand behind, smaller */
         f = (typeof B !== 'undefined' && B) ? B[i] : null;
         if (!f || f.ti == null || f.ko) continue;
         R = (typeof FTR !== 'undefined' && FTR[f.ti]) ? FTR[f.ti] : null;
         var bx = ((f.x != null ? f.x : (i ? 380 : 100)) - 240) / U;
-        if (syncFighter('fB' + i, f, bx, 0, -2.2, 0.8, R ? (R.hood || R.spc) : '#888888', R ? (R.mask || R.spc) : '#888888', R ? R.spc : '#ffffff', false, camYaw)) used['fB' + i] = 1;
+        var bScale2 = (R && R.boss) ? 1.25 : 1; /* boss bench partner stays bigger */
+        if (syncFighter('fB' + i, f, bx, 0, -2.2, 0.8 * bScale2, R ? (R.hood || R.spc) : '#888888', R ? (R.mask || R.spc) : '#888888', R ? R.spc : '#ffffff', false, camYaw, traitFor(R ? R.n : null))) used['fB' + i] = 1;
       }
       if (n > 0) { var m = mid / n; _camera.userData.midX = (m - 240) / U; }
     } catch (e) {}
     poolHideUnused(used);
+  }
+  /* ---------- structure HP bars (towers + nexus): same look as hero bars ----------
+   * Backing + colored fill, billboarded toward the camera each frame. Materials
+   * are per-instance (matOwn) so the fog dim (opacity 0.25 outside vision)
+   * never leaks onto the shared hero-bar materials. */
+  function structBar(parent, y, w) {
+    var T = three(); if (!T) return null;
+    var bar = null;
+    try {
+      bar = new T.Group(); bar.position.set(0, y, 0); parent.add(bar);
+      var bg = mesh(bar, geo('box', w, 0.1, 0.02), matOwn('#220505', true, 1), 0, 0, 0);
+      var fg = mesh(bar, geo('box', w * 0.95, 0.06, 0.03), matOwn('#37d67a', true, 1), 0, 0, 0);
+      bar.userData.bg = bg; bar.userData.fg = fg; bar.userData.w = w;
+    } catch (e) { bar = null; }
+    return bar;
+  }
+  function syncStructBar(bar, hp, maxhp, op, camYaw) {
+    if (!bar) return;
+    try {
+      var max = (maxhp || 0) > 0 ? maxhp : 1000;
+      var frac = max > 0 ? clamp0(hp || 0) / max : 0;
+      var fg = bar.userData.fg, bg = bar.userData.bg, w = bar.userData.w || 1;
+      if (fg) {
+        fg.scale.x = Math.max(0.001, frac);
+        fg.position.x = -0.475 * w * (1 - frac);
+        var col = frac > 0.5 ? '#37d67a' : (frac > 0.25 ? '#ffb35c' : '#ff5252');
+        try { fg.material = matOwn(col, true, op); } catch (e) {}
+      }
+      if (bg && bg.material) { try { bg.material.transparent = true; bg.material.opacity = op; } catch (e) {} }
+      if (camYaw != null) bar.rotation.y = camYaw;
+    } catch (e) {}
   }
   function topXY(x, y, moba) {
     return moba ? [(x - 360) / U, (y - 270) / U] : [(x - 240) / U, (y - 180) / U];
@@ -4152,7 +4391,7 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
           var vis = true;
           if (moba && f.team !== 0) { vis = brCanSee(f.x, f.y); }
           if (!vis) continue;
-          if (syncFighter('t' + i, f, p[0], 0, p[1], 1, col, '#15151d', col, !!(R && R.blade), camYaw)) used['t' + i] = 1;
+          if (syncFighter('t' + i, f, p[0], 0, p[1], 1, col, '#15151d', col, !!(R && R.blade), camYaw, traitFor(R ? R.n : null))) used['t' + i] = 1;
         }
       }
       if (moba) {
@@ -4173,6 +4412,7 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
               mesh(g, geo('cone', 0.5, 0.7, 8), matOwn(tcol, false, 1), 0, 1.85, 0);
               mesh(g, geo('sph', 0.14), matOwn(CORE_GREEN, true, 1), 0, 1.5, 0.3);
               g.userData.tcol = tcol; g.userData.base = base;
+              g.userData.bar = structBar(g, 2.35, 1.1); /* above the cone tip (2.2) */
               poolSet(key, g); _scene.add(g);
             } catch (e) { continue; }
           }
@@ -4183,6 +4423,7 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
               var ch = g.children[ci];
               if (ch.material) { try { ch.material.transparent = true; ch.material.opacity = op; } catch (e) {} }
             }
+            if (g.userData.bar) syncStructBar(g.userData.bar, tw.hp, tw.maxhp || tw.maxHP, op, camYaw);
           } catch (e) {}
           used[key] = 1;
         }
@@ -4200,6 +4441,7 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
               var ncol = nn.team === 0 ? '#6db3ff' : '#ff7a6b';
               mesh(ng, geo('oct', 0.6), matOwn(ncol, false, 1), 0, 0.7, 0);
               mesh(ng, geo('sph', 0.16), matOwn(CORE_GREEN, true, 1), 0, 0.7, 0.5);
+              ng.userData.bar = structBar(ng, 1.7, 1.3); /* above the octahedron top (1.3) */
               poolSet(nk, ng); _scene.add(ng);
             } catch (e) { continue; }
           }
@@ -4210,6 +4452,7 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
               var ch2 = ng.children[cj];
               if (ch2.material) { try { ch2.material.transparent = true; ch2.material.opacity = nop; } catch (e) {} }
             }
+            if (ng.userData.bar) syncStructBar(ng.userData.bar, nn.hp, nn.maxhp || nn.maxHP, nop, camYaw);
           } catch (e) {}
           used[nk] = 1;
         }
@@ -4241,11 +4484,16 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
               cg = new T4.Group();
               box(cg, 0.5, 0.4, 0.5, '#3a3a4a', -0.2, 0.2, 0);
               box(cg, 0.4, 0.5, 0.4, '#2a2a3a', 0.25, 0.25, 0.1);
-              mesh(cg, geo('oct', 0.2), mat(CORE_GREEN, true), 0, 0.6, 0);
+              cg.userData.marker = mesh(cg, geo('oct', 0.2), mat(CORE_GREEN, true), 0, 0.6, 0);
               poolSet(ck, cg); _scene.add(cg);
             } catch (e) { continue; }
           }
-          try { cg.visible = true; cg.position.set(p[0], 0, p[1]); } catch (e) {}
+          try {
+            cg.visible = true; cg.position.set(p[0], 0, p[1]);
+            /* live-camp marker pulse (scale only — the green material is
+             * shared, so opacity would leak onto every core glow) */
+            if (cg.userData.marker) { var ps = 1 + 0.15 * Math.sin(_t / 300); cg.userData.marker.scale.set(ps, ps, ps); }
+          } catch (e) {}
           used[ck] = 1;
         }
       }
@@ -4293,12 +4541,12 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
       for (i = 0; i < list.length; i++) {
         f = list[i]; if (!f || !f.alive) continue;
         var ff = { hp: f.hp, maxhp: f.maxhp || 100, dir: f.ang != null ? f.ang : 0, atkT: 0, blk: false, cr: false, ko: false, walk: 0 };
-        if (syncFighter('e' + i, ff, f.x / U, 0, f.y / U, 1, f.col || '#888888', '#15151d', f.col || '#ffffff', false, camYaw)) used['e' + i] = 1;
+        if (syncFighter('e' + i, ff, f.x / U, 0, f.y / U, 1, f.col || '#888888', '#15151d', f.col || '#ffffff', false, camYaw, traitFor(f.n))) used['e' + i] = 1;
       }
       /* player figure: visible only in third-person (hidden in first-person) */
       if (third && p.alive) {
         var pf = { hp: p.hp, maxhp: p.maxhp || 100, dir: p.ang || 0, atkT: 0, blk: false, cr: false, ko: false, walk: 0 };
-        if (syncFighter('me', pf, p.x / U, 0, p.y / U, 1, p.col || '#ffffff', '#15151d', p.col || '#ffffff', false, camYaw)) used.me = 1;
+        if (syncFighter('me', pf, p.x / U, 0, p.y / U, 1, p.col || '#ffffff', '#15151d', p.col || '#ffffff', false, camYaw, traitFor(p.n))) used.me = 1;
       }
       var shs = (_Bf && _Bf.fpsShots) ? _Bf.fpsShots : [];
       for (i = 0; i < shs.length; i++) {
@@ -4328,6 +4576,72 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
           used[bk] = 1;
         }
       }
+      /* ---- FPS viewmodel + muzzle flash (first-person feel only) ----
+       * Scene-parented (not camera-parented): re-placed each frame from
+       * the camera transform, so it can never leak into another mode's
+       * scene when the arena is rebuilt. Gun for ranged fighters, blade
+       * for melee (ROSTER rng 'shot' vs 'melee'; unknown -> gun). The
+       * sim pushes every shot at its shooter's position, so a FRESH shot
+       * (t < 40ms) whose origin is within 48 sim px of the player is the
+       * player's shot (fpsFlash is not exposed via BRAWL). No new sim
+       * state is added. */
+      try {
+        var _vmS = _camera.userData.vmState;
+        if (!_vmS) { _vmS = _camera.userData.vmState = { group: null, flash: null, kind: '', scene: null, flashUntil: 0 }; }
+        var _vmKind = 'gun';
+        try { var _vmR = (_Bf && _Bf.ROSTER && p && p.ri != null) ? _Bf.ROSTER[p.ri] : null; if (_vmR && _vmR.rng === 'melee') _vmKind = 'blade'; } catch (e) {}
+        if (!_vmS.group || _vmS.kind !== _vmKind) {
+          var _vmT = three();
+          if (_vmT) {
+            try { if (_vmS.group && _vmS.group.parent) _vmS.group.parent.remove(_vmS.group); } catch (e) {}
+            var _vg = null;
+            try { _vg = new _vmT.Group(); } catch (e) { _vg = null; }
+            if (_vg) {
+              try { _vg.userData.vm = _vmKind; } catch (e) {}
+              var _vfl = null;
+              if (_vmKind === 'blade') {
+                var _vbl = box(_vg, 0.05, 0.7, 0.14, '#e8e8f0', 0, 0.1, -0.15, true);
+                if (_vbl) { try { _vbl.rotation.x = -0.9; } catch (e) {} }
+                box(_vg, 0.07, 0.12, 0.07, '#15151d', 0, -0.18, 0.02);
+                box(_vg, 0.09, 0.03, 0.05, '#7c3aed', 0, -0.12, 0, true);
+                _vfl = mesh(_vg, geo('oct', 0.09), mat('#ffe95a', true), 0, 0.32, -0.42);
+              } else {
+                box(_vg, 0.07, 0.07, 0.5, '#15151d', 0, 0, -0.1);
+                box(_vg, 0.09, 0.05, 0.34, '#7c3aed', 0, 0.05, -0.08, true);
+                box(_vg, 0.07, 0.16, 0.09, '#15151d', 0, -0.1, 0.08);
+                box(_vg, 0.03, 0.05, 0.03, '#e8e8f0', 0, 0.06, -0.3, true);
+                _vfl = mesh(_vg, geo('oct', 0.09), mat('#ffe95a', true), 0, 0.01, -0.38);
+              }
+              if (_vfl) { _vfl.visible = false; try { _vfl.userData.vmFlash = true; } catch (e) {} }
+              _vmS.group = _vg; _vmS.flash = _vfl; _vmS.kind = _vmKind; _vmS.scene = null;
+            }
+          }
+        }
+        if (_vmS.group) {
+          if (_vmS.scene !== _scene) { try { _scene.add(_vmS.group); _vmS.scene = _scene; } catch (e) {} }
+          var _vmFirst = !third && p.alive;
+          for (var _vsi = 0; _vsi < shs.length; _vsi++) {
+            var _vsh = shs[_vsi];
+            if (_vsh && (_vsh.t || 0) < 40 && Math.hypot(_vsh.x - p.x, _vsh.y - p.y) < 48) { _vmS.flashUntil = _t + 80; break; }
+          }
+          try {
+            _vmS.group.visible = _vmFirst;
+            if (_vmS.flash) {
+              var _vmFon = _vmFirst && _vmS.flashUntil > _t;
+              _vmS.flash.visible = _vmFon;
+              if (_vmFon) { var _fs = 0.8 + Math.random() * 0.5; _vmS.flash.scale.set(_fs, _fs, _fs); }
+            }
+            if (_vmFirst) {
+              var _va = p.ang || 0;
+              var _vfx = Math.cos(_va), _vfz = Math.sin(_va);
+              var _vrx = -_vfz, _vrz = _vfx;
+              _vmS.group.position.set(_camera.position.x + _vrx * 0.35 + _vfx * 0.7, _camera.position.y - 0.35, _camera.position.z + _vrz * 0.35 + _vfz * 0.7);
+              try { _vmS.group.rotation.order = 'YXZ'; } catch (e) {}
+              _vmS.group.rotation.set(0, -_va - Math.PI / 2, 0);
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
     } catch (e) {}
     poolHideUnused(used);
   }
@@ -4353,11 +4667,30 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
           var th = (Pv.dir != null && Math.abs(Pv.dir) > 1.01) ? Pv.dir : (Pv.dir >= 0 ? 0 : Math.PI);
           var fx = Math.cos(th), fz = Math.sin(th);
           var px = (Pv.x - 360) / U, pz = (Pv.y - 270) / U;
-          var back = clamp0(5.5), up = 2.6; /* radii clamped non-negative (arc-radius rule) */
+          var back = clamp0(5.5), up = 3.2; /* radii clamped non-negative (arc-radius rule) */
+          /* CAMERAS (2026-11-20): higher + aim higher so the hero reads "at your
+           * feet" — old 2.6/0.8 put the hero's head dead-center under the
+           * crosshair. Lift above a tower/Nexus when the camera would sit
+           * inside one (tower tops ~2.2 units; lift to 4.2 clears them). */
+          try {
+            var _Bt = BR();
+            var _tw = (_Bt && _Bt.mobaTowers) ? _Bt.mobaTowers : [];
+            var _nx = (_Bt && _Bt.mobaNexus) ? _Bt.mobaNexus : [];
+            var _cx0 = px - fx * back, _cz0 = pz - fz * back, _lift = false, _li;
+            for (_li = 0; _li < _tw.length; _li++) {
+              var _o = _tw[_li]; if (!_o || !_o.alive) continue;
+              if (Math.hypot(_cx0 - (_o.x - 360) / U, _cz0 - (_o.y - 270) / U) < 1.2) { _lift = true; break; }
+            }
+            if (!_lift) for (_li = 0; _li < _nx.length; _li++) {
+              var _n = _nx[_li]; if (!_n || !_n.alive) continue;
+              if (Math.hypot(_cx0 - (_n.x - 360) / U, _cz0 - (_n.y - 270) / U) < 1.2) { _lift = true; break; }
+            }
+            if (_lift) up = 4.2;
+          } catch (e) {}
           _camera.position.set(px - fx * back, up, pz - fz * back);
-          _camera.lookAt(px + fx * 7, 0.8, pz + fz * 7);
+          _camera.lookAt(px + fx * 8, 1.5, pz + fz * 8);
           showCross(true);
-          return Math.atan2(-(px + fx * 7 - _camera.position.x), -(pz + fz * 7 - _camera.position.z));
+          return Math.atan2(-(px + fx * 8 - _camera.position.x), -(pz + fz * 8 - _camera.position.z));
         }
       }
       var W2 = moba ? 720 : 480, H2 = moba ? 540 : 360;
@@ -4380,9 +4713,29 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
         _camera.position.set(px, 1.6, pz);
         _camera.rotation.set(0, -ang - Math.PI / 2, 0);
       } else {
-        var back = clamp0(2.4), side = 0.8, up = 1.3; /* radii clamped non-negative */
+        var back = clamp0(2.4), side = 1.2, up = 1.5; /* radii clamped non-negative */
         var rx = -fz, rz = fx; /* right vector */
-        _camera.position.set(px - fx * back + rx * side, up, pz - fz * back + rz * side);
+        /* CAMERAS (2026-11-20): side 1.2 puts the player figure clearly
+         * left-of-center (~17 deg off the view axis) so the crosshair has a
+         * clear lane; up 1.5 keeps the over-shoulder height. Wall pull-in:
+         * step the camera toward the player until it leaves a wall cell
+         * (fpsCurMap '#' cells, 48 sim px each), never closer than 0.8. */
+        var _cx = px - fx * back + rx * side, _cz = pz - fz * back + rz * side;
+        try {
+          var _Bm = BR(); var _map = (_Bm && _Bm.fpsCurMap) ? _Bm.fpsCurMap : null;
+          if (_map && _map.length) {
+            var _guard = 0;
+            while (_guard++ < 8) {
+              var _cc = Math.floor(_cx * U / 48), _rr = Math.floor(_cz * U / 48);
+              var _ch = (_rr >= 0 && _rr < _map.length && _cc >= 0 && _cc < _map[_rr].length) ? _map[_rr].charAt(_cc) : '#';
+              if (_ch !== '#') break;
+              if (back <= 0.8) break;
+              back = Math.max(0.8, back - 0.4);
+              _cx = px - fx * back + rx * side; _cz = pz - fz * back + rz * side;
+            }
+          }
+        } catch (e) {}
+        _camera.position.set(_cx, up, _cz);
         _camera.lookAt(px + fx * 8, 1.2, pz + fz * 8);
       }
       showCross(true);
@@ -4428,6 +4781,21 @@ window.BRAWL={enter:enterBrawl,enterMode:enterMode,exit:exitBrawl,endMatch:endMa
       if (m === 'fight') { syncFight(0); yaw = camFight(); }
       else if (m === 'moba' || m === 'brawl') { yaw = camTop(m); syncTop(m, yaw); }
       else if (m === 'fps') { yaw = camFps(); syncFps(yaw); }
+      /* CAMERAS (2026-11-20): camera kick reads the sim's shared shake
+       * signal (window.BRAWL.bShake, set by juiceShake on hits/supers/
+       * tower+nexus kills and decayed by the sim itself) — read-only, the
+       * sim is never touched. A few hundredths of a unit, decaying with
+       * bShake; classic Fight has no such signal, so it stays 0 there. */
+      try {
+        var _b = BR(); var _sh = (_b && _b.bShake) ? _b.bShake : 0;
+        if (_sh > 0.05) {
+          var _km = Math.min(_sh, 7) * 0.008;
+          var _ph = _t * 0.11;
+          _camera.position.x += Math.sin(_ph) * _km;
+          _camera.position.y += Math.sin(_ph * 1.7 + 1.3) * _km * 0.6;
+          _camera.position.z += Math.cos(_ph * 0.83) * _km;
+        }
+      } catch (e) {}
       try { _renderer.render(_scene, _camera); } catch (e) {}
       return { mode: m, on: true, three: !!T };
     } catch (e) {
